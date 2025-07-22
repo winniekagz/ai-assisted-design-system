@@ -1,0 +1,50 @@
+{
+  "recommendations": [
+    // Essential extensions
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+
+    // React development
+    "ms-vscode.vscode-react-native",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "ms-vscode.vscode-json",
+
+    // Git integration
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+
+    // Testing
+    "orta.vscode-jest",
+    "ms-vscode.vscode-js-debug",
+
+    // Storybook
+    "storybook.vscode-storybook",
+
+    // Productivity
+    "ms-vscode.vscode-js-debug-companion",
+    "ms-vscode.vscode-js-debug",
+    "ms-vscode.vscode-js-profile-flame",
+    "ms-vscode.vscode-js-profile-table",
+
+    // Code quality
+    "streetsidesoftware.code-spell-checker",
+    "ms-vscode.vscode-css-peek",
+    "bradlc.vscode-tailwindcss",
+
+    // Themes (optional)
+    "github.github-vscode-theme",
+    "ms-vscode.theme-tomorrowkit",
+
+    // Icons
+    "pkief.material-icon-theme",
+    "vscode-icons-team.vscode-icons"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.vscode-typescript",
+    "hookyqr.beautify",
+    "ms-vscode.vscode-json"
+  ]
+}
