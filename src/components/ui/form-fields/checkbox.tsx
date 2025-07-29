@@ -1,9 +1,10 @@
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { Check } from 'lucide-react';
 import * as React from 'react';
 
-const radioVariants = cva(
-  'peer h-4 w-4 shrink-0 rounded-full border border-[color:var(--color-border-default)] bg-transparent focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:border-primary data-[state=checked]:bg-primary',
+const checkboxVariants = cva(
+  'peer h-4 w-4 shrink-0 rounded border border-[color:var(--color-border-default)] bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary',
   {
     variants: {
       variant: {
@@ -27,15 +28,15 @@ const radioVariants = cva(
   }
 );
 
-export interface RadioProps
+export interface CheckboxProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
-    VariantProps<typeof radioVariants> {
+    VariantProps<typeof checkboxVariants> {
   error?: boolean;
   success?: boolean;
   label?: string;
 }
 
-const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
+const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
   (
     {
       className,
@@ -59,9 +60,9 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
       <div className='flex items-center space-x-2'>
         <div className='relative'>
           <input
-            type='radio'
+            type='checkbox'
             className={cn(
-              radioVariants({ variant: finalVariant, size, className }),
+              checkboxVariants({ variant: finalVariant, size, className }),
               'sr-only'
             )}
             ref={ref}
@@ -71,20 +72,20 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
           />
           <div
             className={cn(
-              radioVariants({ variant: finalVariant, size }),
+              checkboxVariants({ variant: finalVariant, size }),
               'flex items-center justify-center cursor-pointer'
             )}
             data-state={checked ? 'checked' : 'unchecked'}
             onClick={() => {
               if (onChange) {
                 const event = {
-                  target: { checked: true },
+                  target: { checked: !checked },
                 } as React.ChangeEvent<HTMLInputElement>;
                 onChange(event);
               }
             }}
           >
-            {checked && <div className='h-2 w-2 rounded-full bg-white' />}
+            {checked && <Check className='h-3 w-3 text-white' />}
           </div>
         </div>
         {label && (
@@ -94,7 +95,7 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
             onClick={() => {
               if (onChange) {
                 const event = {
-                  target: { checked: true },
+                  target: { checked: !checked },
                 } as React.ChangeEvent<HTMLInputElement>;
                 onChange(event);
               }
@@ -107,6 +108,6 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
     );
   }
 );
-Radio.displayName = 'Radio';
+Checkbox.displayName = 'Checkbox';
 
-export { Radio, radioVariants };
+export { Checkbox, checkboxVariants };

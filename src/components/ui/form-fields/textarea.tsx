@@ -3,13 +3,16 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
 const textareaVariants = cva(
-  'flex min-h-[80px] w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[rgba(0,0,0,0.60)] rounded border border-[rgba(0,0,0,0.23)] bg-transparent px-3 py-2 placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none',
+  'flex min-h-[80px] w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[color:var(--color-text-secondary)] rounded border border-[color:var(--color-border-default)] bg-transparent px-3 py-2 placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none',
   {
     variants: {
       variant: {
-        default: 'border-[rgba(0,0,0,0.23)] focus:border-[#009966]',
-        error: 'border-[#f44336] focus:border-[#f44336]',
-        success: 'border-[#4caf50] focus:border-[#4caf50]',
+        default:
+          'border-[color:var(--color-border-default)] focus:border-[color:var(--color-primary-500)]',
+        error:
+          'border-[color:var(--color-error-500)] focus:border-[color:var(--color-error-500)]',
+        success:
+          'border-[color:var(--color-success-500)] focus:border-[color:var(--color-success-500)]',
       },
       size: {
         default: 'min-h-[80px] px-3 py-2',

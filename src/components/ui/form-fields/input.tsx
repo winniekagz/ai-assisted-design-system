@@ -3,16 +3,19 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
 const inputVariants = cva(
-  'flex w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[rgba(0,0,0,0.60)] max-h-14 h-auto px-2 py-2 rounded border border-[rgba(0,0,0,0.23)] bg-transparent transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+  'flex w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[color:var(--color-text-secondary)] max-h-14 h-auto px-2 py-2 rounded border border-[color:var(--color-border-default)] bg-transparent transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'border-[rgba(0,0,0,0.23)] focus:border-[#009966]',
+        default:
+          'border-[color:var(--color-border-default)] focus:border-[color:var(--color-primary-500)]',
         outline:
-          'border-[rgba(0,0,0,0.23)] focus:border-[#009966] bg-transparent',
-        text: 'border-transparent bg-transparent focus:border-transparent hover:bg-gray-50',
-        error: 'border-[#f44336] focus:border-[#f44336]',
-        success: 'border-[#4caf50] focus:border-[#4caf50]',
+          'border-[color:var(--color-border-default)] focus:border-[color:var(--color-primary-500)] bg-transparent',
+        text: 'border-transparent bg-transparent focus:border-transparent hover:bg-[color:var(--color-neutral-50)]',
+        error:
+          'border-[color:var(--color-error-500)] focus:border-[color:var(--color-error-500)]',
+        success:
+          'border-[color:var(--color-success-500)] focus:border-[color:var(--color-success-500)]',
       },
       size: {
         default: 'h-10 px-3',
