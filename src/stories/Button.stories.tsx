@@ -1,20 +1,20 @@
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { fn } from 'storybook/test';
 import { Button } from '@/components/ui/button';
-import { 
-  Download, 
-  Heart, 
-  Settings, 
-  Plus, 
-  ArrowRight, 
-  Mail, 
-  Star, 
-  Trash2,
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import {
+  ArrowRight,
   Check,
-  X,
+  Download,
+  Heart,
+  Mail,
+  Menu,
+  Plus,
   Search,
-  Menu
+  Settings,
+  Star,
+  Trash2,
+  X,
 } from 'lucide-react';
+import { fn } from 'storybook/test';
 
 const meta = {
   title: 'Components/Button',
@@ -23,7 +23,8 @@ const meta = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'A highly customizable button component with multiple variants, sizes, icons, and accessibility features.',
+        component:
+          'A highly customizable button component with multiple variants, sizes, icons, and accessibility features.',
       },
     },
   },
@@ -31,7 +32,15 @@ const meta = {
   argTypes: {
     variant: {
       control: { type: 'select' },
-      options: ['contained', 'outlined', 'text', 'secondary', 'destructive', 'ghost', 'link'],
+      options: [
+        'contained',
+        'outlined',
+        'text',
+        'secondary',
+        'destructive',
+        'ghost',
+        'link',
+      ],
       description: 'The visual style variant of the button',
     },
     size: {
@@ -64,7 +73,7 @@ const meta = {
       description: 'Button content',
     },
   },
-  args: { 
+  args: {
     onClick: fn(),
     children: 'Button',
     variant: 'contained',
@@ -243,7 +252,7 @@ export const Interactive: Story = {
   args: {
     startIcon: <Heart />,
     children: 'Like Post',
-    onClick: () => alert('Button clicked!'),
+    onClick: fn(),
   },
 };
 
@@ -253,7 +262,7 @@ export const FormSubmit: Story = {
     fullWidth: true,
     endIcon: <Check />,
     children: 'Submit Form',
-    onClick: () => alert('Form submitted!'),
+    onClick: fn(),
   },
   parameters: {
     layout: 'padded',
@@ -269,10 +278,10 @@ export const Accessible: Story = {
     'aria-label': 'Add new item to the list',
     'aria-describedby': 'add-item-desc',
   },
-  render: (args) => (
+  render: args => (
     <div>
       <Button {...args} />
-      <div id="add-item-desc" className="sr-only">
+      <div id='add-item-desc' className='sr-only'>
         This button adds a new item to the current list
       </div>
     </div>
@@ -296,9 +305,9 @@ export const AsLink: Story = {
     children: 'Go to Dashboard',
     asChild: true,
   },
-  render: (args) => (
+  render: args => (
     <Button {...args}>
-      <a href="#dashboard">Go to Dashboard</a>
+      <a href='#dashboard'>Go to Dashboard</a>
     </Button>
   ),
 };
@@ -306,15 +315,15 @@ export const AsLink: Story = {
 // All Variants Grid
 export const AllVariants: Story = {
   render: () => (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
-      <Button variant="contained">Contained</Button>
-      <Button variant="outlined">Outlined</Button>
-      <Button variant="text">Text</Button>
-      <Button variant="secondary">Secondary</Button>
-      <Button variant="destructive">Destructive</Button>
-      <Button variant="ghost">Ghost</Button>
-      <Button variant="link">Link</Button>
-      <Button size="icon" aria-label="Menu">
+    <div className='grid grid-cols-2 md:grid-cols-4 gap-4 p-4'>
+      <Button variant='contained'>Contained</Button>
+      <Button variant='outlined'>Outlined</Button>
+      <Button variant='text'>Text</Button>
+      <Button variant='secondary'>Secondary</Button>
+      <Button variant='destructive'>Destructive</Button>
+      <Button variant='ghost'>Ghost</Button>
+      <Button variant='link'>Link</Button>
+      <Button size='icon' aria-label='Menu'>
         <Menu />
       </Button>
     </div>
@@ -327,12 +336,12 @@ export const AllVariants: Story = {
 // All Sizes
 export const AllSizes: Story = {
   render: () => (
-    <div className="flex flex-wrap items-center gap-4 p-4">
-      <Button size="sm">Small</Button>
-      <Button size="default">Default</Button>
-      <Button size="lg">Large</Button>
-      <Button size="xl">Extra Large</Button>
-      <Button size="icon" aria-label="Search">
+    <div className='flex flex-wrap items-center gap-4 p-4'>
+      <Button size='sm'>Small</Button>
+      <Button size='default'>Default</Button>
+      <Button size='lg'>Large</Button>
+      <Button size='xl'>Extra Large</Button>
+      <Button size='icon' aria-label='Search'>
         <Search />
       </Button>
     </div>
@@ -345,13 +354,21 @@ export const AllSizes: Story = {
 // Icon Examples
 export const IconExamples: Story = {
   render: () => (
-    <div className="flex flex-wrap gap-4 p-4">
+    <div className='flex flex-wrap gap-4 p-4'>
       <Button startIcon={<Download />}>Download</Button>
       <Button endIcon={<ArrowRight />}>Continue</Button>
-      <Button startIcon={<Mail />} endIcon={<Star />}>Send Email</Button>
-      <Button startIcon={<Plus />} endIcon={<Check />}>Add & Save</Button>
-      <Button startIcon={<Trash2 />} variant="destructive">Delete</Button>
-      <Button startIcon={<X />} variant="outlined">Cancel</Button>
+      <Button startIcon={<Mail />} endIcon={<Star />}>
+        Send Email
+      </Button>
+      <Button startIcon={<Plus />} endIcon={<Check />}>
+        Add & Save
+      </Button>
+      <Button startIcon={<Trash2 />} variant='destructive'>
+        Delete
+      </Button>
+      <Button startIcon={<X />} variant='outlined'>
+        Cancel
+      </Button>
     </div>
   ),
   parameters: {
@@ -362,11 +379,13 @@ export const IconExamples: Story = {
 // States Comparison
 export const StatesComparison: Story = {
   render: () => (
-    <div className="flex flex-wrap gap-4 p-4">
+    <div className='flex flex-wrap gap-4 p-4'>
       <Button>Normal</Button>
       <Button disabled>Disabled</Button>
       <Button loading>Loading</Button>
-      <Button loading disabled>Processing</Button>
+      <Button loading disabled>
+        Processing
+      </Button>
     </div>
   ),
   parameters: {
