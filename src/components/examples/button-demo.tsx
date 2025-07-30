@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import {
   ArrowRight,
@@ -142,10 +144,12 @@ export const ButtonDemo = () => {
           >
             Submit Form
           </Button>
-          <Button variant='text' asChild>
-            <a href='#section' aria-label='Navigate to section'>
-              Go to Section
-            </a>
+          <Button
+            variant='text'
+            onClick={() => (window.location.hash = 'section')}
+            aria-label='Navigate to section'
+          >
+            Go to Section
           </Button>
         </div>
       </div>

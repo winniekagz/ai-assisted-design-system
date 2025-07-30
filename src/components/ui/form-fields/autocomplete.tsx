@@ -74,7 +74,12 @@ const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps>(
     ref
   ) => {
     const [isOpen, setIsOpen] = React.useState(false);
-    const [inputValue, setInputValue] = React.useState(value || '');
+    const [inputValue, setInputValue] = React.useState(() => {
+      if (typeof value === 'string') return value;
+      if (value && typeof value === 'object' && 'value' in value)
+        return String((value as any).value);
+      return '';
+    });
     const [filteredOptions, setFilteredOptions] = React.useState(options);
     const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -84,11 +89,21 @@ const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps>(
     if (success) finalVariant = 'success';
 
     React.useEffect(() => {
+      const inputValueStr = typeof inputValue === 'string' ? inputValue : '';
       const filtered = options.filter(option =>
-        option.label.toLowerCase().includes(inputValue.toLowerCase())
+        option.label.toLowerCase().includes(inputValueStr.toLowerCase())
       );
       setFilteredOptions(filtered);
     }, [inputValue, options]);
+
+    // Update inputValue when value prop changes
+    React.useEffect(() => {
+      if (typeof value === 'string') {
+        setInputValue(value);
+      } else if (value && typeof value === 'object' && 'value' in value) {
+        setInputValue(String((value as any).value));
+      }
+    }, [value]);
 
     React.useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
