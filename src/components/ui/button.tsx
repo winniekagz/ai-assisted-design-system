@@ -140,17 +140,23 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...accessibilityProps}
         {...props}
       >
-        {loading && <LoadingSpinner />}
-        {!loading && finalStartIcon && (
-          <span className='flex-shrink-0' aria-hidden='true'>
-            {finalStartIcon}
-          </span>
-        )}
-        <span className='flex-shrink-0'>{children}</span>
-        {!loading && finalEndIcon && (
-          <span className='flex-shrink-0' aria-hidden='true'>
-            {finalEndIcon}
-          </span>
+        {asChild ? (
+          children
+        ) : (
+          <>
+            {loading && <LoadingSpinner />}
+            {!loading && finalStartIcon && (
+              <span className='flex-shrink-0' aria-hidden='true'>
+                {finalStartIcon}
+              </span>
+            )}
+            <span className='flex-shrink-0'>{children}</span>
+            {!loading && finalEndIcon && (
+              <span className='flex-shrink-0' aria-hidden='true'>
+                {finalEndIcon}
+              </span>
+            )}
+          </>
         )}
       </Comp>
     );

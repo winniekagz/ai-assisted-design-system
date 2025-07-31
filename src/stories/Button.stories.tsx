@@ -302,7 +302,6 @@ export const ToggleButton: Story = {
 export const AsLink: Story = {
   args: {
     variant: 'text',
-    children: 'Go to Dashboard',
     asChild: true,
   },
   render: args => (
