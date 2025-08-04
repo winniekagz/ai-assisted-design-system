@@ -116,10 +116,14 @@ export default function DashLayoutDemo() {
     },
   };
 
-  const handleNavigationChange = (item: unknown) => {
-    setActiveItem(item.id);
+const handleNavigationChange = (item: unknown) => {
+  if (typeof item === 'object' && item !== null && 'id' in item) {
+    setActiveItem((item as { id: string }).id);
     console.log('Navigation changed:', item);
-  };
+  } else {
+    console.warn('Invalid item passed to handleNavigationChange:', item);
+  }
+}
 
   const handleLogoClick = () => {
     console.log('Logo clicked');
