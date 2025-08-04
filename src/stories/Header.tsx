@@ -44,7 +44,7 @@ export const Header = ({
         </svg>
         <h1>Acme</h1>
       </div>
-      <div>
+      {/* <div>
         {user ? (
           <>
             <span className='welcome'>
@@ -63,7 +63,7 @@ export const Header = ({
             />
           </>
         )}
-      </div>
+      </div> */}
     </div>
   </header>
 );
