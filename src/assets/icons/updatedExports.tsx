@@ -1,0 +1,30 @@
+// Auto-generated icon exports
+
+export const AddUsersIconIcon = '/assets/icons/add-users-icon.svg';
+export const ArrowBackIcon = '/assets/icons/arrow-back.svg';
+export const ArrowForwardFilledIcon = '/assets/icons/arrow-forward-filled.svg';
+export const ArrowRightIcon = '/assets/icons/arrow-right.svg';
+export const DashboardIconIcon = '/assets/icons/dashboard-icon.svg';
+export const EyeIconIcon = '/assets/icons/eye-icon.svg';
+export const EyeOffIconIcon = '/assets/icons/eye-off-icon.svg';
+export const FourtwonineIconIcon = '/assets/icons/fourtwonine-icon.svg';
+export const GoogleIconIcon = '/assets/icons/google-icon.svg';
+export const Image4Icon = '/assets/icons/image-4.svg';
+export const Image6Icon = '/assets/icons/image-6.svg';
+export const Image7AltIcon = '/assets/icons/image-7-alt.svg';
+export const Image7Icon = '/assets/icons/image-7.svg';
+export const Image8Icon = '/assets/icons/image-8.svg';
+export const KeyIconIcon = '/assets/icons/key-icon.svg';
+export const ListRoundedIconIcon = '/assets/icons/list-rounded-icon.svg';
+export const LogoIconIcon = '/assets/icons/logo-icon.svg';
+export const LogoMarkIconIcon = '/assets/icons/logo-mark-icon.svg';
+export const LogoTextIconIcon = '/assets/icons/logo-text-icon.svg';
+export const MenuActiveIconIcon = '/assets/icons/menu-active-icon.svg';
+export const MenuHoverIconIcon = '/assets/icons/menu-hover-icon.svg';
+export const MenuIconIcon = '/assets/icons/menu-icon.svg';
+export const NinetyIconIcon = '/assets/icons/ninety-icon.svg';
+export const PasswordIconIcon = '/assets/icons/password-icon.svg';
+export const PeopleFilledIconIcon = '/assets/icons/people-filled-icon.svg';
+export const SettingsIconIcon = '/assets/icons/settings-icon.svg';
+export const UsersIconIcon = '/assets/icons/users-icon.svg';
+export const VectorIconIcon = '/assets/icons/vector-icon.svg';
