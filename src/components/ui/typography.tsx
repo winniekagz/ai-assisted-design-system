@@ -94,9 +94,7 @@ export interface TypographyProps
   target?: string;
   rel?: string;
 }
-export type TypographyVariantProps = VariantProps<
-  typeof typographyVariants
->['variant'];
+
 const Typography = React.forwardRef<any, TypographyProps>(
   (
     {
