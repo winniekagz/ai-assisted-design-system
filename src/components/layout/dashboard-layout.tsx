@@ -101,7 +101,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {/* Sidebar */}
       {isSidebarOpen && (
         <div
-          className='fixed left-0 top-0 z-40 h-full'
+          className='fixed left-0 top-0 z-40 h-full p-4'
           style={{ width: sidebarWidth }}
         >
           <SidebarComponent

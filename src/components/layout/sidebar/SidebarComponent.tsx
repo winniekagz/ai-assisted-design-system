@@ -50,9 +50,7 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   );
 
   return (
-    <Sidebar
-      className={cn(isCollapsed ? 'w-16' : 'w-64', 'flex flex-col h-full')}
-    >
+    <Sidebar className={cn('w-[256px]', 'flex flex-col h-full border-none')}>
       <SidebarHeaderComponent
         branding={branding}
         isCollapsed={isCollapsed}

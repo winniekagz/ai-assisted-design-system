@@ -92,6 +92,7 @@
   --background-paper: #ffffff;
   --background-secondary: #fafafa;
   --background-tertiary: #f0f0f0;
+  --background-hover: rgba(0, 0, 0, 0.08);
 
   /* Text Colors */
   --text-primary: rgba(0, 0, 0, 0.87);

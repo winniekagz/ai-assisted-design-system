@@ -141,6 +141,7 @@
   --color-background-paper: var(--background-paper);
   --color-background-secondary: var(--background-secondary);
   --color-background-tertiary: var(--background-tertiary);
+  --color-background-hover: var(--background-hover);
 
   /* Text Colors */
   --color-text-primary: var(--text-primary);

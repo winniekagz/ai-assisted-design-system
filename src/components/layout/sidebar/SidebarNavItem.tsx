@@ -1,6 +1,7 @@
-// components/ui/sidebar-nav-item.tsx
 import { cn } from '@/lib/utils';
 import * as React from 'react';
+import { ChevronDown } from 'lucide-react';
+import { Typography } from '../../ui/typography';
 
 interface SidebarNavItemProps extends React.HTMLAttributes<HTMLLIElement> {
   icon?: React.ReactNode;
@@ -31,27 +32,37 @@ export const SidebarNavItem = React.forwardRef<
     },
     ref
   ) => {
+    const levelPadding = `pl-${level * 4}`; // Adjust as needed, or use a map
     return (
       <li
         ref={ref}
         className={cn(
-          'group flex items-center gap-3 w-full cursor-pointer rounded px-3 py-2 text-sm transition-colors',
+          'group flex w-full items-center rounded px-2 py-1 transition-colors',
           disabled && 'opacity-50 pointer-events-none',
-          active
-            ? 'bg-primary/10 text-primary'
-            : 'hover:bg-primary/5 text-muted-foreground',
-          level > 0 && `pl-${level * 4}`,
-          className
+          active ? 'bg-background-hover' : 'hover:bg-background-hover',
+          className,
+          levelPadding
         )}
         {...props}
       >
-        {icon && <span className='h-4 w-4'>{icon}</span>}
-        <span className='flex-1 text-left'>{title}</span>
-        {expandable && (
-          <span className={cn('transition-transform', expanded && 'rotate-90')}>
-            ▶
-          </span>
-        )}
+        {/* Icon + title container */}
+        <div className='flex items-center gap-3 flex-grow min-w-0'>
+          {icon && <span className='h-4 w-4 shrink-0'>{icon}</span>}
+          <Typography variant='body1' className='truncate'>
+            {title}
+          </Typography>
+        </div>
+
+        {/* Chevron wrapper always rendered to prevent shift */}
+        <div className='ml-2 h-4 w-4 flex items-center justify-center'>
+          {expandable && (
+            <ChevronDown
+              className={cn('h-4 w-4 ', expanded ? 'rotate-180' : 'rotate-0')}
+            />
+          )}
+        </div>
+
+        {/* Optional expandable children */}
         {children}
       </li>
     );
