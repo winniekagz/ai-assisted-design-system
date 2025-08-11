@@ -25,7 +25,7 @@ export default function SidebarHeaderComponent({
         {!isCollapsed && (
           <div className='flex items-center space-x-2'>{branding.logo}</div>
         )}
-        <Button
+        {/* <Button
           variant='ghost'
           size='sm'
           onClick={onToggle}
@@ -36,7 +36,7 @@ export default function SidebarHeaderComponent({
           ) : (
             <ChevronLeft className='h-4 w-4' />
           )}
-        </Button>
+        </Button> */}
       </div>
     </SidebarHeader>
   );

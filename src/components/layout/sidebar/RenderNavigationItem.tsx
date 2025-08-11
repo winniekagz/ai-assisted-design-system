@@ -22,33 +22,36 @@ export const RenderNavigationItem = ({
   console.log('sidebarIttem', item);
 
   return (
-    <div key={item.id} className='w-full '>
-      <SidebarNavItem
-        icon={item.icon}
-        title={item.title}
-        active={isActive}
-        disabled={item.disabled}
-        level={level}
-        expandable={hasChildren}
-        expanded={isExpanded}
-        onClick={() => !item.disabled && handleItemClick(item)}
-      />
-
-      {hasChildren && isExpanded && !isCollapsed && (
-        <ul className='ml-2 space-y-1'>
-          {item.children!.map(child => (
-            <RenderNavigationItem
-              key={child.id}
-              item={child}
-              level={level + 1}
-              handleItemClick={handleItemClick}
-              isCollapsed={isCollapsed}
-              activeItem={activeItem}
-              expandedItems={expandedItems}
-            />
-          ))}
-        </ul>
-      )}
+    <div key={item.id} className='w-full flex flex-col gap-1 '>
+      <div className=''>
+        <SidebarNavItem
+          icon={item.icon}
+          title={item.title}
+          active={isActive}
+          disabled={item.disabled}
+          level={level}
+          expandable={hasChildren}
+          expanded={isExpanded}
+          onClick={() => !item.disabled && handleItemClick(item)}
+        />
+      </div>
+      <div className=''>
+        {hasChildren && isExpanded && !isCollapsed && (
+          <ul className='ml-2 space-y-1'>
+            {item.children!.map(child => (
+              <RenderNavigationItem
+                key={child.id}
+                item={child}
+                level={level + 1}
+                handleItemClick={handleItemClick}
+                isCollapsed={isCollapsed}
+                activeItem={activeItem}
+                expandedItems={expandedItems}
+              />
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };
