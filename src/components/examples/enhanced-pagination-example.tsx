@@ -1,14 +1,14 @@
 'use client';
-import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Typography } from '../ui/typography';
-import { Badge } from '../ui/badge';
+import { useMemo, useState } from 'react';
+import { Badge } from '../ui/badge/badge';
 import { Button } from '../ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import {
   EnhancedPagination,
   useEnhancedPagination,
 } from '../ui/pagination/enhanced-pagination';
+import { Typography } from '../ui/typography';
 
 // Mock data interface
 interface DataItem {

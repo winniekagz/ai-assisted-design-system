@@ -1,4 +1,5 @@
 import { ColumnDef } from '@tanstack/table-core';
+import { BadgeStatus } from '../../../types/badgw';
 import { Avatar } from '../avatar';
 import { TableCell } from '../dataTable/Tablecell';
 
@@ -235,7 +236,7 @@ export const userColumns: ColumnDef<User>[] = [
       <TableCell
         content={row.getValue('role')}
         variant='badge'
-        status={row.getValue('role') === 'Admin' ? 'success' : 'default'}
+        status={row.getValue('role') === 'Admin' ? 'success' : 'neutral'}
       />
     ),
   },
@@ -251,13 +252,16 @@ export const userColumns: ColumnDef<User>[] = [
     header: 'Status',
     cell: ({ row }) => {
       const status = row.getValue('status') as string;
-      const statusMap = {
-        active: { label: 'Active', status: 'success' as const },
-        inactive: { label: 'Inactive', status: 'error' as const },
-        pending: { label: 'Pending', status: 'warning' as const },
+      const statusMap: Record<string, { label: string; status: BadgeStatus }> =
+        {
+          active: { label: 'Active', status: 'success' },
+          inactive: { label: 'Inactive', status: 'error' },
+          pending: { label: 'Pending', status: 'pending' },
+        };
+      const { label, status: statusType } = statusMap[status] || {
+        label: status,
+        status: 'neutral',
       };
-      const { label, status: statusType } =
-        statusMap[status as keyof typeof statusMap];
       return <TableCell content={label} variant='status' status={statusType} />;
     },
   },
@@ -298,16 +302,16 @@ export const productColumns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       const stock = row.getValue('stock') as number;
       const status = row.getValue('status') as string;
-      const statusMap = {
+      const statusMap: Record<string, BadgeStatus> = {
         'in-stock': 'success',
-        'low-stock': 'warning',
+        'low-stock': 'pending',
         'out-of-stock': 'error',
       };
       return (
         <TableCell
           content={stock}
           variant='badge'
-          status={statusMap[status as keyof typeof statusMap] as any}
+          status={statusMap[status] || 'neutral'}
         />
       );
     },
@@ -370,15 +374,18 @@ export const orderColumns: ColumnDef<Order>[] = [
     header: 'Status',
     cell: ({ row }) => {
       const status = row.getValue('status') as string;
-      const statusMap = {
-        pending: { label: 'Pending', status: 'warning' as const },
-        processing: { label: 'Processing', status: 'info' as const },
-        shipped: { label: 'Shipped', status: 'success' as const },
-        delivered: { label: 'Delivered', status: 'success' as const },
-        cancelled: { label: 'Cancelled', status: 'error' as const },
+      const statusMap: Record<string, { label: string; status: BadgeStatus }> =
+        {
+          pending: { label: 'Pending', status: 'pending' },
+          processing: { label: 'Processing', status: 'completed' },
+          shipped: { label: 'Shipped', status: 'success' },
+          delivered: { label: 'Delivered', status: 'success' },
+          cancelled: { label: 'Cancelled', status: 'error' },
+        };
+      const { label, status: statusType } = statusMap[status] || {
+        label: status,
+        status: 'neutral',
       };
-      const { label, status: statusType } =
-        statusMap[status as keyof typeof statusMap];
       return <TableCell content={label} variant='status' status={statusType} />;
     },
   },
@@ -387,13 +394,18 @@ export const orderColumns: ColumnDef<Order>[] = [
     header: 'Priority',
     cell: ({ row }) => {
       const priority = row.getValue('priority') as string;
-      const priorityMap = {
-        low: { label: 'Low', status: 'default' as const },
-        medium: { label: 'Medium', status: 'warning' as const },
-        high: { label: 'High', status: 'error' as const },
+      const priorityMap: Record<
+        string,
+        { label: string; status: BadgeStatus }
+      > = {
+        low: { label: 'Low', status: 'neutral' },
+        medium: { label: 'Medium', status: 'pending' },
+        high: { label: 'High', status: 'error' },
       };
-      const { label, status: statusType } =
-        priorityMap[priority as keyof typeof priorityMap];
+      const { label, status: statusType } = priorityMap[priority] || {
+        label: priority,
+        status: 'neutral',
+      };
       return <TableCell content={label} variant='badge' status={statusType} />;
     },
   },

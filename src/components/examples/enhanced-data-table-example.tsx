@@ -2,12 +2,9 @@
 
 import {
   AlertCircle,
-  Download,
   Edit,
   Eye,
-  Filter,
   Package,
-  Plus,
   Trash2,
   TrendingUp,
   Users,
@@ -45,24 +42,6 @@ const CustomRowActions = ({ user }: { user: User }) => (
   </div>
 );
 
-// Top toolbar component
-// const TopToolbar = () => (
-//   <div className='flex items-center gap-2'>
-//     <Button size='sm' variant='outlined'>
-//       <Filter className='h-4 w-4 mr-2' />
-//       Filter
-//     </Button>
-//     <Button size='sm' variant='outlined'>
-//       <Download className='h-4 w-4 mr-2' />
-//       Export
-//     </Button>
-//     <Button size='sm' variant='contained'>
-//       <Plus className='h-4 w-4 mr-2' />
-//       Add User
-//     </Button>
-//   </div>
-// );
-
 // Main example component
 export function EnhancedDataTableExample() {
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
@@ -82,7 +61,7 @@ export function EnhancedDataTableExample() {
         <Typography variant='h1'>Enhanced Data Table Examples</Typography>
         <Typography variant='body1' className='text-muted-foreground'>
           Comprehensive examples of the enhanced data table component with
-          various features and use cases.
+          various features and use cases, including badge integration.
         </Typography>
       </div>
 
@@ -94,7 +73,6 @@ export function EnhancedDataTableExample() {
               <Users className='h-5 w-5' />
               <CardTitle>Users Management</CardTitle>
             </div>
-            {/* <TopToolbar /> */}
           </div>
         </CardHeader>
         <CardContent>
@@ -215,6 +193,77 @@ export function EnhancedDataTableExample() {
         </CardContent>
       </Card>
 
+      {/* Badge Usage Guide */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Badge Integration in Data Tables</CardTitle>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+          <div>
+            <Typography variant='h6'>Badge Types Used:</Typography>
+            <ul className='mt-2 space-y-1 text-sm text-muted-foreground'>
+              <li>
+                • <strong>Role Badges:</strong> Admin (success), User (neutral)
+              </li>
+              <li>
+                • <strong>Status Badges:</strong> Active (success), Inactive
+                (error), Pending (pending)
+              </li>
+              <li>
+                • <strong>Stock Badges:</strong> In Stock (success), Low Stock
+                (pending), Out of Stock (error)
+              </li>
+              <li>
+                • <strong>Priority Badges:</strong> Low (neutral), Medium
+                (pending), High (error)
+              </li>
+              <li>
+                • <strong>Order Status:</strong> Pending (pending), Processing
+                (completed), Shipped/Delivered (success), Cancelled (error)
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <Typography variant='h6'>Badge Variants:</Typography>
+            <ul className='mt-2 space-y-1 text-sm text-muted-foreground'>
+              <li>
+                • <code>variant='badge'</code> - Uses the Badge component with
+                filled variant
+              </li>
+              <li>
+                • <code>variant='status'</code> - Uses status indicator with
+                colored dot
+              </li>
+              <li>
+                • <code>variant='default'</code> - Standard text display
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <Typography variant='h6'>Badge Status Mapping:</Typography>
+            <ul className='mt-2 space-y-1 text-sm text-muted-foreground'>
+              <li>
+                • <code>success</code> - Green badges for positive states
+              </li>
+              <li>
+                • <code>error</code> - Red badges for negative states
+              </li>
+              <li>
+                • <code>pending</code> - Yellow badges for warning states
+              </li>
+              <li>
+                • <code>completed</code> - Blue badges for info states
+              </li>
+              <li>
+                • <code>neutral</code> - Gray badges for default states
+              </li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Usage Instructions */}
       <Card>
         <CardHeader>
@@ -234,7 +283,7 @@ export function EnhancedDataTableExample() {
               <li>• Different cell types (badge, status, avatar)</li>
               <li>• Pagination with customizable page sizes</li>
               <li>• Row click handlers</li>
-              <li>• Custom top toolbar</li>
+              <li>• Badge integration with proper status mapping</li>
             </ul>
           </div>
 
