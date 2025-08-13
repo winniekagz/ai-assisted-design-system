@@ -25,7 +25,7 @@ export interface UseEnhancedPaginationReturn {
   previousPage: number;
 
   // Pagination items for rendering
-  paginationItems: (number | 'ellipsis')[];
+  paginationItems: unknown;
 
   // Actions
   setPage: (page: number) => void;
