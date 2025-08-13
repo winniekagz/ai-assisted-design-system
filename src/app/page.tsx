@@ -21,6 +21,28 @@ export default function HomePage() {
           </p>
         </Link>
 
+        <Link
+          href='/badge-demo'
+          className='p-6 border rounded-lg hover:bg-accent transition-colors'
+        >
+          <h2 className='text-xl font-semibold mb-2'>Badge Component</h2>
+          <p className='text-muted-foreground'>
+            Explore the badge component with status indicators, variants, and
+            custom configurations.
+          </p>
+        </Link>
+
+        <Link
+          href='/table'
+          className='p-6 border rounded-lg hover:bg-accent transition-colors'
+        >
+          <h2 className='text-xl font-semibold mb-2'>Enhanced Data Tables</h2>
+          <p className='text-muted-foreground'>
+            See enhanced data tables with badges, status indicators, and
+            comprehensive features.
+          </p>
+        </Link>
+
         {/* Add more component demos here as they become available */}
       </div>
     </div>
