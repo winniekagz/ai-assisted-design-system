@@ -5,7 +5,7 @@ import {
   DashboardLayout,
   NavigationBuilder,
 } from '@/components/layout';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -31,8 +31,8 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 // Import SVG as React component
-import { Logo } from '../../lib/icon-registry';
 import DashPageHeader from '../../components/ui/layouts/DashPageHeader';
+import { Logo } from '../../lib/icon-registry';
 
 export default function DashLayoutDemo() {
   const [activeItem, setActiveItem] = useState('dashboard');
@@ -116,14 +116,14 @@ export default function DashLayoutDemo() {
     },
   };
 
-const handleNavigationChange = (item: unknown) => {
-  if (typeof item === 'object' && item !== null && 'id' in item) {
-    setActiveItem((item as { id: string }).id);
-    console.log('Navigation changed:', item);
-  } else {
-    console.warn('Invalid item passed to handleNavigationChange:', item);
-  }
-}
+  const handleNavigationChange = (item: unknown) => {
+    if (typeof item === 'object' && item !== null && 'id' in item) {
+      setActiveItem((item as { id: string }).id);
+      console.log('Navigation changed:', item);
+    } else {
+      console.warn('Invalid item passed to handleNavigationChange:', item);
+    }
+  };
 
   const handleLogoClick = () => {
     console.log('Logo clicked');

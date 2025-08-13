@@ -120,7 +120,8 @@ const brandingData: BrandingData = {
 
 // Example: Dashboard Layout Usage
 export const DashboardLayoutExample: React.FC = () => {
-  const { navigation, footer } = createCustomNavigation();
+  const navigationData = createCustomNavigation();
+  const { navigation, footer } = navigationData;
 
   const handleNavigationChange = (item: NavigationItem) => {
     console.log('Navigation changed:', item);
@@ -139,8 +140,8 @@ export const DashboardLayoutExample: React.FC = () => {
 
   return (
     <DashboardLayout
-      navigation={navigation}
-      sidebarFooter={footer}
+      navigation={navigationData}
+      sidebarFooter={navigationData.footer}
       branding={{
         logo: (
           <BrandingComponent
@@ -201,7 +202,7 @@ export const DashboardLayoutExample: React.FC = () => {
 export const SimpleDashboardExample: React.FC = () => {
   return (
     <DashboardLayout
-      navigation={defaultNavigation}
+      navigation={{ navigation: defaultNavigation }}
       sidebarFooter={defaultFooterItems}
       branding={{
         logo: <Building2 className='h-8 w-8 text-primary' />,
