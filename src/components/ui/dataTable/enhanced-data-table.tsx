@@ -34,7 +34,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../dropdown-menu';
+} from '../dropdown/dropdown-menu';
 import { Input } from '../input';
 import { DataTablePagination } from '../pagination/data-table-pagination';
 import { Typography } from '../typography';
