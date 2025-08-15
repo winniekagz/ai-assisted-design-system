@@ -65,8 +65,6 @@ export function TabDemo() {
       <Typography variant='h3' className='mb-6'>
         Tab Component Variants
       </Typography>
-
-      {/* Underlined Variant (Default) */}
       <div className='space-y-4'>
         <Typography variant='h5'>Underlined Variant (Default)</Typography>
         <ReusableTabs

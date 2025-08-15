@@ -5,12 +5,12 @@ import * as React from 'react';
 
 // Tab trigger variants
 const tabTriggerVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap text-body1 font-normal transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm',
+  'inline-flex items-center justify-center whitespace-nowrap text-[0.87rem] leading-[24px] font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-none',
   {
     variants: {
       variant: {
         underlined:
-          'border-b-2 border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground data-[state=active]:border-primary data-[state=active]:text-primary',
+          'border-b-2 border-transparent text-muted-foreground hover:text-primary uppercase hover:border-muted-foreground data-[state=active]:border-primary data-[state=active]:text-primary',
         outlined:
           'rounded-lg data-[state=active]:border data-[state=active]:border-input bg-transparent hover:bg-accent hover:text-accent-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:border-primary',
         contained:
