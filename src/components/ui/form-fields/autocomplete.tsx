@@ -6,7 +6,7 @@ import { ChevronDown, X } from 'lucide-react';
 import * as React from 'react';
 
 const autocompleteVariants = cva(
-  'flex w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[color:var(--color-text-secondary)] max-h-14 h-auto px-3 py-2 rounded border border-[color:var(--color-border-default)] bg-background focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+  'flex w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[color:var(--color-text-secondary)] max-h-14 h-auto px-3 py-2 rounded border border-[color:var(--color-border-default)] bg-paper focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -171,7 +171,7 @@ const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps>(
 
         {/* Selected values display for multiple mode */}
         {multiple && selectedOptions.length > 0 && (
-          <div className='flex flex-wrap gap-1 mt-2 bg-white rounded'>
+          <div className='flex flex-wrap gap-1 mt-2  rounded'>
             {selectedOptions.map(option => (
               <span
                 key={option.value}
@@ -181,7 +181,7 @@ const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps>(
                 <button
                   type='button'
                   onClick={() => handleRemoveValue(option.value)}
-                  className='ml-1 hover:bg-primary/80 rounded-full p-0.5'
+                  className='ml-1 hover:bg-primary-50 rounded-full p-0.5'
                 >
                   <X className='h-3 w-3' />
                 </button>

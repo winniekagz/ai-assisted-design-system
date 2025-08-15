@@ -4,7 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import * as React from 'react';
 
 const selectVariants = cva(
-  'flex w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[color:var(--color-text-secondary)] max-h-14 h-auto px-3 py-2 rounded border border-[color:var(--color-border-default)] bg-transparent focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 appearance-none',
+  'flex w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[color:var(--color-text-secondary)] max-h-14 h-auto px-3 py-2 rounded border border-[color:var(--color-border-default)] bg-background focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 appearance-none transition-colors',
   {
     variants: {
       variant: {
@@ -72,7 +72,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           )}
           {children}
         </select>
-        <ChevronDown className='absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none' />
+        <ChevronDown className='absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground dark:text-muted-foreground pointer-events-none' />
       </div>
     );
   }

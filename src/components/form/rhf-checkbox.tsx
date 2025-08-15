@@ -29,22 +29,11 @@ export const RHFCheckbox = React.forwardRef<HTMLInputElement, RHFCheckboxProps>(
             {...props}
             ref={ref}
             id={name}
+            label={label}
+            required={required}
             error={!!formError}
             disabled={disabled}
           />
-          {label && (
-            <label
-              htmlFor={name}
-              className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-rubik text-[color:var(--color-text-secondary)]'
-            >
-              {label}
-              {required && (
-                <span className='text-[color:var(--color-error-500)] ml-1'>
-                  *
-                </span>
-              )}
-            </label>
-          )}
           {formError && (
             <p className='text-sm text-[color:var(--color-error-500)]'>
               {formError}
@@ -65,28 +54,18 @@ export const RHFCheckbox = React.forwardRef<HTMLInputElement, RHFCheckboxProps>(
           control={control}
           render={({ field }) => (
             <Checkbox
-              {...field}
               {...props}
               ref={ref}
               id={name}
+              label={label}
+              required={required}
               error={hasError}
               disabled={disabled}
+              checked={field.value}
+              onChange={field.onChange}
             />
           )}
         />
-        {label && (
-          <label
-            htmlFor={name}
-            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-rubik text-[color:var(--color-text-secondary)]'
-          >
-            {label}
-            {required && (
-              <span className='text-[color:var(--color-error-500)] ml-1'>
-                *
-              </span>
-            )}
-          </label>
-        )}
         {(fieldError || formError) && (
           <p className='text-sm text-[color:var(--color-error-500)]'>
             {fieldError || formError}

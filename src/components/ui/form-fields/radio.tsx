@@ -33,6 +33,7 @@ export interface RadioProps
   error?: boolean;
   success?: boolean;
   label?: string;
+  required?: boolean;
 }
 
 const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
@@ -44,6 +45,7 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
       error,
       success,
       label,
+      required,
       checked,
       onChange,
       ...props
@@ -54,6 +56,15 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
     let finalVariant = variant;
     if (error) finalVariant = 'error';
     if (success) finalVariant = 'success';
+
+    const handleSelect = () => {
+      if (onChange) {
+        const event = {
+          target: { checked: true },
+        } as React.ChangeEvent<HTMLInputElement>;
+        onChange(event);
+      }
+    };
 
     return (
       <div className='flex items-center space-x-2'>
@@ -72,15 +83,17 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
           <div
             className={cn(
               radioVariants({ variant: finalVariant, size }),
-              'flex items-center justify-center cursor-pointer'
+              'flex items-center justify-center cursor-pointer hover:bg-primary-50/50 transition-colors'
             )}
             data-state={checked ? 'checked' : 'unchecked'}
-            onClick={() => {
-              if (onChange) {
-                const event = {
-                  target: { checked: true },
-                } as React.ChangeEvent<HTMLInputElement>;
-                onChange(event);
+            onClick={handleSelect}
+            role='radio'
+            aria-checked={checked}
+            tabIndex={0}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleSelect();
               }
             }}
           >
@@ -91,16 +104,14 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
           <label
             htmlFor={props.id}
             className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-rubik text-[color:var(--color-text-secondary)] cursor-pointer'
-            onClick={() => {
-              if (onChange) {
-                const event = {
-                  target: { checked: true },
-                } as React.ChangeEvent<HTMLInputElement>;
-                onChange(event);
-              }
-            }}
+            onClick={handleSelect}
           >
             {label}
+            {required && (
+              <span className='text-[color:var(--color-error-500)] ml-1'>
+                *
+              </span>
+            )}
           </label>
         )}
       </div>
