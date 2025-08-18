@@ -13,6 +13,7 @@ import { Typography } from '../ui/typography';
 import {
   RHFAutocomplete,
   RHFCheckbox,
+  RHFDDatePicker,
   RHFInput,
   RHFRadio,
   RHFSelect,
@@ -21,7 +22,14 @@ import {
 } from '../form';
 
 // Import regular form field components
-import { Checkbox, Input, Radio, Select, Textarea } from '../ui/form-fields';
+import {
+  Checkbox,
+  DatePicker,
+  Input,
+  Radio,
+  Select,
+  Textarea,
+} from '../ui/form-fields';
 
 // Form validation schema
 const formSchema = z.object({
@@ -35,6 +43,18 @@ const formSchema = z.object({
   notifications: z.enum(['email', 'sms', 'push']),
   interests: z.array(z.string()).min(1, 'Please select at least one interest'),
   terms: z.boolean().refine(val => val === true, 'You must accept the terms'),
+  startDate: z
+    .object({
+      startDate: z.date().nullable(),
+      endDate: z.date().nullable(),
+    })
+    .optional(),
+  dateRange: z
+    .object({
+      startDate: z.date().nullable(),
+      endDate: z.date().nullable(),
+    })
+    .optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -77,6 +97,8 @@ export function FormDemo() {
     notifications: 'email',
     interests: [] as string[],
     terms: false,
+    startDate: { startDate: null, endDate: null },
+    dateRange: { startDate: null, endDate: null },
   });
 
   const form = useForm<FormData>({
@@ -93,6 +115,8 @@ export function FormDemo() {
       notifications: 'email',
       interests: [],
       terms: false,
+      startDate: { startDate: null, endDate: null },
+      dateRange: { startDate: null, endDate: null },
     },
   });
 
@@ -178,6 +202,23 @@ export function FormDemo() {
               rows={4}
               required
             />
+
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <RHFDDatePicker
+                name='startDate'
+                label='Start Date'
+                placeholder='Pick a date'
+                variant='single'
+                required
+              />
+              <RHFDDatePicker
+                name='dateRange'
+                label='Date Range'
+                placeholder='Pick a date range'
+                variant='range'
+                required
+              />
+            </div>
 
             <div className='space-y-4'>
               <Typography variant='h6'>Preferences</Typography>
@@ -297,6 +338,27 @@ export function FormDemo() {
             />
           </div>
 
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>Start Date</label>
+              <DatePicker
+                value={regularFormData.startDate}
+                onChange={value => handleRegularFormChange('startDate', value)}
+                variant='single'
+                placeholder='Pick a date'
+              />
+            </div>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>Date Range</label>
+              <DatePicker
+                value={regularFormData.dateRange}
+                onChange={value => handleRegularFormChange('dateRange', value)}
+                variant='range'
+                placeholder='Pick a date range'
+              />
+            </div>
+          </div>
+
           <div className='space-y-4'>
             <Typography variant='h6'>Preferences</Typography>
 
@@ -365,6 +427,63 @@ export function FormDemo() {
             Submit Regular Form
           </Button>
         </form>
+      </Card>
+
+      {/* DatePicker Variants Demo */}
+      <Card className='p-6'>
+        <Typography variant='h4' className='mb-4'>
+          DatePicker Variants & States
+        </Typography>
+        <Typography variant='body2' className='mb-6 text-muted-foreground'>
+          Examples of different DatePicker variants and configurations.
+        </Typography>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>Single Date Picker</label>
+            <DatePicker
+              value={{ startDate: null, endDate: null }}
+              onChange={() => {}}
+              variant='single'
+              placeholder='Select a date'
+            />
+          </div>
+
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>Range Date Picker</label>
+            <DatePicker
+              value={{ startDate: null, endDate: null }}
+              onChange={() => {}}
+              variant='range'
+              placeholder='Select date range'
+            />
+          </div>
+
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>Disabled Date Picker</label>
+            <DatePicker
+              value={{ startDate: null, endDate: null }}
+              onChange={() => {}}
+              variant='single'
+              placeholder='Disabled picker'
+              disabled
+            />
+          </div>
+
+          <div className='space-y-2'>
+            <label className='text-sm font-medium'>
+              Date Picker with Min/Max
+            </label>
+            <DatePicker
+              value={{ startDate: null, endDate: null }}
+              onChange={() => {}}
+              variant='single'
+              placeholder='Select date'
+              minDate={new Date()}
+              maxDate={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)} // 30 days from now
+            />
+          </div>
+        </div>
       </Card>
 
       {/* Form Field Variants Demo */}
