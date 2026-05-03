@@ -35,7 +35,7 @@ const sampleBranding = {
       <span className='text-white font-bold text-sm'>L</span>
     </div>
   ),
-  title: 'Leja Dashboard',
+  title: 'componentIq Dashboard',
   subtitle: 'Component Library',
   homeUrl: '/',
 };

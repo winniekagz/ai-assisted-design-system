@@ -1,6 +1,6 @@
-# Contributing to Leja Component Library
+# Contributing to componentIq Component Library
 
-Thank you for your interest in contributing to the Leja Component Library! This document provides
+Thank you for your interest in contributing to the componentIq Component Library! This document provides
 guidelines and information for contributors.
 
 ## Table of Contents
@@ -209,4 +209,4 @@ license as the project.
 
 ---
 
-Thank you for contributing to the Leja Component Library! 🎉
+Thank you for contributing to the componentIq Component Library! 🎉

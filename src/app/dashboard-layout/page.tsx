@@ -107,11 +107,11 @@ export default function DashLayoutDemo() {
   // Branding data
   const brandingData = {
     logo: Logo,
-    title: 'Leja Dashboard',
+    title: 'componentIq Dashboard',
     subtitle: 'Admin Panel',
     user: {
       name: 'John Doe',
-      email: 'john.doe@leja.com',
+      email: 'john.doe@componentiq.com',
       avatar: '/api/placeholder/32/32',
     },
   };

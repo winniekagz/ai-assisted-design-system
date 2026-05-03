@@ -1,5 +1,5 @@
 // SVG Component imports
-import LejaLogo from '../assets/icons/LejaLogo.svg';
+import componentIqLogo from '../assets/icons/componentIqLogo.svg';
 import Logo from '../assets/icons/Logo (2).svg';
 import SendIcon from '../assets/icons/sendIcon.svg';
 import SupportIcon from '../assets/icons/support.svg';
@@ -46,7 +46,7 @@ export {
   GoogleIcon,
   ListRoundedIcon,
   Key,
-  LejaLogo,
+  componentIqLogo,
   Logo,
   SendIcon,
   SupportIcon,

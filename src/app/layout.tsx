@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import '../styles/globals.css';
 
 export const metadata: Metadata = {
-  title: 'Leja Component Library',
+  title: 'componentIq Component Library',
   description: 'A modern component library built with Next.js and Tailwind CSS',
 };
 

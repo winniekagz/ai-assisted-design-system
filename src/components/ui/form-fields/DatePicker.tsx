@@ -43,7 +43,7 @@ function isValidDate(date: Date | undefined) {
   return !isNaN(date.getTime());
 }
 
-const LejaDatePicker: React.FC<DatePickerProps> = ({
+const ComponentIqDatePicker: React.FC<DatePickerProps> = ({
   value,
   onChange,
   variant = 'single',
@@ -193,4 +193,4 @@ const LejaDatePicker: React.FC<DatePickerProps> = ({
   );
 };
 
-export default LejaDatePicker;
+export default ComponentIqDatePicker;

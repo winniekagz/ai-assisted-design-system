@@ -105,7 +105,7 @@ const createCustomNavigation = () => {
 // Example: Branding Data
 const brandingData: BrandingData = {
   logo: Logo, // Replace with your logo path
-  title: 'Leja Dashboard',
+  title: 'componentIq Dashboard',
   subtitle: 'Payment Management System',
   user: {
     name: 'John Doe',
@@ -113,7 +113,7 @@ const brandingData: BrandingData = {
     avatar: '/avatar.jpg', // Replace with user avatar path
   },
   company: {
-    name: 'Leja Inc.',
+    name: 'componentIq Inc.',
     logo: '/company-logo.png',
   },
 };

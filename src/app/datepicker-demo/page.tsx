@@ -8,7 +8,7 @@ import DatePicker, {
 import { Separator } from '../../components/ui/separator';
 import { Typography } from '../../components/ui/typography';
 import { cn } from '../../lib/utils';
-import LejaDatePicker from '../../components/ui/form-fields/DatePicker';
+import ComponentIqDatePicker from '../../components/ui/form-fields/DatePicker';
 
 export default function DatePickerDemo() {
   const [singleDate, setSingleDate] = useState<DatePickerValue>({
@@ -51,7 +51,7 @@ export default function DatePickerDemo() {
             <Typography variant='body2' className='font-medium'>
               Single Date Picker
             </Typography>
-            <LejaDatePicker
+            <ComponentIqDatePicker
               value={singleDate}
               onChange={setSingleDate}
               variant='single'
@@ -69,7 +69,7 @@ export default function DatePickerDemo() {
             <Typography variant='body2' className='font-medium'>
               Range Date Picker
             </Typography>
-            <LejaDatePicker
+            <ComponentIqDatePicker
               value={rangeDate}
               onChange={setRangeDate}
               variant='range'
@@ -105,7 +105,7 @@ export default function DatePickerDemo() {
             <Typography variant='body2' className='font-medium'>
               Custom Configuration
             </Typography>
-            <LejaDatePicker
+            <ComponentIqDatePicker
               value={customDate}
               onChange={setCustomDate}
               variant='single'
@@ -135,7 +135,7 @@ export default function DatePickerDemo() {
             <Typography variant='body2' className='font-medium'>
               Date Restrictions
             </Typography>
-            <LejaDatePicker
+            <ComponentIqDatePicker
               value={disabledDate}
               onChange={setDisabledDate}
               variant='single'

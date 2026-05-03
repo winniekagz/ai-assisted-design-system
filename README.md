@@ -1,4 +1,4 @@
-# Leja Component Library
+# componentIq Component Library
 
 A modern, accessible React component library built with Next.js, TypeScript, and Tailwind CSS.
 

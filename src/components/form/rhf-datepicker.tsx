@@ -1,6 +1,8 @@
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import LejaDatePicker, { DatePickerProps } from '../ui/form-fields/DatePicker';
+import ComponentIqDatePicker, {
+  DatePickerProps,
+} from '../ui/form-fields/DatePicker';
 import { Typography } from '../ui/typography';
 
 export interface RHFDDatePickerProps
@@ -48,7 +50,7 @@ export const RHFDDatePicker: React.FC<RHFDDatePickerProps> = ({
         name={name}
         control={control}
         render={({ field }) => (
-          <LejaDatePicker
+          <ComponentIqDatePicker
             value={field.value || { startDate: null, endDate: null }}
             onChange={value => field.onChange(value)}
             variant={variant}

@@ -3,7 +3,7 @@ import Link from 'next/link';
 export default function HomePage() {
   return (
     <div className='container mx-auto py-8'>
-      <h1 className='text-4xl font-bold mb-8'>Leja Component Library</h1>
+      <h1 className='text-4xl font-bold mb-8'>componentIq Component Library</h1>
       <p className='text-muted-foreground mb-8'>
         A modern component library built with Next.js and Tailwind CSS,
         featuring design tokens and accessibility best practices.
