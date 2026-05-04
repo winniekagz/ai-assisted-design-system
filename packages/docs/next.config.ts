@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  transpilePackages: ['@winniekagendo/componentiq', '@winniekagendo/componentiq-ai'],
   experimental: {
     turbo: {
       rules: {

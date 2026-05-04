@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { getGovernance } from '@/ai/server';
-import { governanceRequestSchema } from '@/ai/schemas/governance.schema';
+import { getGovernance, governanceRequestSchema } from '@winniekagendo/componentiq-ai';
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { getAudit } from '@/ai/server';
-import { auditRequestSchema } from '@/ai/schemas/audit.schema';
+import { getAudit, auditRequestSchema } from '@winniekagendo/componentiq-ai';
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);

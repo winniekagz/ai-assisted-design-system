@@ -5,12 +5,11 @@ import { Bot, RefreshCw, Save, Send, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-import { recommendationRequestSchema, recommendationResponseSchema, type RecommendationRequest, type RecommendationResponse } from '@/ai/schemas/recommendation.schema';
-import { createMockRecommendation } from '@/ai/mock-service';
-import { Badge } from '@/components/ui/badge/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select } from '@/components/ui/form-fields/select';
+import { recommendationRequestSchema, recommendationResponseSchema, type RecommendationRequest, type RecommendationResponse, createMockRecommendation } from '@winniekagendo/componentiq-ai';
+import { Badge } from '@winniekagendo/componentiq';
+import { Button } from '@winniekagendo/componentiq';
+import { Card, CardContent, CardHeader, CardTitle } from '@winniekagendo/componentiq';
+import { Select } from '@winniekagendo/componentiq';
 import { AppShell, PageHeader } from '@/features/dashboard/app-shell';
 
 const contexts = ['Feature UI', 'Form', 'Dashboard', 'Marketing', 'Data Display', 'Navigation', 'Feedback', 'Settings', 'Checkout'];

@@ -17,10 +17,10 @@
     "src/hooks/**/*.tsx",
     "src/lib/**/*.ts",
     "src/lib/**/*.tsx",
-    "src/styles/**/*.ts",
-    "src/styles/**/*.tsx",
+    "src/theme/**/*.ts",
+    "src/theme/**/*.tsx",
     "src/types/**/*.ts",
     "src/types/**/*.tsx"
   ],
-  "exclude": ["node_modules", "src/components/examples/**", "src/stories/**"]
+  "exclude": ["node_modules", "src/components/examples/**"]
 }

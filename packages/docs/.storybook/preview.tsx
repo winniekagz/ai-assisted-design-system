@@ -1,7 +1,7 @@
 import type { Preview } from '@storybook/nextjs-vite';
 import React from 'react';
 import '../src/styles/globals.css';
-import { ComponentIqProvider, componentIqThemes } from '../src/theme';
+import { ComponentIqProvider, componentIqThemes } from '@winniekagendo/componentiq';
 
 const preview: Preview = {
   globalTypes: {

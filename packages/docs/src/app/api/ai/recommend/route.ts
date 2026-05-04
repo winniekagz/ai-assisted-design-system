@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { getRecommendation } from '@/ai/server';
-import { recommendationRequestSchema } from '@/ai/schemas/recommendation.schema';
+import { getRecommendation, recommendationRequestSchema } from '@winniekagendo/componentiq-ai';
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);

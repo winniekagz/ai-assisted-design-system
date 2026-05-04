@@ -1,0 +1,51 @@
+{
+  "name": "@winniekagendo/componentiq-ai",
+  "version": "0.1.0",
+  "description": "AI utilities and assistant for the ComponentIQ design system.",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/winniekagz/ai-assisted-design-system.git",
+    "directory": "packages/ai"
+  },
+  "homepage": "https://github.com/winniekagz/ai-assisted-design-system#readme",
+  "bugs": {
+    "url": "https://github.com/winniekagz/ai-assisted-design-system/issues"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build:lib": "tsup",
+    "prepublishOnly": "npm run build:lib",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "@winniekagendo/componentiq": "*",
+    "zod": "^4.0.14"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tsup": "^8.5.1"
+  }
+}
