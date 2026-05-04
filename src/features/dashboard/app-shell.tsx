@@ -4,11 +4,13 @@ import {
   Bot,
   ClipboardCheck,
   Component,
+  FileText,
   Gauge,
   GitPullRequest,
   Home,
   Library,
   Moon,
+  PackagePlus,
   ShieldCheck,
   Sun,
   Workflow,
@@ -24,6 +26,8 @@ const navItems = [
   { href: '/', label: 'Dashboard', icon: Home },
   { href: '/assistant', label: 'AI Assistant', icon: Bot },
   { href: '/components', label: 'Components', icon: Library },
+  { href: '/custom-components', label: 'Customize & Share', icon: PackagePlus },
+  { href: '/docs', label: 'Docs', icon: FileText },
   { href: '/audit', label: 'Audit', icon: ClipboardCheck },
   { href: '/governance', label: 'Governance', icon: Workflow },
   { href: '/safety', label: 'Guardrails', icon: ShieldCheck },
@@ -37,13 +41,18 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className='min-h-screen bg-background'>
       <aside className='fixed inset-y-0 left-0 hidden w-64 border-r border-border bg-card lg:block'>
         <div className='flex h-full flex-col gap-6 p-5'>
-          <Link href='/' className='flex items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'>
+          <Link
+            href='/'
+            className='flex items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+          >
             <span className='grid size-10 place-items-center rounded-md bg-primary text-primary-foreground'>
               <Gauge className='size-5' />
             </span>
             <span>
               <span className='block text-base font-semibold'>ComponentIQ</span>
-              <span className='block text-xs text-muted-foreground'>AI design-system mentor</span>
+              <span className='block text-xs text-muted-foreground'>
+                AI design-system mentor
+              </span>
             </span>
           </Link>
           <nav aria-label='Primary navigation' className='grid gap-1'>
@@ -105,8 +114,11 @@ function ThemeToggle({ compact = false }: { compact?: boolean }) {
 
   useEffect(() => {
     const stored = window.localStorage.getItem('componentiq-theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = stored === 'dark' || (!stored && prefersDark) ? 'dark' : 'light';
+    const prefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    ).matches;
+    const initialTheme =
+      stored === 'dark' || (!stored && prefersDark) ? 'dark' : 'light';
     setTheme(initialTheme);
     document.documentElement.classList.toggle('dark', initialTheme === 'dark');
   }, []);

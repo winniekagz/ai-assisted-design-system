@@ -115,5 +115,6 @@ export { usePagination } from './hooks/use-pagination';
 export { useTableState } from './hooks/useTable';
 export * from './lib/button-utils';
 export { cn } from './lib/utils';
+export * from './theme';
 export type * from './types/badgw';
 export type * from './types/table';

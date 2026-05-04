@@ -1,8 +1,25 @@
 import type { Preview } from '@storybook/nextjs-vite';
 import React from 'react';
 import '../src/styles/globals.css';
+import { ComponentIqProvider, componentIqThemes } from '../src/theme';
 
 const preview: Preview = {
+  globalTypes: {
+    theme: {
+      description: 'componentIq token theme',
+      defaultValue: 'default',
+      toolbar: {
+        title: 'Theme',
+        icon: 'paintbrush',
+        items: [
+          { value: 'default', title: 'Default' },
+          { value: 'ocean', title: 'Ocean' },
+          { value: 'editorial', title: 'Editorial' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+  },
   parameters: {
     controls: {
       matchers: {
@@ -56,11 +73,21 @@ const preview: Preview = {
 
   // Global decorators
   decorators: [
-    Story => (
-      <div className='min-h-screen bg-background text-foreground'>
-        <Story />
-      </div>
-    ),
+    (Story, context) => {
+      const themeName = context.globals.theme as
+        | keyof typeof componentIqThemes
+        | undefined;
+      const tokens = componentIqThemes[themeName ?? 'default'];
+
+      return (
+        <ComponentIqProvider
+          tokens={tokens}
+          className='min-h-screen bg-background text-foreground'
+        >
+          <Story />
+        </ComponentIqProvider>
+      );
+    },
   ],
 };
 

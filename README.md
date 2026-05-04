@@ -1,39 +1,41 @@
-# componentIq
+# ComponentIQ
 
-componentIq is a React component library documented with Storybook. The npm package ships the compiled component library from `dist` so consumers can install and import components directly.
+ComponentIQ is an AI-assisted design system demo and internal-tool concept built with Next.js, TypeScript, Tailwind CSS, and Storybook. It shows how a frontend platform team can combine component guidance, governance rules, accessibility checks, and safe AI-assisted workflows around a reusable component library.
 
-## Install
+## Product Goal
 
-```bash
-npm i @winniekagendo/componentiq
-```
+- Help engineers choose the right component before inventing new UI.
+- Surface design token expectations and accessibility gaps early.
+- Route duplication into governance decisions: compose, variant, pattern, proposal, or local implementation.
+- Keep AI prompts on the server and treat generated output as draft-only until reviewed.
 
-## Usage
+## Architecture
 
-```tsx
-import { Button, Card, Input, Typography } from '@winniekagendo/componentiq';
+- `src/app`: Next.js App Router pages and API routes.
+- `src/features`: product screens for assistant, audit, governance, safety, and component browsing.
+- `src/components`: reusable component library used by the app and Storybook.
+- `src/design-system/data`: component metadata, patterns, tokens, and governance rules.
+- `src/ai`: prompts, schemas, server helpers, and mock fallbacks.
+- `.storybook`: Storybook configuration for documenting the component library.
 
-export function Example() {
-  return (
-    <Card>
-      <Typography variant='h3'>Create account</Typography>
-      <Input placeholder='Email address' />
-      <Button>Create</Button>
-    </Card>
-  );
-}
-```
-
-The library uses React, TypeScript, and Tailwind CSS utility classes. Make sure your app is configured to process Tailwind classes used by your dependencies.
-
-## Storybook
-
-Storybook is the source of truth for browsing the component library, checking variants, and copying usage patterns.
-
-Run Storybook locally:
+## Local Development
 
 ```bash
 npm install
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+## Storybook
+
+Use Storybook to browse component states, variants, and usage examples:
+
+```bash
 npm run storybook
 ```
 
@@ -43,36 +45,21 @@ Open:
 http://localhost:6006
 ```
 
-Build the static Storybook documentation:
+Build static Storybook docs:
 
 ```bash
 npm run build-storybook
 ```
 
-The generated static docs are written to:
+Storybook includes a theme toolbar powered by `ComponentIqProvider`, so designers can preview component tokens such as brand colors, radius, and font families.
 
-```text
-storybook-static/
+## npm Package
+
+The installable component library is published as:
+
+```bash
+npm i @winniekagendo/componentiq
 ```
-
-## Available Components
-
-The package exports common UI primitives and patterns, including:
-
-- `Button`
-- `Badge`
-- `Card`
-- `Input`
-- `Select`
-- `Checkbox`
-- `Radio`
-- `Textarea`
-- `DatePicker`
-- `Pagination`
-- `EnhancedPagination`
-- `EnhancedDataTable`
-- `DashboardLayout`
-- `Typography`
 
 ## Package Link
 
@@ -80,11 +67,7 @@ The package exports common UI primitives and patterns, including:
 https://www.npmjs.com/package/@winniekagendo/componentiq
 ```
 
-## Repository
-
-```text
-https://github.com/winniekagz/ai-assisted-design-system
-```
+The npm package uses `README.npm.md` as its Storybook-focused documentation during CI publishing. The root `README.md` stays focused on the GitHub product docs.
 
 ## CI/CD
 
