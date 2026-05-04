@@ -1,3 +1,36 @@
+# ComponentIQ (AI-assisted design system demo)
+
+ComponentIQ is a **review-first internal tool / future SaaS simulation** built on this Next.js design system. It demonstrates how a frontend platform team would combine **mentor-grade guidance**, **token and component whitelists**, **governance**, and **safe AI usage** (prompts on the server, Zod-validated JSON, draft-only code).
+
+### Product goal (MVP)
+
+- Help engineers **choose the right component** before inventing new UI.
+- Surface **design token** expectations and **accessibility / state gaps** early.
+- Route duplication into **governance** (compose → variant → pattern → proposal → local).
+- Keep **API keys off the client** and treat model output as **untrusted** until humans review.
+
+### Architecture (high level)
+
+- **UI**: Next.js App Router screens under `src/app` and feature modules under `src/features/*`.
+- **Design system data**: `src/design-system/data` (components, tokens, patterns, rules) — used in prompts and product UI.
+- **AI**: Prompts in `src/ai/prompts`, Zod schemas in `src/ai/schemas`, shared server helpers in `src/ai/server.ts`, deterministic **mock fallbacks** in `src/ai/mock-service.ts`.
+- **API routes**: `src/app/api/ai/{recommend,audit,governance}/route.ts` — JSON in/out, no secrets exposed to the browser.
+
+### Configure an LLM (optional)
+
+Set **`OPENAI_API_KEY`** or **`LLM_API_KEY`**. Optional: **`LLM_BASE_URL`** (defaults to OpenAI-compatible `https://api.openai.com/v1`) and **`LLM_MODEL`** (defaults to `gpt-4o-mini`). If keys are missing or the response fails validation, the app uses **structured mocks** so demos stay reliable.
+
+### What is mocked vs real
+
+- **Real**: Routes, forms, navigation, component catalog, Zod validation, server-side fetch to the configured chat-completions API when keys work.
+- **Mocked / fallback**: Session-only storage for saved recommendations; dashboard “metrics” and activity; audit/governance/recommendation **mock payloads** whenever the API is absent or returns invalid JSON.
+
+### Scripts
+
+Use `npm run dev` for the app and `npm run storybook` for the underlying component library stories.
+
+---
+
 # componentIq Component Library
 
 A modern, accessible React component library built with Next.js, TypeScript, and Tailwind CSS.
