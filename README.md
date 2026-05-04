@@ -1,135 +1,96 @@
-# ComponentIQ (AI-assisted design system demo)
+# componentIq
 
-ComponentIQ is a **review-first internal tool / future SaaS simulation** built on this Next.js design system. It demonstrates how a frontend platform team would combine **mentor-grade guidance**, **token and component whitelists**, **governance**, and **safe AI usage** (prompts on the server, Zod-validated JSON, draft-only code).
+componentIq is a React component library documented with Storybook. The npm package ships the compiled component library from `dist` so consumers can install and import components directly.
 
-### Product goal (MVP)
-
-- Help engineers **choose the right component** before inventing new UI.
-- Surface **design token** expectations and **accessibility / state gaps** early.
-- Route duplication into **governance** (compose → variant → pattern → proposal → local).
-- Keep **API keys off the client** and treat model output as **untrusted** until humans review.
-
-### Architecture (high level)
-
-- **UI**: Next.js App Router screens under `src/app` and feature modules under `src/features/*`.
-- **Design system data**: `src/design-system/data` (components, tokens, patterns, rules) — used in prompts and product UI.
-- **AI**: Prompts in `src/ai/prompts`, Zod schemas in `src/ai/schemas`, shared server helpers in `src/ai/server.ts`, deterministic **mock fallbacks** in `src/ai/mock-service.ts`.
-- **API routes**: `src/app/api/ai/{recommend,audit,governance}/route.ts` — JSON in/out, no secrets exposed to the browser.
-
-### Configure an LLM (optional)
-
-Set **`OPENAI_API_KEY`** or **`LLM_API_KEY`**. Optional: **`LLM_BASE_URL`** (defaults to OpenAI-compatible `https://api.openai.com/v1`) and **`LLM_MODEL`** (defaults to `gpt-4o-mini`). If keys are missing or the response fails validation, the app uses **structured mocks** so demos stay reliable.
-
-### What is mocked vs real
-
-- **Real**: Routes, forms, navigation, component catalog, Zod validation, server-side fetch to the configured chat-completions API when keys work.
-- **Mocked / fallback**: Session-only storage for saved recommendations; dashboard “metrics” and activity; audit/governance/recommendation **mock payloads** whenever the API is absent or returns invalid JSON.
-
-### Scripts
-
-Use `npm run dev` for the app and `npm run storybook` for the underlying component library stories.
-
----
-
-# componentIq Component Library
-
-A modern, accessible React component library built with Next.js, TypeScript, and Tailwind CSS.
-
-## Features
-
-- 🎨 **Modern Design System** - Consistent, beautiful components
-- ♿ **Accessibility First** - WCAG compliant components
-- 📱 **Responsive** - Mobile-first design approach
-- 🧪 **Tested** - Comprehensive test coverage with Vitest
-- 📖 **Documented** - Full Storybook documentation
-- 🚀 **TypeScript** - Full type safety and IntelliSense
-- 🎯 **Conventional Commits** - Standardized commit messages
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js (v18 or higher)
-- npm or yarn
-
-### Installation
+## Install
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/leja-component-library.git
-cd leja-component-library
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
+npm i @winniekagendo/componentiq
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Usage
 
-### Storybook
+```tsx
+import { Button, Card, Input, Typography } from '@winniekagendo/componentiq';
 
-View and interact with components in Storybook:
+export function Example() {
+  return (
+    <Card>
+      <Typography variant='h3'>Create account</Typography>
+      <Input placeholder='Email address' />
+      <Button>Create</Button>
+    </Card>
+  );
+}
+```
+
+The library uses React, TypeScript, and Tailwind CSS utility classes. Make sure your app is configured to process Tailwind classes used by your dependencies.
+
+## Storybook
+
+Storybook is the source of truth for browsing the component library, checking variants, and copying usage patterns.
+
+Run Storybook locally:
 
 ```bash
+npm install
 npm run storybook
 ```
 
-Open [http://localhost:6006](http://localhost:6006) to explore the component library.
+Open:
 
-## Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run storybook` - Start Storybook
-- `npm run test` - Run tests
-- `npm run lint` - Run ESLint
-- `npm run type-check` - Run TypeScript type checking
-
-## Documentation
-
-- **[Contributing Guide](./docs/CONTRIBUTING.md)** - How to contribute to the project
-- **[Conventional Commits](./docs/CONVENTIONAL_COMMITS.md)** - Commit message guidelines
-- **[Component Documentation](./docs/)** - Detailed component documentation
-
-## Development
-
-This project uses:
-
-- **Next.js** - React framework
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **Storybook** - Component documentation
-- **Vitest** - Testing framework
-- **ESLint** - Code linting
-- **Conventional Commits** - Standardized commit messages
-
-## Contributing
-
-We welcome contributions! Please read our [Contributing Guide](./docs/CONTRIBUTING.md) for details
-on our code of conduct and the process for submitting pull requests.
-
-### Commit Guidelines
-
-We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification. See our
-detailed guide in [`docs/CONVENTIONAL_COMMITS.md`](./docs/CONVENTIONAL_COMMITS.md).
-
-Quick reference:
-
-```bash
-feat: add new component
-fix: resolve bug
-docs: update documentation
-style: format code
+```text
+http://localhost:6006
 ```
 
-## License
+Build the static Storybook documentation:
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+```bash
+npm run build-storybook
+```
 
-## Support
+The generated static docs are written to:
 
-- 📖 [Documentation](./docs/)
-- 🐛 [Report Issues](https://github.com/your-username/leja-component-library/issues)
-- 💬 [Discussions](https://github.com/your-username/leja-component-library/discussions)
+```text
+storybook-static/
+```
+
+## Available Components
+
+The package exports common UI primitives and patterns, including:
+
+- `Button`
+- `Badge`
+- `Card`
+- `Input`
+- `Select`
+- `Checkbox`
+- `Radio`
+- `Textarea`
+- `DatePicker`
+- `Pagination`
+- `EnhancedPagination`
+- `EnhancedDataTable`
+- `DashboardLayout`
+- `Typography`
+
+## Package Link
+
+```text
+https://www.npmjs.com/package/@winniekagendo/componentiq
+```
+
+## Repository
+
+```text
+https://github.com/winniekagz/ai-assisted-design-system
+```
+
+## CI/CD
+
+The repository includes GitHub Actions for:
+
+- CI on pull requests and pushes to `main` or `master`
+- npm publishing when a GitHub release is published or a `v*.*.*` tag is pushed
+
+To publish from CI, add an npm automation or granular access token as the `NPM_TOKEN` repository secret.

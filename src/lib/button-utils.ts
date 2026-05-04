@@ -1,6 +1,29 @@
 import { buttonVariants } from '@/components/ui/button';
 import { type VariantProps } from 'class-variance-authority';
 
+const baseButtonVariantClasses = {
+  contained:
+    'bg-primary text-primary-foreground  hover:bg-primary/90 active:bg-primary/80 focus-visible:ring-primary/20 font-medium text-base radius-md ',
+  outlined:
+    'border border-border bg-background text-foreground  hover:bg-accent hover:text-accent-foreground active:bg-accent/80  font-medium text-base radius-md',
+  text: 'bg-transparent text-primary hover:bg-primary/10  active:bg-primary/20 focus-visible:ring-primary/20 font-medium text-base radius-md',
+  destructive:
+    'bg-destructive hover:bg-destructive/90 active:bg-destructive/80 font-medium text-base radius-md text-white',
+  secondary:
+    'bg-secondary text-secondary-foreground  hover:bg-secondary/80 active:bg-secondary/70 font-medium text-base radius-md',
+  ghost:
+    'hover:bg-accent hover:text-accent-foreground active:bg-accent/80 focus-visible:ring-accent/20 font-medium text-base radius-md',
+  link: 'text-primary underline-offset-4 hover:underline focus-visible:ring-primary/20 font-medium text-base radius-md',
+};
+
+const baseButtonSizeClasses = {
+  sm: 'h-8 px-3 py-1.5 text-xs rounded-md gap-1.5',
+  default: 'h-10 px-[30px] py-[10px] text-sm rounded-md gap-2',
+  lg: 'h-11 px-6 py-2.5 text-base rounded-md gap-2.5',
+  xl: 'h-12 px-8 py-3 text-lg rounded-lg gap-3',
+  icon: 'h-9 w-9 p-0',
+};
+
 // Utility to create custom button variants
 export function createCustomButtonVariants(
   customVariants: Record<string, string> = {},
@@ -9,16 +32,23 @@ export function createCustomButtonVariants(
   return {
     variants: {
       variant: {
-        ...buttonVariants.variants?.variant,
+        ...baseButtonVariantClasses,
         ...customVariants,
       },
       size: {
-        ...buttonVariants.variants?.size,
+        ...baseButtonSizeClasses,
         ...customSizes,
       },
-      fullWidth: buttonVariants.variants?.fullWidth,
+      fullWidth: {
+        true: 'w-full',
+        false: 'w-auto',
+      },
     },
-    defaultVariants: buttonVariants.defaultVariants,
+    defaultVariants: {
+      variant: 'contained',
+      size: 'default',
+      fullWidth: false,
+    },
   };
 }
 

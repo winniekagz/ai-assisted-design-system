@@ -7,8 +7,10 @@ export interface UsePaginationProps {
   boundaryCount?: number;
 }
 
+export type PaginationItemValue = number | 'ellipsis';
+
 export interface UsePaginationReturn {
-  items: (number | 'ellipsis')[];
+  items: PaginationItemValue[];
   hasNextPage: boolean;
   hasPreviousPage: boolean;
   nextPage: number;
@@ -28,7 +30,7 @@ export function usePagination({
     return Array.from({ length }, (_, idx) => idx + start);
   };
 
-  const items = useMemo(() => {
+  const items = useMemo<PaginationItemValue[]>(() => {
     const totalNumbers = siblingCount * 2 + 3;
     const totalBlocks = totalNumbers + boundaryCount * 2;
 

@@ -9,6 +9,8 @@ export interface UseEnhancedPaginationProps {
   pageSizeOptions?: number[];
 }
 
+export type PaginationItemValue = number | 'ellipsis';
+
 export interface UseEnhancedPaginationReturn {
   // Current state
   currentPage: number;
@@ -25,7 +27,7 @@ export interface UseEnhancedPaginationReturn {
   previousPage: number;
 
   // Pagination items for rendering
-  paginationItems: unknown;
+  paginationItems: PaginationItemValue[];
 
   // Actions
   setPage: (page: number) => void;
@@ -90,7 +92,7 @@ export function useEnhancedPagination({
   const previousPage = hasPreviousPage ? currentPage - 1 : currentPage;
 
   // Generate pagination items with ellipsis
-  const paginationItems = useMemo(() => {
+  const paginationItems = useMemo<PaginationItemValue[]>(() => {
     const range = (start: number, end: number) => {
       const length = end - start + 1;
       return Array.from({ length }, (_, idx) => idx + start);
