@@ -1,7 +1,9 @@
 {
   "name": "componentiq-monorepo",
   "private": true,
+  "packageManager": "npm@9.2.0",
   "workspaces": [
+    "apps/*",
     "packages/*"
   ],
   "scripts": {
@@ -13,8 +15,8 @@
     "test": "turbo test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "storybook": "npm run storybook --workspace=packages/docs",
-    "build-storybook": "npm run build-storybook --workspace=packages/docs"
+    "storybook": "npm run storybook --workspace=apps/docs",
+    "build-storybook": "npm run build-storybook --workspace=apps/docs"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",

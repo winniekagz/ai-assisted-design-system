@@ -5,4 +5,4 @@ export type { AuditRequest, AuditResponse } from './ai/schemas/audit.schema';
 export type { GovernanceRequest, GovernanceResponse } from './ai/schemas/governance.schema';
 export { recommendationRequestSchema, recommendationResponseSchema } from './ai/schemas/recommendation.schema';
 export { auditRequestSchema, auditResponseSchema } from './ai/schemas/audit.schema';
-export { governanceRequestSchema, governanceResponseSchema, type GovernanceRequest, type GovernanceResponse } from './ai/schemas/governance.schema';
+export { governanceRequestSchema, governanceResponseSchema } from './ai/schemas/governance.schema';

@@ -86,6 +86,7 @@ export {
   type ReusableTabsProps,
   type TabItem,
 } from './components/ui/tab/tabs';
+export { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 export {
   Typography,
   typographyVariants,

@@ -1,0 +1,500 @@
+/* Design Tokens CSS Variables */
+
+:root {
+  /* ── PALETTE ──────────────────────────────────────────────────────────────
+     Six raw values that define the entire warm earthy colour system.
+     Everything else is derived from or maps to these.
+  ──────────────────────────────────────────────────────────────────────── */
+  --palette-darkest: #331812; /* deepest warm brown — max contrast text */
+  --palette-primary: #8D493A; /* terracotta — brand action colour */
+  --palette-mid:     #D0B8A8; /* warm taupe — borders & input strokes */
+  --palette-light:   #DFD3C3; /* warm beige — subtle separators & mid-bg */
+  --palette-cream:   #F8EDE3; /* cream — card / surface background */
+  --palette-white:   #FDFAF9; /* near-white — page background */
+
+  /* ── TEXT (4 semantic tokens) ────────────────────────────────────────── */
+  --text-title:      #331812; /* h1-h6, display text */
+  --text-paragraph:  #331812; /* body copy — 14.6:1 on page bg, AAA */
+  --text-muted:      #7A5F57; /* secondary / metadata — 5.6:1, AA */
+  --text-brand:      #8D493A; /* links, active labels, brand emphasis */
+  --text-inverse:    #FDFAF9; /* text on dark / primary-coloured surfaces */
+
+  /* ── BACKGROUNDS (5 semantic tokens) ────────────────────────────────── */
+  --bg-default:      #FDFAF9; /* page background */
+  --bg-surface:      #F8EDE3; /* cards, popovers, modals */
+  --bg-secondary:    #DFD3C3; /* inset panels, secondary sections */
+  --bg-hover:        #F8EDE3; /* hover on default bg (lifts to surface) */
+  --bg-card-active:  #DFD3C3; /* selected / active card state */
+
+  /* ── BORDERS (3 semantic tokens) ─────────────────────────────────────── */
+  --border-default:  #D0B8A8; /* input strokes, card outlines */
+  --border-subtle:   #DFD3C3; /* light dividers between sections */
+  --border-focus:    #8D493A; /* keyboard focus ring */
+
+  /* ── BRAND (primary + secondary) ─────────────────────────────────────── */
+  --color-primary:        #8D493A;
+  --color-primary-fg:     #FDFAF9;
+  --color-secondary:      #647A58; /* warm sage — 5.8:1 on page bg, AA */
+  --color-secondary-fg:   #FDFAF9;
+
+  /* ── STATUS ──────────────────────────────────────────────────────────── */
+  --status-error:         #C62828;
+  --status-warning:       #E65100;
+  --status-success:       #2E7D32;
+  --status-info:          #0277BD;
+  --status-error-bg:      #FDECEA;
+  --status-warning-bg:    #FEF0E7;
+  --status-success-bg:    #EBF5EB;
+  --status-info-bg:       #EAF4FB;
+
+  /* ── COMPAT ALIASES ──────────────────────────────────────────────────────
+     Keep existing component code working without changes. These map old
+     variable names to the new semantic tokens or palette values above.
+  ──────────────────────────────────────────────────────────────────────── */
+
+  /* Background compat */
+  --background-default:    var(--bg-default);
+  --background-paper:      var(--bg-surface);
+  --background-secondary:  var(--bg-secondary);
+  --background-tertiary:   var(--bg-secondary);
+  --background-hover:      var(--bg-hover);
+  --background-disabled:   #EDE3DA;
+
+  /* Text compat */
+  --text-primary:          var(--text-paragraph);
+  --text-secondary:        var(--text-muted);
+  --text-disabled:         rgba(51, 24, 18, 0.35);
+
+  /* Border compat */
+  --border-secondary:      var(--border-subtle);
+  --border-error:          var(--status-error);
+
+  /* Primary scale — derived from #8D493A */
+  --primary-50:   #F8EDE3;
+  --primary-100:  #EDDDD2;
+  --primary-200:  #D9B8A6;
+  --primary-300:  #BC8A76;
+  --primary-400:  #A56855;
+  --primary-500:  var(--color-primary);
+  --primary-600:  #7A3F33;
+  --primary-700:  #66352B;
+  --primary-800:  #4D271F;
+  --primary-900:  #331812;
+  --primary-950:  #1A0C09;
+
+  /* Secondary scale — derived from #647A58 */
+  --secondary-50:  #EEF2EC;
+  --secondary-100: #D5DDD2;
+  --secondary-200: #ABBAA6;
+  --secondary-300: #8A9E83;
+  --secondary-400: #7B8E73;
+  --secondary-500: var(--color-secondary);
+  --secondary-600: #5A6B4F;
+  --secondary-700: #4A5942;
+  --secondary-800: #394534;
+  --secondary-900: #283125;
+  --secondary-950: #141A13;
+
+  /* Status compat (500 scale names) */
+  --error-50:  #FDECEA; --error-100: #FCCAC7; --error-200: #F5918A;
+  --error-300: #EB5C52; --error-400: #D93020; --error-500: var(--status-error);
+  --error-600: #A81E1E; --error-700: #8C1616; --error-800: #6B0E0E;
+  --error-900: #460909; --error-950: #230404;
+
+  --warning-50:  #FEF0E7; --warning-100: #FDDDC4; --warning-200: #F9B77A;
+  --warning-300: #F48C35; --warning-400: #EF6900; --warning-500: var(--status-warning);
+  --warning-600: #C04500; --warning-700: #9A3800; --warning-800: #742A00;
+  --warning-900: #4D1B00; --warning-950: #260D00;
+
+  --info-50:  #EAF4FB; --info-100: #C8E5F6; --info-200: #8EC6EB;
+  --info-300: #52A5DC; --info-400: #1889CF; --info-500: var(--status-info);
+  --info-600: #01579B; --info-700: #014477; --info-800: #013259;
+  --info-900: #01203A; --info-950: #00101D;
+
+  --success-50:  #EBF5EB; --success-100: #C8E6C9; --success-200: #A5D6A7;
+  --success-300: #81C784; --success-400: #66BB6A; --success-500: var(--status-success);
+  --success-600: #1B5E20; --success-700: #388E3C; --success-800: #2E7D32;
+  --success-900: #1B5E20; --success-950: #0D2E10;
+
+  /* Neutral scale — warm gray-browns */
+  --neutral-50:  #FAFAF9;
+  --neutral-100: #F5F0EC;
+  --neutral-200: #EAE2DB;
+  --neutral-300: #D9CFCA;
+  --neutral-400: #C0B5B0;
+  --neutral-500: #9E908C;
+  --neutral-600: #786B68;
+  --neutral-700: #5C4E4B;
+  --neutral-800: #3D3230;
+  --neutral-900: #231C1B;
+  --neutral-950: #130F0E;
+
+  /* Font Families */
+  --font-sans:
+    'Rubik', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo,
+    monospace;
+  --font-rubik:
+    'Rubik', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+  /* Border Colors */
+  --border-default: rgba(0, 0, 0, 0.23);
+  --border-secondary: rgba(0, 0, 0, 0.12);
+  --border-focus: #009966;
+  --border-error: #d32f2f;
+
+  /* Typography */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+  --font-size-6xl: 3.75rem;
+  --font-size-7xl: 4.5rem;
+  --font-size-8xl: 6rem;
+  --font-size-9xl: 8rem;
+
+  --font-size-page-header: 6em;
+  --font-size-h1: 75px;
+  --font-size-h1-mobile: 60px;
+  --font-size-h2: 50px;
+  --font-size-h2-mobile: 30px;
+  --font-size-h3: 30px;
+  --font-size-h3-mobile: 24px;
+  --font-size-h4: 21px;
+  --font-size-h5: 1.5em;
+  --font-size-h6: 1.25rem;
+  --font-size-button-large: 26px;
+  --font-size-body1: 1rem;
+  --font-size-body2: 0.87rem;
+  --font-size-link: 16px;
+  --font-size-caption: 14px;
+  --font-size-small-text: 14px;
+
+  --line-height-none: 1;
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+
+  --line-height-page-header: 100%;
+  --line-height-h1: 100%;
+  --line-height-h2: 100%;
+  --line-height-h3: 100%;
+  --line-height-h4: 120%;
+  --line-height-h5: 133%;
+  --line-height-h6: 160%;
+  --line-height-button-large: 0.46;
+  --line-height-body1: 150%;
+  --line-height-body2: 143%;
+  --line-height-link: 130%;
+  --line-height-caption: 100%;
+  --line-height-small-text: 130%;
+  --line-height-paragraph: 130%;
+
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+
+  --letter-spacing-page-header: 1.5px;
+  --letter-spacing-h1: -2px;
+  --letter-spacing-h1-mobile: -5%;
+  --letter-spacing-h2: -3%;
+  --letter-spacing-h2-mobile: -2px;
+  --letter-spacing-h3: -2px;
+  --letter-spacing-h3-mobile: -3px;
+  --letter-spacing-h4: 0px;
+  --letter-spacing-h4-mobile: -3%;
+  --letter-spacing-h5: 0.5%;
+  --letter-spacing-h6: 0.15px;
+  --letter-spacing-body1: 0.15%;
+  --letter-spacing-body2: 0.17%;
+  --letter-spacing-link: 15px;
+  --letter-spacing-caption: 0px;
+  --letter-spacing-small-text: 0px;
+
+  /* Spacing */
+  --spacing-0: 0px;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-7: 1.75rem;
+  --spacing-8: 2rem;
+  --spacing-9: 2.25rem;
+  --spacing-10: 2.5rem;
+  --spacing-11: 2.75rem;
+  --spacing-12: 3rem;
+  --spacing-14: 3.5rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-28: 7rem;
+  --spacing-32: 8rem;
+  --spacing-36: 9rem;
+  --spacing-40: 10rem;
+  --spacing-44: 11rem;
+  --spacing-48: 12rem;
+  --spacing-52: 13rem;
+  --spacing-56: 14rem;
+  --spacing-60: 15rem;
+  --spacing-64: 16rem;
+  --spacing-72: 18rem;
+  --spacing-80: 20rem;
+  --spacing-96: 24rem;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  --spacing-4xl: 6rem;
+  --spacing-5xl: 8rem;
+  --spacing-6xl: 12rem;
+
+  /* Border Radius */
+  --radius-0: 0px;
+  --radius-none: 0px;
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Border Width */
+  --border-width-0: 0px;
+  --border-width-none: 0px;
+  --border-width-thin: 1px;
+  --border-width-sm: 1px;
+  --border-width-md: 2px;
+  --border-width-lg: 3px;
+  --border-width-xl: 4px;
+  --border-width-2xl: 6px;
+  --border-width-3xl: 8px;
+
+  /* Shadows */
+  --shadow-none: none;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-3xl: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+
+  /* Opacity */
+  --opacity-0: 0;
+  --opacity-5: 0.05;
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-25: 0.25;
+  --opacity-30: 0.3;
+  --opacity-40: 0.4;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-70: 0.7;
+  --opacity-75: 0.75;
+  --opacity-80: 0.8;
+  --opacity-90: 0.9;
+  --opacity-95: 0.95;
+  --opacity-100: 1;
+
+  /* Motion Durations */
+  --duration-instant: 0ms;
+  --duration-fast: 100ms;
+  --duration-quick: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+  --duration-slowest: 700ms;
+}
+
+/* Dark Theme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Override semantic tokens for system dark mode preference */
+    --bg-default:     #18100E;
+    --bg-surface:     #231511;
+    --bg-secondary:   #2E1C17;
+    --bg-hover:       rgba(208, 184, 168, 0.08);
+    --bg-card-active: rgba(141, 73, 58, 0.18);
+
+    --text-title:     rgba(253, 250, 249, 0.95);
+    --text-paragraph: rgba(253, 250, 249, 0.88);
+    --text-muted:     rgba(208, 184, 168, 0.65);
+    --text-brand:     #C4896F;
+    --text-inverse:   #18100E;
+
+    --border-default: rgba(208, 184, 168, 0.2);
+    --border-subtle:  rgba(208, 184, 168, 0.1);
+    --border-focus:   #C4896F;
+
+    --color-primary:      #C4896F;
+    --color-primary-fg:   #18100E;
+    --color-secondary:    #8FA882;
+    --color-secondary-fg: #18100E;
+
+    --status-error:   #F05252;
+    --status-warning: #FB923C;
+    --status-success: #4ADE80;
+    --status-info:    #38BDF8;
+  }
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes slideInUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleOut {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%,
+  43% {
+    transform: translate3d(0, -30px, 0);
+  }
+  70% {
+    transform: translate3d(0, -15px, 0);
+  }
+  90% {
+    transform: translate3d(0, -4px, 0);
+  }
+}
