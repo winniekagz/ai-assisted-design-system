@@ -124,4 +124,12 @@ const ReusableTabs = React.forwardRef<
 
 ReusableTabs.displayName = 'ReusableTabs';
 
-export { ReusableTabs, tabListVariants, tabTriggerVariants };
+export {
+  ReusableTabs,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  tabListVariants,
+  tabTriggerVariants,
+};

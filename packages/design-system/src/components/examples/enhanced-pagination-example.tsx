@@ -40,14 +40,14 @@ const mockData = generateMockData(250);
 
 // Status badge component
 const StatusBadge = ({ status }: { status: DataItem['status'] }) => {
-  const variants = {
+  const statuses = {
     active: 'success',
-    inactive: 'secondary',
+    inactive: 'inactive',
     pending: 'warning',
   } as const;
 
   return (
-    <Badge variant={variants[status]}>
+    <Badge variant='pastel' status={statuses[status]}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </Badge>
   );
@@ -134,7 +134,7 @@ export function EnhancedPaginationExample() {
               <Typography variant='small' className='text-muted-foreground'>
                 Total Results:
               </Typography>
-              <Badge variant='outline'>{filteredData.length}</Badge>
+              <Badge variant='outlined'>{filteredData.length}</Badge>
             </div>
           </div>
 

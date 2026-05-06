@@ -27,6 +27,11 @@ export interface DatePickerProps {
   displayFormat?: string;
   readOnly?: boolean;
   calendarProps?: any;
+  separator?: string;
+  showShortcuts?: boolean;
+  showFooter?: boolean;
+  primaryColor?: string;
+  configs?: Record<string, unknown>;
 }
 
 function formatDate(date: Date | undefined, formatStr: string = 'PPP') {
@@ -56,6 +61,7 @@ const ComponentIqDatePicker: React.FC<DatePickerProps> = ({
   displayFormat = 'PPP',
   readOnly = false,
   calendarProps = {},
+  separator = ' - ',
 }) => {
   const [open, setOpen] = React.useState(false);
   const [month, setMonth] = React.useState<Date | undefined>(
@@ -97,7 +103,7 @@ const ComponentIqDatePicker: React.FC<DatePickerProps> = ({
           };
           onChange(newValue);
           setInputValue(
-            `${formatDate(endDate || undefined, displayFormat)} - ${formatDate(startDate || undefined, displayFormat)}`
+            `${formatDate(endDate || undefined, displayFormat)}${separator}${formatDate(startDate || undefined, displayFormat)}`
           );
         } else {
           const newValue = {
@@ -106,7 +112,7 @@ const ComponentIqDatePicker: React.FC<DatePickerProps> = ({
           };
           onChange(newValue);
           setInputValue(
-            `${formatDate(startDate || undefined, displayFormat)} - ${formatDate(endDate || undefined, displayFormat)}`
+            `${formatDate(startDate || undefined, displayFormat)}${separator}${formatDate(endDate || undefined, displayFormat)}`
           );
         }
         setOpen(false);
@@ -132,12 +138,12 @@ const ComponentIqDatePicker: React.FC<DatePickerProps> = ({
         : placeholder;
     } else {
       if (value.startDate && value.endDate) {
-        return `${formatDate(value.startDate, displayFormat)} - ${formatDate(
+        return `${formatDate(value.startDate, displayFormat)}${separator}${formatDate(
           value.endDate,
           displayFormat
         )}`;
       } else if (value.startDate) {
-        return `${formatDate(value.startDate, displayFormat)} - ${placeholder}`;
+        return `${formatDate(value.startDate, displayFormat)}${separator}${placeholder}`;
       }
       return placeholder;
     }
