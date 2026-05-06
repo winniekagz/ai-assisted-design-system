@@ -118,6 +118,7 @@
   "editor.wordWrap": "bounded",
   "editor.wordWrapColumn": 80,
   "conventionalCommits.scopes": [
-    "lint"
+    "lint",
+    "app"
   ]
 } 

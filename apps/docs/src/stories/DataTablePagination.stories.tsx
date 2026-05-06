@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { DataTablePagination } from '../components/ui/pagination/data-table-pagination';
+import { DataTablePagination } from '@/components/ui/pagination/data-table-pagination';
 
 const meta = {
   title: 'Components/Data Table Pagination',
@@ -203,7 +203,6 @@ export const CustomCounts: Story = {
     boundaryCount: 2,
   },
 };
-
 
 
 

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import DatePicker, {
   DatePickerValue,
-} from '../components/ui/form-fields/DatePicker';
+} from '@/components/ui/form-fields/DatePicker';
 import { lightColors } from '../styles/tokens';
 
 const meta: Meta<typeof DatePicker> = {

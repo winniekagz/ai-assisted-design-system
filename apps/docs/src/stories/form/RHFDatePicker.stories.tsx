@@ -2,9 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { Meta, StoryObj } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { RHFDDatePicker } from '../../components/form/rhf-datepicker';
-import { Button } from '../../components/ui/button';
-import { Card } from '../../components/ui/card';
+import { RHFDDatePicker } from '@/components/form/rhf-datepicker';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 const formSchema = z.object({
   singleDate: z

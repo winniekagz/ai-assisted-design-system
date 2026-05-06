@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { EnhancedPagination } from '../components/ui/pagination/enhanced-pagination';
-import { Typography } from '../components/ui/typography';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { EnhancedPagination } from '@/components/ui/pagination/enhanced-pagination';
+import { Typography } from '@/components/ui/typography';
 
 const meta = {
   title: 'Components/Enhanced Pagination',
@@ -212,7 +212,6 @@ export const WithCustomContent: Story = {
     showPageInfo: true,
   },
 };
-
 
 
 

@@ -10,7 +10,7 @@ import {
   Input,
   Typography,
   type ComponentIqTokens,
-} from '../index';
+} from '@winniekagendo/componentiq';
 
 const meta = {
   title: 'Design System/ComponentIqProvider',

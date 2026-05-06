@@ -8,10 +8,10 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '../components/ui/pagination/pagination';
-import { DataTablePagination } from '../components/ui/pagination/data-table-pagination';
-import { EnhancedPagination } from '../components/ui/pagination/enhanced-pagination';
-import { usePagination } from '../hooks/use-pagination';
+} from '@/components/ui/pagination/pagination';
+import { DataTablePagination } from '@/components/ui/pagination/data-table-pagination';
+import { EnhancedPagination } from '@/components/ui/pagination/enhanced-pagination';
+import { usePagination } from '@/hooks/use-pagination';
 
 // Base Pagination Components Stories
 const basePaginationMeta = {

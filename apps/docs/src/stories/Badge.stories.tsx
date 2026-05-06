@@ -10,7 +10,7 @@ import {
   Star,
   Heart,
 } from 'lucide-react';
-import { BadgeStatusConfig } from '../types/badgw';
+import { BadgeStatusConfig } from '@/types/badgw';
 
 const meta: Meta<typeof Badge> = {
   title: 'UI/Badge',

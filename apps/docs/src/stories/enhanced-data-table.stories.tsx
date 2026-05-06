@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Edit, Eye } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '../components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Product,
   productColumns,
@@ -10,9 +10,9 @@ import {
   User,
   userColumns,
   users,
-} from '../components/ui/data/table';
-import { EnhancedDataTable } from '../components/ui/dataTable/enhanced-data-table';
-import { Typography } from '../components/ui/typography';
+} from '@/components/ui/data/table';
+import { EnhancedDataTable } from '@/components/ui/dataTable/enhanced-data-table';
+import { Typography } from '@/components/ui/typography';
 
 const meta = {
   title: 'Components/Enhanced Data Table',
