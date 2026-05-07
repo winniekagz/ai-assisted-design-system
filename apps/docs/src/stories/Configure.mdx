@@ -141,48 +141,41 @@ export function App({ children }: { children: React.ReactNode }) {
 <style>
   {`
 .ciq-doc {
-  color: var(--text-paragraph);
+  color: #111827;
   max-width: 980px;
 }
 
 .ciq-doc h1,
 .ciq-doc h2,
 .ciq-doc h3 {
-  color: var(--text-primary);
+  color: #111827;
   letter-spacing: 0;
 }
 
 .ciq-doc p {
-  color: var(--text-secondary);
+  color: #111827;
   line-height: 1.65;
 }
 
 .ciq-doc code {
-  color: var(--text-primary);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
+  color: #111827;
   padding: 1px 5px;
 }
 
 .ciq-hero {
-  background: var(--color-primary);
-  color: var(--color-primary-fg, var(--text-inverse));
-  border-radius: 6px;
   padding: 32px;
   margin-bottom: 20px;
 }
 
 .ciq-hero h1 {
-  color: var(--color-primary-fg, var(--text-inverse));
+  color: #111827;
   margin: 8px 0 10px;
   font-size: 34px;
 }
 
 .ciq-hero p,
 .ciq-hero .ciq-kicker {
-  color: var(--color-primary-fg, var(--text-inverse));
-  opacity: 0.9;
+  color: #111827;
   max-width: 680px;
 }
 
@@ -192,7 +185,7 @@ export function App({ children }: { children: React.ReactNode }) {
   letter-spacing: 0.18em;
   font-size: 11px;
   font-weight: 700;
-  color: var(--text-muted);
+  color: #111827;
 }
 
 .ciq-path {
@@ -200,16 +193,6 @@ export function App({ children }: { children: React.ReactNode }) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
   margin: 20px 0;
-}
-
-.ciq-step,
-.ciq-card,
-.ciq-token-board,
-.ciq-code-section {
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-surface);
-  border-radius: 6px;
-  box-shadow: var(--shadow-sm);
 }
 
 .ciq-step {
@@ -220,13 +203,8 @@ export function App({ children }: { children: React.ReactNode }) {
 }
 
 .ciq-step span {
-  display: inline-grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
+  display: inline-block;
+  color: #111827;
   font-size: 12px;
   font-weight: 700;
 }
@@ -234,16 +212,12 @@ export function App({ children }: { children: React.ReactNode }) {
 .ciq-step strong {
   display: block;
   margin-top: 14px;
-  color: var(--text-primary);
+  color: #111827;
 }
 
 .ciq-step p {
   margin: 6px 0 0;
   font-size: 14px;
-}
-
-.ciq-step:hover {
-  border-color: var(--border-focus);
 }
 
 .ciq-grid {
@@ -261,7 +235,7 @@ export function App({ children }: { children: React.ReactNode }) {
 .ciq-card ol {
   margin: 12px 0 0;
   padding-left: 22px;
-  color: var(--text-secondary);
+  color: #111827;
 }
 
 .ciq-card li {
@@ -286,16 +260,14 @@ export function App({ children }: { children: React.ReactNode }) {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--text-secondary);
+  color: #111827;
   font-size: 14px;
 }
 
 .ciq-swatches span {
   width: 18px;
   height: 18px;
-  border-radius: 999px;
-  border: 1px solid var(--border-subtle);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
+  border-radius: 4px;
 }
 
 .ciq-code-section {
@@ -305,8 +277,6 @@ export function App({ children }: { children: React.ReactNode }) {
 
 .ciq-code-section pre {
   margin-top: 16px !important;
-  border-radius: 6px !important;
-  border: 1px solid var(--border-subtle) !important;
 }
 
 .ciq-next {
@@ -318,9 +288,7 @@ export function App({ children }: { children: React.ReactNode }) {
   align-items: center;
   min-height: 40px;
   padding: 0 14px;
-  border-radius: 6px;
-  background: var(--color-primary);
-  color: var(--color-primary-fg, var(--text-inverse));
+  color: #111827;
   text-decoration: none;
   font-weight: 600;
 }

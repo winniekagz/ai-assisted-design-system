@@ -48,14 +48,10 @@ export {
   NavigationMenuLink,
 } from './components/ui/navigation-menu';
 export {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from './components/ui/pagination';
+  PaginationControl,
+  type PaginationControlProps,
+  type PaginationControlVariant,
+} from './components/ui/pagination/pagination';
 export {
   DataTablePagination,
   type DataTablePaginationProps,

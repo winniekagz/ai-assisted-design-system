@@ -5,9 +5,9 @@ export const badgeVariants = cva(
   {
     variants: {
       variant: {
-        filled: 'border-transparent',
+        filled: '',
         outlined: 'bg-transparent',
-        pastel: 'border-transparent',
+        pastel: '',
       },
       size: {
         sm: 'text-xs px-2.5 py-0.5',
@@ -17,7 +17,7 @@ export const badgeVariants = cva(
       },
     },
     defaultVariants: {
-      variant: 'filled',
+      variant: 'pastel',
       size: 'md',
     },
   }

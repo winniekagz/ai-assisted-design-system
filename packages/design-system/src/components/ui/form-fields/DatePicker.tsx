@@ -78,41 +78,51 @@ function getPlaceholderValue(
 }
 
 const datePickerThemeClassName =
-  '[--background:var(--bg-default)] [--foreground:var(--text-primary,var(--text-paragraph))] [--surface:var(--bg-surface)] [--surface-foreground:var(--text-primary,var(--text-paragraph))] [--surface-secondary:var(--bg-secondary)] [--overlay:var(--bg-surface)] [--overlay-foreground:var(--text-primary,var(--text-paragraph))] [--field-background:var(--bg-surface)] [--field-foreground:var(--text-primary,var(--text-paragraph))] [--field-placeholder:var(--text-muted)] [--muted:var(--text-secondary,var(--text-muted))] [--default:var(--bg-secondary)] [--default-foreground:var(--text-primary,var(--text-paragraph))] [--accent:var(--componentiq-date-accent,var(--color-primary))] [--accent-foreground:var(--color-primary-fg,var(--text-inverse))] [--focus:var(--componentiq-date-accent,var(--color-primary))] [--disabled-opacity:0.72]';
+  '[--background:var(--bg-default)] [--foreground:var(--text-primary,var(--text-paragraph))] [--surface:var(--bg-surface)] [--surface-foreground:var(--text-primary,var(--text-paragraph))] [--surface-secondary:var(--bg-secondary)] [--overlay:var(--bg-surface)] [--overlay-foreground:var(--text-primary,var(--text-paragraph))] [--field-background:var(--bg-surface)] [--field-foreground:var(--text-primary,var(--text-paragraph))] [--field-placeholder:var(--text-muted)] [--muted:var(--text-secondary,var(--text-muted))] [--default:var(--bg-secondary)] [--default-foreground:var(--text-primary,var(--text-paragraph))] [--accent:var(--componentiq-date-accent,var(--color-primary))] [--accent-foreground:var(--color-primary-fg,var(--text-inverse))] [--focus:var(--componentiq-date-accent,var(--color-primary))] [--disabled-opacity:1]';
 
 const dateFieldClassName =
   'min-h-11 w-full rounded  bg-[color:var(--bg-surface)] text-[color:var(--text-primary,var(--text-paragraph))] shadow-none data-[invalid=true]:border-[color:var(--status-error)]';
 
 const datePopoverClassName =
-  'min-w-72 rounded-md  bg-[color:var(--bg-surface)] p-3 text-[color:var(--text-primary,var(--text-paragraph))] shadow-lg';
+  'min-w-72 overflow-hidden rounded-lg border border-[color:var(--border-subtle)] bg-[color:var(--bg-surface)] p-0 text-[color:var(--text-primary,var(--text-paragraph))] shadow-xl';
 
 const dateCalendarClassName =
-  'w-63 max-w-full text-[color:var(--text-primary,var(--text-paragraph))]';
+  'w-80 max-w-full p-4 text-[color:var(--text-primary,var(--text-paragraph))]';
 
 const dateRangeCalendarClassName =
-  'w-63 max-w-full text-[color:var(--text-primary,var(--text-paragraph))]';
+  'w-[min(42rem,calc(100vw-2rem))] max-w-full p-4 text-[color:var(--text-primary,var(--text-paragraph))]';
 
 const dateCalendarHeaderClassName =
   'flex items-center justify-between px-0.5 pb-4 text-[color:var(--text-primary,var(--text-paragraph))]';
 
 const dateCalendarHeadingClassName =
-  'flex-1 text-sm font-medium text-[color:var(--text-primary,var(--text-paragraph))]';
+  'flex-1 text-center text-sm font-semibold text-[color:var(--text-primary,var(--text-paragraph))]';
 
 const dateCalendarNavButtonClassName =
-  'flex size-6 items-center justify-center rounded-full text-[color:var(--text-secondary,var(--text-muted))] hover:bg-[color:var(--bg-secondary)] hover:text-[color:var(--text-primary,var(--text-paragraph))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--componentiq-date-accent,var(--color-primary))]';
+  'flex size-8 items-center justify-center rounded-md border border-[color:var(--border-subtle)] bg-[color:var(--bg-surface)] text-[color:var(--text-secondary,var(--text-muted))] shadow-sm hover:bg-[color:var(--bg-secondary)] hover:text-[color:var(--text-primary,var(--text-paragraph))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--componentiq-date-accent,var(--color-primary))]';
 
 const dateCalendarHeaderCellClassName =
-  'flex items-center justify-center pb-2 text-xs font-semibold !text-[color:var(--text-secondary,var(--text-primary))] !opacity-100';
+  'flex h-9 items-center justify-center text-xs font-semibold !text-[color:var(--text-primary,var(--text-paragraph))] !opacity-100';
+
+const dateCalendarGridClassName = 'w-full border-separate border-spacing-y-1';
+
+const todayIndicatorClassName =
+  'after:absolute after:bottom-1 after:left-1/2 after:size-1 after:-translate-x-1/2 after:rounded-full after:bg-[color:var(--componentiq-date-accent,var(--color-primary))]';
 
 function getCalendarCellClassName(state: any) {
   return cn(
-    'relative flex aspect-square size-full items-center justify-center rounded-full text-center text-sm font-medium text-[color:var(--text-primary,var(--text-paragraph))] outline-none transition-colors',
+    'relative flex aspect-square size-full items-center justify-center rounded-md text-center text-sm font-medium text-[color:var(--text-primary,var(--text-paragraph))] outline-none transition-colors',
     'hover:bg-[color:var(--bg-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--componentiq-date-accent,var(--color-primary))]',
-    state?.isToday && 'font-semibold text-[color:var(--text-primary)]',
+    state?.isToday &&
+      !state?.isSelected &&
+      cn(
+        'font-semibold text-[color:var(--componentiq-date-accent,var(--color-primary))]',
+        todayIndicatorClassName
+      ),
     state?.isOutsideMonth &&
       '!text-[color:var(--text-secondary,var(--text-primary))] !opacity-100',
     (state?.isDisabled || state?.isUnavailable) &&
-      'cursor-not-allowed !text-[color:var(--text-disabled,var(--text-muted))] opacity-75 line-through',
+      'cursor-not-allowed !text-[color:var(--text-disabled,var(--text-muted))] line-through',
     state?.isSelected &&
       'bg-[color:var(--componentiq-date-accent,var(--color-primary))] text-[color:var(--color-primary-fg,var(--text-inverse))] hover:bg-[color:var(--componentiq-date-accent,var(--color-primary))]'
   );
@@ -120,28 +130,33 @@ function getCalendarCellClassName(state: any) {
 
 function getRangeCalendarCellClassName(state: any) {
   return cn(
-    'relative z-1 my-0.5 rounded-full text-[color:var(--text-primary,var(--text-paragraph))] outline-none transition-colors',
+    'relative z-1 h-9 text-[color:var(--text-primary,var(--text-paragraph))] outline-none transition-colors',
     state?.isSelected && 'bg-[color:var(--bg-secondary)]',
-    state?.isSelectionStart && 'rounded-l-full',
-    state?.isSelectionEnd && 'rounded-r-full',
+    state?.isSelectionStart && 'rounded-l-md',
+    state?.isSelectionEnd && 'rounded-r-md',
     state?.isOutsideMonth &&
       '!text-[color:var(--text-secondary,var(--text-primary))] !opacity-100',
     (state?.isDisabled || state?.isUnavailable) &&
-      'cursor-not-allowed !text-[color:var(--text-disabled,var(--text-muted))] opacity-75 line-through'
+      'cursor-not-allowed !text-[color:var(--text-disabled,var(--text-muted))] line-through'
   );
 }
 
 function getRangeCalendarCellButtonClassName(state: any) {
   return cn(
-    'flex aspect-square w-full items-center justify-center rounded-full text-sm font-medium text-[color:var(--text-primary,var(--text-paragraph))] transition-colors',
+    'relative flex aspect-square w-full items-center justify-center rounded-md text-sm font-medium text-[color:var(--text-primary,var(--text-paragraph))] transition-colors',
     'hover:bg-[color:var(--bg-secondary)]',
-    state?.isToday && 'font-semibold text-[color:var(--text-primary)]',
+    state?.isToday &&
+      !(state?.isSelectionStart || state?.isSelectionEnd) &&
+      cn(
+        'font-semibold text-[color:var(--componentiq-date-accent,var(--color-primary))]',
+        todayIndicatorClassName
+      ),
     state?.isOutsideMonth &&
       '!text-[color:var(--text-secondary,var(--text-primary))] !opacity-100',
     (state?.isDisabled || state?.isUnavailable) &&
-      'cursor-not-allowed !text-[color:var(--text-disabled,var(--text-muted))] opacity-75 line-through',
+      'cursor-not-allowed !text-[color:var(--text-disabled,var(--text-muted))] line-through',
     (state?.isSelectionStart || state?.isSelectionEnd) &&
-      'bg-[color:var(--componentiq-date-accent,var(--color-primary))] text-[color:var(--color-primary-fg,var(--text-inverse))] hover:bg-[color:var(--componentiq-date-accent,var(--color-primary))]'
+      'bg-[color:var(--componentiq-date-accent,var(--color-primary))] text-[color:var(--color-primary-fg,var(--text-inverse))] shadow-sm hover:bg-[color:var(--componentiq-date-accent,var(--color-primary))]'
   );
 }
 
@@ -177,7 +192,7 @@ function DatePickerCalendar({
           className={dateCalendarNavButtonClassName}
         />
       </Calendar.Header>
-      <Calendar.Grid>
+      <Calendar.Grid className={dateCalendarGridClassName}>
         <Calendar.GridHeader>
           {day => (
             <Calendar.HeaderCell className={dateCalendarHeaderCellClassName}>
@@ -187,7 +202,9 @@ function DatePickerCalendar({
         </Calendar.GridHeader>
         <Calendar.GridBody>
           {date => (
-            <Calendar.Cell date={date} className={getCalendarCellClassName} />
+            <Calendar.Cell date={date} className={getCalendarCellClassName}>
+              {state => state.formattedDate}
+            </Calendar.Cell>
           )}
         </Calendar.GridBody>
       </Calendar.Grid>
@@ -206,6 +223,7 @@ function DateRangePickerCalendar({
     <RangeCalendar
       aria-label={label}
       {...calendarProps}
+      visibleDuration={calendarProps?.visibleDuration ?? { months: 2 }}
       className={cn(
         dateRangeCalendarClassName,
         calendarProps?.className as string | undefined
@@ -227,31 +245,41 @@ function DateRangePickerCalendar({
           className={dateCalendarNavButtonClassName}
         />
       </RangeCalendar.Header>
-      <RangeCalendar.Grid>
-        <RangeCalendar.GridHeader>
-          {day => (
-            <RangeCalendar.HeaderCell
-              className={dateCalendarHeaderCellClassName}
-            >
-              {day}
-            </RangeCalendar.HeaderCell>
-          )}
-        </RangeCalendar.GridHeader>
-        <RangeCalendar.GridBody>
-          {date => (
-            <RangeCalendar.Cell
-              date={date}
-              className={getRangeCalendarCellClassName}
-            >
-              {state => (
-                <span className={getRangeCalendarCellButtonClassName(state)}>
-                  {state.formattedDate}
-                </span>
+      <div className='grid gap-6 md:grid-cols-2'>
+        {[0, 1].map(offset => (
+          <RangeCalendar.Grid
+            key={offset}
+            offset={offset ? { months: offset } : undefined}
+            className={dateCalendarGridClassName}
+          >
+            <RangeCalendar.GridHeader>
+              {day => (
+                <RangeCalendar.HeaderCell
+                  className={dateCalendarHeaderCellClassName}
+                >
+                  {day}
+                </RangeCalendar.HeaderCell>
               )}
-            </RangeCalendar.Cell>
-          )}
-        </RangeCalendar.GridBody>
-      </RangeCalendar.Grid>
+            </RangeCalendar.GridHeader>
+            <RangeCalendar.GridBody>
+              {date => (
+                <RangeCalendar.Cell
+                  date={date}
+                  className={getRangeCalendarCellClassName}
+                >
+                  {state => (
+                    <span
+                      className={getRangeCalendarCellButtonClassName(state)}
+                    >
+                      {state.formattedDate}
+                    </span>
+                  )}
+                </RangeCalendar.Cell>
+              )}
+            </RangeCalendar.GridBody>
+          </RangeCalendar.Grid>
+        ))}
+      </div>
     </RangeCalendar>
   );
 }

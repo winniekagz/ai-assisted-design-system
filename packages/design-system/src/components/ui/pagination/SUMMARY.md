@@ -11,7 +11,7 @@ Pagination System
 ├── Components
 │   ├── EnhancedPagination (Main component)
 │   ├── DataTablePagination (Legacy table-specific)
-│   └── Base Components (Pagination, PaginationContent, etc.)
+│   └── PaginationControl (Atomic controlled variants)
 ├── Hooks
 │   ├── useEnhancedPagination (Complete state management)
 │   ├── usePagination (Legacy pagination items)
@@ -29,7 +29,7 @@ Pagination System
 | **Purpose**          | Table-specific            | Universal                              |
 | **State Management** | External (TanStack Table) | Internal + External                    |
 | **Reusability**      | Limited to tables         | Any component                          |
-| **Variants**         | Single style              | 3 variants (default, compact, minimal) |
+| **Variants**         | Table controls            | Numbered, labeled, jump, table, simple |
 | **Customization**    | Basic                     | Extensive                              |
 | **Hook Integration** | None                      | Built-in hook support                  |
 | **Standalone Usage** | ❌                        | ✅                                     |
@@ -165,7 +165,3 @@ The system is designed to be:
 - **Accessible**: Built with accessibility in mind
 - **Type-safe**: Full TypeScript support
 - **Future-proof**: Extensible architecture for future enhancements
-
-
-
-
