@@ -24,6 +24,7 @@ export function createComponentIqCssVariables(
   const radius = merged.radius;
   const spacing = merged.spacing;
   const shadows = merged.shadows;
+  const strokeWidth = merged.strokeWidth;
   const vars: ComponentIqCssVariables = {};
   const textPrimary =
     colors?.textPrimary ?? colors?.title ?? colors?.foreground;
@@ -159,6 +160,16 @@ export function createComponentIqCssVariables(
   setVar(vars, '--shadow-sm', shadows?.sm);
   setVar(vars, '--shadow-md', shadows?.md);
   setVar(vars, '--shadow-lg', shadows?.lg);
+
+  setVar(vars, '--stroke-hairline', strokeWidth?.hairline);
+  setVar(vars, '--stroke-thin', strokeWidth?.thin);
+  setVar(vars, '--stroke-md', strokeWidth?.md);
+  setVar(vars, '--stroke-lg', strokeWidth?.lg);
+  setVar(vars, '--border-width-hairline', strokeWidth?.hairline);
+  setVar(vars, '--border-width-thin', strokeWidth?.thin);
+  setVar(vars, '--border-width-sm', strokeWidth?.thin);
+  setVar(vars, '--border-width-md', strokeWidth?.md);
+  setVar(vars, '--border-width-lg', strokeWidth?.lg);
 
   return vars;
 }

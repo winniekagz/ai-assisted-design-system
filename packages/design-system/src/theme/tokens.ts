@@ -81,10 +81,18 @@ export interface ComponentIqShadowTokens {
   lg?: string;
 }
 
+export interface ComponentIqStrokeWidthTokens {
+  hairline?: string;
+  thin?: string;
+  md?: string;
+  lg?: string;
+}
+
 export interface ComponentIqTokens {
   colors?: ComponentIqColorTokens;
   typography?: ComponentIqTypographyTokens;
   radius?: ComponentIqRadiusTokens;
   spacing?: ComponentIqSpacingTokens;
   shadows?: ComponentIqShadowTokens;
+  strokeWidth?: ComponentIqStrokeWidthTokens;
 }

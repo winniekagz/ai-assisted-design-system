@@ -92,4 +92,10 @@ export const defaultComponentIqTokens: ComponentIqTokens = {
     md: '0 4px 12px rgb(0 0 0 / 0.08)',
     lg: '0 10px 30px rgb(0 0 0 / 0.12)',
   },
+  strokeWidth: {
+    hairline: '0.5px',
+    thin: '1px',
+    md: '1.5px',
+    lg: '2px',
+  },
 };

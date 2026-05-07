@@ -42,6 +42,11 @@ import { Meta } from '@storybook/addon-docs/blocks';
         <code>warning</code>, <code>error</code>, <code>success</code>,{' '}
         <code>information</code>, and their pastel pairs for feedback.
       </li>
+      <li>
+        <code>spacing</code>, <code>shadows</code>, <code>typography</code>,{' '}
+        <code>radius</code>, and <code>strokeWidth</code> for component
+        structure.
+      </li>
     </ul>
   </div>
   <div className='ciq-token-card'>
@@ -93,6 +98,31 @@ const brandTheme: ComponentIqTokens = {
     sm: '0.25rem',
     md: '0.5rem',
     lg: '0.75rem',
+  },
+  spacing: {
+    xs: '0.25rem',
+    sm: '0.5rem',
+    md: '1rem',
+    lg: '1.5rem',
+    xl: '2rem',
+  },
+  shadows: {
+    sm: '0 1px 2px rgb(0 0 0 / 0.05)',
+    md: '0 4px 12px rgb(0 0 0 / 0.08)',
+    lg: '0 10px 30px rgb(0 0 0 / 0.12)',
+  },
+  typography: {
+    fontFamily: "'Rubik', ui-sans-serif, system-ui, sans-serif",
+    headingFontFamily: "'Rubik', ui-sans-serif, system-ui, sans-serif",
+    baseSize: '1rem',
+    headingWeight: 700,
+    bodyWeight: 400,
+  },
+  strokeWidth: {
+    hairline: '0.5px',
+    thin: '1px',
+    md: '1.5px',
+    lg: '2px',
   },
 };
 

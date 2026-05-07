@@ -9,6 +9,7 @@ export type {
   ComponentIqRadiusTokens,
   ComponentIqShadowTokens,
   ComponentIqSpacingTokens,
+  ComponentIqStrokeWidthTokens,
   ComponentIqTokens,
   ComponentIqTypographyTokens,
 } from './tokens';

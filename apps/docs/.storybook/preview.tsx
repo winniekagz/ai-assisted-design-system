@@ -1,7 +1,10 @@
 import type { Preview } from '@storybook/nextjs-vite';
 import React from 'react';
 import '../src/styles/globals.css';
-import { ComponentIqProvider, componentIqThemes } from '@winniekagendo/componentiq';
+import {
+  ComponentIqProvider,
+  componentIqThemes,
+} from '@winniekagendo/componentiq';
 
 const preview: Preview = {
   globalTypes: {
@@ -37,6 +40,13 @@ const preview: Preview = {
 
     // Add design tokens documentation
     docs: {
+      source: {
+        type: 'dynamic',
+        language: 'tsx',
+      },
+      canvas: {
+        sourceState: 'shown',
+      },
       description: {
         component:
           'All components use our design token system for consistent styling.',
