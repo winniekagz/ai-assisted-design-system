@@ -1,3 +1,8 @@
+export {
+  Accordion,
+  type AccordionItem,
+  type AccordionProps,
+} from './components/ui/accordion';
 export { Avatar, AvatarFallback, AvatarImage } from './components/ui/avatar';
 export {
   Badge,

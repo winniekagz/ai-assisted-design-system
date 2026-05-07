@@ -53,6 +53,18 @@ export interface ComponentIqTypographyTokens {
   headingFontFamily?: string;
   monoFontFamily?: string;
   baseSize?: string;
+  bodySize?: string;
+  bodySmallSize?: string;
+  captionSize?: string;
+  heading1Size?: string;
+  heading2Size?: string;
+  heading3Size?: string;
+  heading4Size?: string;
+  heading5Size?: string;
+  heading6Size?: string;
+  display1Size?: string;
+  display2Size?: string;
+  display3Size?: string;
   headingWeight?: string | number;
   bodyWeight?: string | number;
 }

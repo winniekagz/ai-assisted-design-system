@@ -1,0 +1,181 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title='Components/Typography/Foundation' />
+
+<div className='ciq-type-doc'>
+  <section className='ciq-type-head'>
+    <p className='ciq-kicker'>Typography tokens</p>
+    <h1>Build text from reusable roles</h1>
+    <p>
+      Typography should use semantic size, family, weight, and color tokens
+      instead of one-off classes. Components should reserve heading roles for
+      titles and body roles for readable product copy.
+    </p>
+  </section>
+
+<section className='ciq-type-grid'>
+  <div>
+    <h2>Core roles</h2>
+    <ul>
+      <li>
+        <code>--font-heading</code> for headings and display text.
+      </li>
+      <li>
+        <code>--font-rubik</code> for body and interface text.
+      </li>
+      <li>
+        <code>--font-size-heading-6</code> for compact component headings.
+      </li>
+      <li>
+        <code>--font-size-body</code> for paragraph and description copy.
+      </li>
+      <li>
+        <code>--text-title</code> for headings and <code>--text-paragraph</code>{' '}
+        for body copy.
+      </li>
+    </ul>
+  </div>
+  <div className='ciq-type-card'>
+    <p className='ciq-kicker'>Component example</p>
+    <h3>Accordion text</h3>
+    <p>
+      Accordion titles use heading 6, while the expanded content uses body text.
+      That keeps dense UI readable without making every component look like a
+      page heading.
+    </p>
+  </div>
+</section>
+
+```tsx
+const brandTheme: ComponentIqTokens = {
+  typography: {
+    fontFamily: "'Rubik', ui-sans-serif, system-ui, sans-serif",
+    headingFontFamily: "'Rubik', ui-sans-serif, system-ui, sans-serif",
+    monoFontFamily: 'ui-monospace, SFMono-Regular, Consolas, monospace',
+    baseSize: '1rem',
+    bodySize: '1rem',
+    bodySmallSize: '0.875rem',
+    captionSize: '0.75rem',
+    heading1Size: '4rem',
+    heading2Size: '3rem',
+    heading3Size: '2.25rem',
+    heading4Size: '1.75rem',
+    heading5Size: '1.375rem',
+    heading6Size: '1rem',
+    display1Size: '3.75rem',
+    display2Size: '3rem',
+    display3Size: '2.25rem',
+    headingWeight: 700,
+    bodyWeight: 400,
+  },
+};
+```
+
+  <section className='ciq-scale'>
+    <div>
+      <span>Heading 6</span>
+      <strong className='ciq-h6'>Reusable component title</strong>
+      <code>--font-size-heading-6</code>
+    </div>
+    <div>
+      <span>Body</span>
+      <p className='ciq-body'>
+        Paragraph text for descriptions, helper copy, and expanded content.
+      </p>
+      <code>--font-size-body</code>
+    </div>
+    <div>
+      <span>Caption</span>
+      <p className='ciq-caption'>Small metadata and quiet supporting labels.</p>
+      <code>--font-size-caption</code>
+    </div>
+  </section>
+</div>
+
+<style>
+  {`
+.ciq-type-doc {
+  max-width: 920px;
+  color: #111827;
+}
+.ciq-type-doc h1,
+.ciq-type-doc h2,
+.ciq-type-doc h3 {
+  color: #111827;
+  letter-spacing: 0;
+}
+.ciq-type-doc p,
+.ciq-type-doc li {
+  color: #111827;
+  line-height: 1.65;
+}
+.ciq-type-doc code {
+  color: #111827;
+  padding: 1px 5px;
+}
+.ciq-type-head {
+  margin-bottom: 22px;
+}
+.ciq-type-head h1 {
+  margin: 8px 0;
+  font-size: 32px;
+}
+.ciq-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 700;
+  color: #111827;
+}
+.ciq-type-grid {
+  display: grid;
+  grid-template-columns: 1fr 0.75fr;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+.ciq-type-card {
+  padding: 20px;
+}
+.ciq-scale {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+.ciq-scale > div {
+  display: grid;
+  grid-template-columns: 110px 1fr 190px;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+}
+.ciq-scale span,
+.ciq-scale code {
+  font-size: 12px;
+}
+.ciq-h6 {
+  color: #111827;
+  font-size: var(--font-size-heading-6);
+  font-family: var(--font-heading);
+  line-height: 1.5;
+}
+.ciq-body {
+  margin: 0;
+  color: #111827;
+  font-size: var(--font-size-body);
+  font-family: var(--font-rubik);
+}
+.ciq-caption {
+  margin: 0;
+  color: #111827;
+  font-size: var(--font-size-caption);
+  font-family: var(--font-rubik);
+}
+@media (max-width: 760px) {
+  .ciq-type-grid,
+  .ciq-scale > div {
+    grid-template-columns: 1fr;
+  }
+}
+`}
+</style>

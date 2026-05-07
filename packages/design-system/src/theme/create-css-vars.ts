@@ -139,6 +139,18 @@ export function createComponentIqCssVariables(
   setVar(vars, '--font-heading', typography?.headingFontFamily);
   setVar(vars, '--font-mono', typography?.monoFontFamily);
   setVar(vars, '--font-size-base', typography?.baseSize);
+  setVar(vars, '--font-size-body', typography?.bodySize);
+  setVar(vars, '--font-size-body-sm', typography?.bodySmallSize);
+  setVar(vars, '--font-size-caption', typography?.captionSize);
+  setVar(vars, '--font-size-heading-1', typography?.heading1Size);
+  setVar(vars, '--font-size-heading-2', typography?.heading2Size);
+  setVar(vars, '--font-size-heading-3', typography?.heading3Size);
+  setVar(vars, '--font-size-heading-4', typography?.heading4Size);
+  setVar(vars, '--font-size-heading-5', typography?.heading5Size);
+  setVar(vars, '--font-size-heading-6', typography?.heading6Size);
+  setVar(vars, '--font-size-display-1', typography?.display1Size);
+  setVar(vars, '--font-size-display-2', typography?.display2Size);
+  setVar(vars, '--font-size-display-3', typography?.display3Size);
   setVar(vars, '--font-weight-bold', typography?.headingWeight);
   setVar(vars, '--font-weight-regular', typography?.bodyWeight);
 
