@@ -1,13 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Select } from '@/components/ui/form-fields/select';
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
+  PaginationControl,
+  type PaginationControlVariant,
 } from '@/components/ui/pagination/pagination';
 import { Typography } from '@/components/ui/typography';
 import { useEnhancedPagination } from '@/hooks/use-enhanced-pagination';
@@ -18,6 +12,8 @@ export interface EnhancedPaginationProps {
   totalItems: number;
   initialPageSize?: number;
   initialPage?: number;
+  currentPage?: number;
+  pageSize?: number;
   siblingCount?: number;
   boundaryCount?: number;
   pageSizeOptions?: number[];
@@ -25,16 +21,42 @@ export interface EnhancedPaginationProps {
   showPageSizeSelector?: boolean;
   showItemCount?: boolean;
   showPageInfo?: boolean;
-  variant?: 'default' | 'compact' | 'minimal';
+  showFirstLast?: boolean;
+  variant?: PaginationControlVariant | 'default' | 'compact' | 'minimal';
+  pageName?: string;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
+  onFirstPage?: () => void;
+  onPreviousPage?: () => void;
+  onNextPage?: () => void;
+  onLastPage?: () => void;
   children?: React.ReactNode;
+}
+
+function getControlVariant(
+  variant: EnhancedPaginationProps['variant']
+): PaginationControlVariant {
+  if (variant === 'default' || variant === undefined) {
+    return 'table';
+  }
+
+  if (variant === 'compact') {
+    return 'numbered';
+  }
+
+  if (variant === 'minimal') {
+    return 'simple';
+  }
+
+  return variant;
 }
 
 export function EnhancedPagination({
   totalItems,
   initialPageSize = 10,
   initialPage = 1,
+  currentPage,
+  pageSize,
   siblingCount = 1,
   boundaryCount = 1,
   pageSizeOptions = [5, 10, 20, 50, 100],
@@ -42,189 +64,95 @@ export function EnhancedPagination({
   showPageSizeSelector = true,
   showItemCount = true,
   showPageInfo = true,
+  showFirstLast,
   variant = 'default',
+  pageName,
   onPageChange,
   onPageSizeChange,
+  onFirstPage,
+  onPreviousPage,
+  onNextPage,
+  onLastPage,
   children,
 }: EnhancedPaginationProps) {
   const pagination = useEnhancedPagination({
     totalItems,
-    initialPageSize,
-    initialPage,
+    initialPageSize: pageSize ?? initialPageSize,
+    initialPage: currentPage ?? initialPage,
     siblingCount,
     boundaryCount,
     pageSizeOptions,
   });
+
+  const activePage = currentPage ?? pagination.currentPage;
+  const activePageSize = pageSize ?? pagination.pageSize;
+  const totalPages = Math.max(1, Math.ceil(totalItems / activePageSize));
+  const startItem = totalItems > 0 ? (activePage - 1) * activePageSize + 1 : 0;
+  const endItem = Math.min(activePage * activePageSize, totalItems);
+  const controlVariant = getControlVariant(variant);
 
   const handlePageChange = (page: number) => {
     pagination.setPage(page);
     onPageChange?.(page);
   };
 
-  const handlePageSizeChange = (pageSize: number) => {
-    pagination.setPageSize(pageSize);
-    onPageSizeChange?.(pageSize);
+  const handlePageSizeChange = (nextPageSize: number) => {
+    pagination.setPageSize(nextPageSize);
+    onPageSizeChange?.(nextPageSize);
   };
 
-  const renderPaginationContent = () => (
-    <Pagination>
-      <PaginationContent>
-        {/* Previous button */}
-        <PaginationItem>
-          <PaginationPrevious
-            href='#'
-            onClick={e => {
-              e.preventDefault();
-              if (pagination.hasPreviousPage) {
-                handlePageChange(pagination.previousPage);
-              }
-            }}
-            className={cn(
-              !pagination.hasPreviousPage && 'pointer-events-none opacity-50'
-            )}
-          />
-        </PaginationItem>
-
-        {/* Page numbers */}
-        {pagination.paginationItems.map((item, index) => (
-          <PaginationItem key={index}>
-            {item === 'ellipsis' ? (
-              <PaginationEllipsis />
-            ) : (
-              <PaginationLink
-                href='#'
-                isActive={item === pagination.currentPage}
-                onClick={e => {
-                  e.preventDefault();
-                  handlePageChange(item);
-                }}
-              >
-                {item}
-              </PaginationLink>
-            )}
-          </PaginationItem>
-        ))}
-
-        {/* Next button */}
-        <PaginationItem>
-          <PaginationNext
-            href='#'
-            onClick={e => {
-              e.preventDefault();
-              if (pagination.hasNextPage) {
-                handlePageChange(pagination.nextPage);
-              }
-            }}
-            className={cn(
-              !pagination.hasNextPage && 'pointer-events-none opacity-50'
-            )}
-          />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
+  const controls = (
+    <PaginationControl
+      currentPage={activePage}
+      totalPages={totalPages}
+      totalItems={totalItems}
+      pageSize={activePageSize}
+      pageSizeOptions={pageSizeOptions}
+      siblingCount={siblingCount}
+      boundaryCount={boundaryCount}
+      variant={controlVariant}
+      pageName={pageName}
+      showFirstLast={showFirstLast}
+      showPageSizeSelector={showPageSizeSelector}
+      showItemRange={showItemCount}
+      showPageNumbers={controlVariant !== 'simple'}
+      onPageChange={handlePageChange}
+      onPageSizeChange={handlePageSizeChange}
+      onFirstPage={onFirstPage}
+      onPreviousPage={onPreviousPage}
+      onNextPage={onNextPage}
+      onLastPage={onLastPage}
+    />
   );
 
-  if (variant === 'minimal') {
+  if (variant === 'compact' || variant === 'minimal') {
     return (
-      <div className={cn('flex items-center justify-center', className)}>
-        {renderPaginationContent()}
+      <div className={cn('flex w-full items-center justify-center', className)}>
+        {controls}
       </div>
     );
   }
 
-  if (variant === 'compact') {
-    return (
-      <div className={cn('flex items-center justify-between', className)}>
-        {showItemCount && (
-          <Typography variant='body2' className='text-primary'>
-            {pagination.startItem}-{pagination.endItem} of{' '}
-            {pagination.totalItems}
-          </Typography>
-        )}
-
-        <div className='flex items-center gap-4'>
-          {showPageSizeSelector && (
-            <div className='flex items-center gap-2'>
-              <Typography variant='small' className='text-primary'>
-                Rows:
-              </Typography>
-              <Select
-                value={pagination.pageSize.toString()}
-                onChange={e => handlePageSizeChange(Number(e.target.value))}
-                size='sm'
-                className='w-[70px]'
-              >
-                {pagination.pageSizeOptions.map(size => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </Select>
-            </div>
-          )}
-
-          {renderPaginationContent()}
-        </div>
-      </div>
-    );
-  }
-
-  // Default variant
   return (
-    <Card className={cn('mt-4', className)}>
+    <Card className={cn('mt-4 border-[color:var(--border-subtle)]', className)}>
       <CardContent className='p-4'>
-        <div className='flex items-center justify-between'>
-          {/* Item count and page info */}
-          {showItemCount && (
-            <div className='flex items-center gap-2 text-sm text-primary'>
-              {showPageInfo && (
-                <>
-                  <span>
-                    Page {pagination.currentPage} of {pagination.totalPages}
-                  </span>
-                  <span>•</span>
-                </>
-              )}
-              <span>
-                {pagination.startItem}-{pagination.endItem} of{' '}
-                {pagination.totalItems} items
-              </span>
+        <div className='flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
+          {showItemCount && showPageInfo && (
+            <div className='min-w-fit text-sm text-[color:var(--text-secondary)]'>
+              <Typography variant='small'>
+                Page {activePage} of {totalPages} · {startItem}-{endItem} of{' '}
+                {totalItems} items
+              </Typography>
             </div>
           )}
 
-          <div className='flex items-center gap-4'>
-            {/* Page size selector */}
-            {showPageSizeSelector && (
-              <div className='flex items-center gap-2'>
-                <Typography variant='body2' className='text-muted-foreground'>
-                  Rows per page:
-                </Typography>
-                <Select
-                  value={pagination.pageSize.toString()}
-                  onChange={e => handlePageSizeChange(Number(e.target.value))}
-                  size='sm'
-                  className='w-[70px]'
-                >
-                  {pagination.pageSizeOptions.map(size => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-            )}
-
-            {/* Pagination controls */}
-            {renderPaginationContent()}
-          </div>
+          <div className='min-w-0 flex-1'>{controls}</div>
         </div>
 
-        {/* Custom content */}
-        {children}
+        {children && <div className='mt-4'>{children}</div>}
       </CardContent>
     </Card>
   );
 }
 
-// Export the hook for direct use
 export { useEnhancedPagination };

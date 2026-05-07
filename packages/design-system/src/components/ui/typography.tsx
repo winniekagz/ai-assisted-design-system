@@ -4,75 +4,84 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-const typographyVariants = cva('font-rubik text-foreground', {
-  variants: {
-    variant: {
-      // Heading variants
-      h1: 'text-[75px] font-bold leading-[100%] tracking-[-2px] text-[#E0E0E0]',
-      h2: 'text-[50px] font-bold leading-[100%] tracking-[-3%] text-[rgba(0,0,0,0.87)]',
-      h3: 'text-[30px] font-semibold leading-[100%] tracking-[-2px]',
-      h4: 'text-[21px] font-semibold leading-[120%] tracking-[0px]',
-      h5: 'text-[1.5em] font-medium leading-[133%] tracking-[0.5%]',
-      h6: 'text-[1.25rem] font-medium leading-[160%] tracking-[0.15px] text-[rgba(0,0,0,0.6)]',
+const typographyVariants = cva(
+  '[font-family:var(--font-rubik)] text-[color:var(--text-paragraph)]',
+  {
+    variants: {
+      variant: {
+        // Heading variants
+        h1: 'text-[length:var(--font-size-heading-1)] font-bold leading-[100%] tracking-[0px] text-[color:var(--text-title)] [font-family:var(--font-heading)]',
+        h2: 'text-[length:var(--font-size-heading-2)] font-bold leading-[105%] tracking-[0px] text-[color:var(--text-title)] [font-family:var(--font-heading)]',
+        h3: 'text-[length:var(--font-size-heading-3)] font-semibold leading-[115%] tracking-[0px] text-[color:var(--text-title)] [font-family:var(--font-heading)]',
+        h4: 'text-[length:var(--font-size-heading-4)] font-semibold leading-[125%] tracking-[0px] text-[color:var(--text-title)] [font-family:var(--font-heading)]',
+        h5: 'text-[length:var(--font-size-heading-5)] font-medium leading-[133%] tracking-[0px] text-[color:var(--text-title)] [font-family:var(--font-heading)]',
+        h6: 'text-[length:var(--font-size-heading-6)] font-medium leading-[150%] tracking-[0px] text-[color:var(--text-title)] [font-family:var(--font-heading)]',
 
-      // Body text variants
-      body1:
-        'text-[1rem] font-normal leading-[150%] tracking-[0.15%] text-[rgba(0,0,0,0.6)]',
-      body2:
-        'text-[0.87rem] font-normal leading-[143%] tracking-[0.17%] text-[rgba(0,0,0,0.6)]',
+        // Body text variants
+        body1:
+          'text-[length:var(--font-size-body)] font-normal leading-[150%] tracking-[0px] text-[color:var(--text-paragraph)]',
+        body2:
+          'text-[length:var(--font-size-body-sm)] font-normal leading-[143%] tracking-[0px] text-[color:var(--text-secondary)]',
 
-      // Specialized variants
-      caption: 'text-[14px] font-normal leading-[100%] tracking-[0px]',
-      small: 'text-[14px] font-normal leading-[130%] tracking-[0px]',
-      link: 'text-[16px] font-medium leading-[130%] tracking-[0.15px] text-primary hover:text-primary/80 underline-offset-4 hover:underline',
+        // Specialized variants
+        caption:
+          'text-[length:var(--font-size-caption)] font-normal leading-[130%] tracking-[0px] text-[color:var(--text-secondary)]',
+        small:
+          'text-[length:var(--font-size-body-sm)] font-normal leading-[130%] tracking-[0px] text-[color:var(--text-secondary)]',
+        link: 'text-[length:var(--font-size-body)] font-medium leading-[130%] tracking-[0px] text-[color:var(--color-primary)] hover:opacity-80 underline-offset-4 hover:underline',
 
-      // Display variants
-      display1: 'text-[2.25rem] font-bold leading-tight tracking-tight',
-      display2: 'text-[3rem] font-bold leading-tight tracking-tight',
-      display3: 'text-[3.75rem] font-bold leading-tight tracking-tight',
+        // Display variants
+        display1:
+          'text-[length:var(--font-size-display-1)] font-bold leading-tight tracking-[0px] text-[color:var(--text-title)] [font-family:var(--font-heading)]',
+        display2:
+          'text-[length:var(--font-size-display-2)] font-bold leading-tight tracking-[0px] text-[color:var(--text-title)] [font-family:var(--font-heading)]',
+        display3:
+          'text-[length:var(--font-size-display-3)] font-bold leading-tight tracking-[0px] text-[color:var(--text-title)] [font-family:var(--font-heading)]',
 
-      // Code variants
-      code: 'font-mono text-sm bg-muted px-1.5 py-0.5 rounded-md',
-      pre: 'font-mono text-sm bg-muted p-4 rounded-lg overflow-x-auto',
+        // Code variants
+        code: '[font-family:var(--font-mono)] text-[length:var(--font-size-body-sm)] bg-[color:var(--bg-secondary)] px-1.5 py-0.5 rounded-[var(--radius-sm)] text-[color:var(--text-paragraph)]',
+        pre: '[font-family:var(--font-mono)] text-[length:var(--font-size-body-sm)] bg-[color:var(--bg-secondary)] p-4 rounded-[var(--radius-lg)] overflow-x-auto text-[color:var(--text-paragraph)]',
+      },
+      textColor: {
+        default: 'text-[color:var(--text-paragraph)]',
+        primary: 'text-[color:var(--color-primary)]',
+        secondary: 'text-[color:var(--text-secondary)]',
+        muted: 'text-[color:var(--text-muted)]',
+        destructive: 'text-[color:var(--helper-error)]',
+        success: 'text-[color:var(--helper-success)]',
+        warning: 'text-[color:var(--helper-warning)]',
+        info: 'text-[color:var(--helper-information)]',
+      },
+      weight: {
+        normal: 'font-normal',
+        medium: 'font-medium',
+        semibold: 'font-semibold',
+        bold: 'font-bold',
+      },
+      align: {
+        left: 'text-left',
+        center: 'text-center',
+        right: 'text-right',
+        justify: 'text-justify',
+      },
+      truncate: {
+        true: 'truncate',
+        false: '',
+      },
     },
-    textColor: {
-      default: 'text-foreground',
-      primary: 'text-primary',
-      secondary: 'text-secondary',
-      muted: 'text-muted-foreground',
-      destructive: 'text-destructive',
-      success: 'text-success-500',
-      warning: 'text-warning-500',
-      info: 'text-info-500',
+    defaultVariants: {
+      variant: 'body1',
+      textColor: 'default',
+      weight: 'normal',
+      align: 'left',
+      truncate: false,
     },
-    weight: {
-      normal: 'font-normal',
-      medium: 'font-medium',
-      semibold: 'font-semibold',
-      bold: 'font-bold',
-    },
-    align: {
-      left: 'text-left',
-      center: 'text-center',
-      right: 'text-right',
-      justify: 'text-justify',
-    },
-    truncate: {
-      true: 'truncate',
-      false: '',
-    },
-  },
-  defaultVariants: {
-    variant: 'body1',
-    textColor: 'default',
-    weight: 'normal',
-    align: 'left',
-    truncate: false,
-  },
-});
+  }
+);
 
 export interface TypographyProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, 'color'>,
+  extends
+    Omit<React.HTMLAttributes<HTMLElement>, 'color'>,
     VariantProps<typeof typographyVariants> {
   asChild?: boolean;
   as?:

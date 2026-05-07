@@ -35,5 +35,9 @@ export function mergeComponentIqTokens(
     radius: mergeTokenGroup(defaultComponentIqTokens.radius, tokens?.radius),
     spacing: mergeTokenGroup(defaultComponentIqTokens.spacing, tokens?.spacing),
     shadows: mergeTokenGroup(defaultComponentIqTokens.shadows, tokens?.shadows),
+    strokeWidth: mergeTokenGroup(
+      defaultComponentIqTokens.strokeWidth,
+      tokens?.strokeWidth
+    ),
   };
 }

@@ -98,7 +98,7 @@ export const designSystemComponents: DesignSystemComponent[] = [
     description: 'Focused interruptive workflow for confirmation or editing.',
     status: 'beta',
     accessibilityStatus: 'needs_review',
-    documentationStatus: 'partial',
+    documentationStatus: 'complete',
     preview: 'Review confirmation and proposal approval dialogs',
     variants: ['default', 'confirmation', 'form'],
     props: [
@@ -225,12 +225,13 @@ export const designSystemComponents: DesignSystemComponent[] = [
     preview: 'Filter ranges and scheduling inputs',
     variants: ['single', 'range'],
     props: [
-      { name: 'value', type: 'Date | DateRange', description: 'Selected date state.' },
-      { name: 'onChange', type: 'function', description: 'Updates selected date.' },
+      { name: 'value', type: 'DatePickerValue', description: 'Controlled startDate/endDate state.' },
+      { name: 'onChange', type: '(value: DatePickerValue) => void', description: 'Updates selected date state.' },
+      { name: 'variant', type: "'single' | 'range'", description: 'Controls one-date or range selection.' },
     ],
-    usage: ['Use when dates benefit from calendar context.'],
-    examples: ['Use RHFDatePicker in validated forms.'],
-    accessibility: ['Support keyboard navigation.', 'Provide typed date alternatives where required.'],
+    usage: ['Use when dates benefit from calendar context.', 'Use neutral text tokens for calendar states and reserve primary fill for selected dates.'],
+    examples: ['Use DatePicker as a controlled standalone field in product forms.'],
+    accessibility: ['Support keyboard navigation.', 'Provide a clear placeholder or label for the date purpose.'],
   },
 ];
 

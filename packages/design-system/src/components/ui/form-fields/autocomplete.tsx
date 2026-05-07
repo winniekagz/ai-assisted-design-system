@@ -6,7 +6,7 @@ import { ChevronDown, X } from 'lucide-react';
 import * as React from 'react';
 
 const autocompleteVariants = cva(
-  'flex w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[color:var(--color-text-secondary)] max-h-14 h-auto px-3 py-2 rounded border border-[color:var(--color-border-default)] bg-paper focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+  'flex w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[color:var(--color-text-secondary)] max-h-14 h-auto px-3 py-2 rounded border border-[color:var(--color-border-default)] bg-[color:var(--bg-paper)] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -36,7 +36,8 @@ export interface AutocompleteOption {
 }
 
 export interface AutocompleteProps
-  extends Omit<
+  extends
+    Omit<
       React.InputHTMLAttributes<HTMLInputElement>,
       'size' | 'onChange' | 'onSelect'
     >,
@@ -192,16 +193,16 @@ const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps>(
 
         {/* Dropdown */}
         {isOpen && filteredOptions.length > 0 && (
-          <div className='absolute z-50 w-full mt-1 bg-white border-none rounded shadow-lg max-h-60 overflow-auto'>
+          <div className='absolute z-50 w-full mt-1 bg-[color:var(--bg-surface)] border border-[color:var(--border-subtle)] rounded-[var(--radius-md)] shadow-[var(--shadow-lg)] max-h-60 overflow-auto'>
             {filteredOptions.map(option => (
               <button
                 key={option.value}
                 type='button'
                 className={cn(
-                  'w-full px-3 py-2 text-left hover:bg-primary/10 focus:bg-primary-100 focus:outline-none font-rubik text-[rgba(0,0,0,0.60)]',
+                  'w-full px-3 py-2 text-left hover:bg-[color:var(--bg-hover)] focus:bg-[color:var(--bg-hover)] focus:outline-none font-rubik text-[color:var(--text-paragraph)]',
                   multiple &&
                     selectedValues.includes(option.value) &&
-                    'bg-primary/10'
+                    'bg-[color:var(--bg-hover)]'
                 )}
                 onClick={() => handleOptionClick(option)}
               >

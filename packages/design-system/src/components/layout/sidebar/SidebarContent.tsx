@@ -26,7 +26,9 @@ export default function SidebarContentComponent({
       <ScrollArea className='h-full px-3 py-4'>
         <div className='space-y-2'>
           {navigation?.length === 0 ? (
-            <div className='text-sm text-gray-500'>No navigation items</div>
+            <div className='text-sm text-[color:var(--text-muted)]'>
+              No navigation items
+            </div>
           ) : (
             navigation?.map(item => (
               <div

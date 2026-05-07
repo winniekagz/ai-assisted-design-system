@@ -1,75 +1,87 @@
 /* Design Tokens CSS Variables */
 
 :root {
-  /* ── PALETTE ──────────────────────────────────────────────────────────────
-     Six raw values that define the entire warm earthy colour system.
-     Everything else is derived from or maps to these.
+  /* PUBLIC COLOR TOKENS
+     Use these semantic tokens in components and docs. Keep raw hex values and
+     shade scales out of product CSS unless you are extending the token system.
   ──────────────────────────────────────────────────────────────────────── */
-  --palette-darkest: #331812; /* deepest warm brown — max contrast text */
-  --palette-primary: #8D493A; /* terracotta — brand action colour */
-  --palette-mid:     #D0B8A8; /* warm taupe — borders & input strokes */
-  --palette-light:   #DFD3C3; /* warm beige — subtle separators & mid-bg */
-  --palette-cream:   #F8EDE3; /* cream — card / surface background */
-  --palette-white:   #FDFAF9; /* near-white — page background */
 
-  /* ── TEXT (4 semantic tokens) ────────────────────────────────────────── */
-  --text-title:      #331812; /* h1-h6, display text */
-  --text-paragraph:  #331812; /* body copy — 14.6:1 on page bg, AAA */
-  --text-muted:      #7A5F57; /* secondary / metadata — 5.6:1, AA */
+  /* ── TEXT (gray semantic tokens) ─────────────────────────────────────── */
+  --text-title:      #111827; /* h1-h6, display text */
+  --text-primary:    #111827; /* highest-emphasis UI text */
+  --text-paragraph:  #374151; /* body copy */
+  --text-secondary:  #4B5563; /* labels, secondary UI text */
+  --text-muted:      #6B7280; /* metadata and low-emphasis text */
+  --text-disabled:   #9CA3AF; /* disabled / placeholder-adjacent text */
   --text-brand:      #8D493A; /* links, active labels, brand emphasis */
   --text-inverse:    #FDFAF9; /* text on dark / primary-coloured surfaces */
 
   /* ── BACKGROUNDS (5 semantic tokens) ────────────────────────────────── */
   --bg-default:      #FDFAF9; /* page background */
-  --bg-surface:      #F8EDE3; /* cards, popovers, modals */
-  --bg-secondary:    #DFD3C3; /* inset panels, secondary sections */
-  --bg-hover:        #F8EDE3; /* hover on default bg (lifts to surface) */
-  --bg-card-active:  #DFD3C3; /* selected / active card state */
+  --bg-surface:      #FFFFFF; /* cards, popovers, modals */
+  --bg-secondary:    #F9FAFB; /* inset panels, secondary sections */
+  --bg-hover:        #F3F4F6; /* hover on default bg */
+  --bg-card-active:  #F3F4F6; /* selected / active card state */
 
   /* ── BORDERS (3 semantic tokens) ─────────────────────────────────────── */
-  --border-default:  #D0B8A8; /* input strokes, card outlines */
-  --border-subtle:   #DFD3C3; /* light dividers between sections */
+  --border-default:  #D1D5DB; /* input strokes, card outlines */
+  --border-subtle:   #E5E7EB; /* light dividers between sections */
   --border-focus:    #8D493A; /* keyboard focus ring */
 
   /* ── BRAND (primary + secondary) ─────────────────────────────────────── */
   --color-primary:        #8D493A;
   --color-primary-fg:     #FDFAF9;
-  --color-secondary:      #647A58; /* warm sage — 5.8:1 on page bg, AA */
+  --color-secondary:      #347887; /* muted teal complement to terracotta */
   --color-secondary-fg:   #FDFAF9;
 
-  /* ── STATUS ──────────────────────────────────────────────────────────── */
-  --status-error:         #C62828;
-  --status-warning:       #E65100;
-  --status-success:       #2E7D32;
-  --status-info:          #0277BD;
-  --status-error-bg:      #FDECEA;
-  --status-warning-bg:    #FEF0E7;
-  --status-success-bg:    #EBF5EB;
-  --status-info-bg:       #EAF4FB;
+  /* ── HELPERS / FEEDBACK ──────────────────────────────────────────────── */
+  --helper-warning:             #B54708;
+  --helper-warning-pastel:      #FFF4E5;
+  --helper-link:                #175CD3;
+  --helper-link-pastel:         #EFF8FF;
+  --helper-information:         #175CD3;
+  --helper-information-pastel:  #EFF8FF;
+  --helper-error:               #B42318;
+  --helper-error-pastel:        #FEF3F2;
+  --helper-success:             #067647;
+  --helper-success-pastel:      #ECFDF3;
 
-  /* ── COMPAT ALIASES ──────────────────────────────────────────────────────
-     Keep existing component code working without changes. These map old
-     variable names to the new semantic tokens or palette values above.
+  /* INTERNAL COMPATIBILITY TOKENS
+     These keep older components, Tailwind utilities, and shadcn mappings
+     working. Prefer the public semantic tokens above for new work.
   ──────────────────────────────────────────────────────────────────────── */
 
   /* Background compat */
   --background-default:    var(--bg-default);
   --background-paper:      var(--bg-surface);
   --background-secondary:  var(--bg-secondary);
-  --background-tertiary:   var(--bg-secondary);
   --background-hover:      var(--bg-hover);
-  --background-disabled:   #EDE3DA;
+  --background-disabled:   #F3F4F6;
 
   /* Text compat */
-  --text-primary:          var(--text-paragraph);
-  --text-secondary:        var(--text-muted);
-  --text-disabled:         rgba(51, 24, 18, 0.35);
+  --color-text-primary:    var(--text-primary);
+  --color-text-paragraph:  var(--text-paragraph);
+  --color-text-secondary:  var(--text-secondary);
+  --color-text-muted:      var(--text-muted);
+  --color-text-disabled:   var(--text-disabled);
+  --color-text-brand:      var(--text-brand);
+  --color-text-inverse:    var(--text-inverse);
 
   /* Border compat */
   --border-secondary:      var(--border-subtle);
-  --border-error:          var(--status-error);
+  --border-error:          var(--helper-error);
 
-  /* Primary scale — derived from #8D493A */
+  /* Status compat */
+  --status-error:         var(--helper-error);
+  --status-warning:       var(--helper-warning);
+  --status-success:       var(--helper-success);
+  --status-info:          var(--helper-information);
+  --status-error-bg:      var(--helper-error-pastel);
+  --status-warning-bg:    var(--helper-warning-pastel);
+  --status-success-bg:    var(--helper-success-pastel);
+  --status-info-bg:       var(--helper-information-pastel);
+
+  /* Tailwind scale compat. Avoid these in new component CSS. */
   --primary-50:   #F8EDE3;
   --primary-100:  #EDDDD2;
   --primary-200:  #D9B8A6;
@@ -82,52 +94,51 @@
   --primary-900:  #331812;
   --primary-950:  #1A0C09;
 
-  /* Secondary scale — derived from #647A58 */
-  --secondary-50:  #EEF2EC;
-  --secondary-100: #D5DDD2;
-  --secondary-200: #ABBAA6;
-  --secondary-300: #8A9E83;
-  --secondary-400: #7B8E73;
+  --secondary-50:  #EEF9FB;
+  --secondary-100: #D7F0F4;
+  --secondary-200: #B2E0E8;
+  --secondary-300: #82CAD7;
+  --secondary-400: #58AEBD;
   --secondary-500: var(--color-secondary);
-  --secondary-600: #5A6B4F;
-  --secondary-700: #4A5942;
-  --secondary-800: #394534;
-  --secondary-900: #283125;
-  --secondary-950: #141A13;
+  --secondary-600: #2F6F7D;
+  --secondary-700: #285D68;
+  --secondary-800: #214B54;
+  --secondary-900: #1C3E45;
+  --secondary-950: #0D2025;
 
-  /* Status compat (500 scale names) */
-  --error-50:  #FDECEA; --error-100: #FCCAC7; --error-200: #F5918A;
-  --error-300: #EB5C52; --error-400: #D93020; --error-500: var(--status-error);
-  --error-600: #A81E1E; --error-700: #8C1616; --error-800: #6B0E0E;
+  --error-50:  var(--helper-error-pastel); --error-100: #FEE4E2; --error-200: #FECDCA;
+  --error-300: #FDA29B; --error-400: #F97066; --error-500: var(--status-error);
+  --error-600: #912018; --error-700: #7A271A; --error-800: #6B0E0E;
   --error-900: #460909; --error-950: #230404;
 
-  --warning-50:  #FEF0E7; --warning-100: #FDDDC4; --warning-200: #F9B77A;
-  --warning-300: #F48C35; --warning-400: #EF6900; --warning-500: var(--status-warning);
-  --warning-600: #C04500; --warning-700: #9A3800; --warning-800: #742A00;
+  --warning-50:  var(--helper-warning-pastel); --warning-100: #FEF0C7; --warning-200: #FEDF89;
+  --warning-300: #FEC84B; --warning-400: #FDB022; --warning-500: var(--status-warning);
+  --warning-600: #93370D; --warning-700: #7A2E0E; --warning-800: #742A00;
   --warning-900: #4D1B00; --warning-950: #260D00;
 
-  --info-50:  #EAF4FB; --info-100: #C8E5F6; --info-200: #8EC6EB;
-  --info-300: #52A5DC; --info-400: #1889CF; --info-500: var(--status-info);
-  --info-600: #01579B; --info-700: #014477; --info-800: #013259;
+  --info-50:  var(--helper-information-pastel); --info-100: #D1E9FF; --info-200: #B2DDFF;
+  --info-300: #84CAFF; --info-400: #53B1FD; --info-500: var(--status-info);
+  --info-600: #1849A9; --info-700: #194185; --info-800: #013259;
   --info-900: #01203A; --info-950: #00101D;
 
-  --success-50:  #EBF5EB; --success-100: #C8E6C9; --success-200: #A5D6A7;
-  --success-300: #81C784; --success-400: #66BB6A; --success-500: var(--status-success);
-  --success-600: #1B5E20; --success-700: #388E3C; --success-800: #2E7D32;
+  --success-50:  var(--helper-success-pastel); --success-100: #D1FADF; --success-200: #A6F4C5;
+  --success-300: #6CE9A6; --success-400: #32D583; --success-500: var(--status-success);
+  --success-600: #05603A; --success-700: #054F31; --success-800: #2E7D32;
   --success-900: #1B5E20; --success-950: #0D2E10;
 
-  /* Neutral scale — warm gray-browns */
-  --neutral-50:  #FAFAF9;
-  --neutral-100: #F5F0EC;
-  --neutral-200: #EAE2DB;
-  --neutral-300: #D9CFCA;
-  --neutral-400: #C0B5B0;
-  --neutral-500: #9E908C;
-  --neutral-600: #786B68;
-  --neutral-700: #5C4E4B;
-  --neutral-800: #3D3230;
-  --neutral-900: #231C1B;
-  --neutral-950: #130F0E;
+  --neutral-50:  #F9FAFB;
+  --neutral-100: #F3F4F6;
+  --neutral-200: #E5E7EB;
+  --neutral-300: #D1D5DB;
+  --neutral-400: #9CA3AF;
+  --neutral-500: #6B7280;
+  --neutral-600: #4B5563;
+  --neutral-700: #374151;
+  --neutral-800: #1F2937;
+  --neutral-900: #111827;
+  --neutral-950: #030712;
+
+  /* NON-COLOR TOKENS */
 
   /* Font Families */
   --font-sans:
@@ -140,12 +151,6 @@
   --font-rubik:
     'Rubik', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-
-  /* Border Colors */
-  --border-default: rgba(0, 0, 0, 0.23);
-  --border-secondary: rgba(0, 0, 0, 0.12);
-  --border-focus: #009966;
-  --border-error: #d32f2f;
 
   /* Typography */
   --font-weight-regular: 400;
@@ -338,31 +343,49 @@
 @media (prefers-color-scheme: dark) {
   :root {
     /* Override semantic tokens for system dark mode preference */
-    --bg-default:     #18100E;
-    --bg-surface:     #231511;
-    --bg-secondary:   #2E1C17;
-    --bg-hover:       rgba(208, 184, 168, 0.08);
-    --bg-card-active: rgba(141, 73, 58, 0.18);
+    --bg-default:     #111827;
+    --bg-surface:     #1F2937;
+    --bg-secondary:   #374151;
+    --bg-hover:       #374151;
+    --bg-card-active: rgba(213, 154, 134, 0.18);
 
-    --text-title:     rgba(253, 250, 249, 0.95);
-    --text-paragraph: rgba(253, 250, 249, 0.88);
-    --text-muted:     rgba(208, 184, 168, 0.65);
-    --text-brand:     #C4896F;
-    --text-inverse:   #18100E;
+    --text-title:     #F9FAFB;
+    --text-primary:   #F3F4F6;
+    --text-paragraph: #E5E7EB;
+    --text-secondary: #D1D5DB;
+    --text-muted:     #9CA3AF;
+    --text-disabled:  #6B7280;
+    --text-brand:     #D59A86;
+    --text-inverse:   #111827;
 
-    --border-default: rgba(208, 184, 168, 0.2);
-    --border-subtle:  rgba(208, 184, 168, 0.1);
-    --border-focus:   #C4896F;
+    --border-default: #374151;
+    --border-subtle:  #4B5563;
+    --border-focus:   #D59A86;
 
-    --color-primary:      #C4896F;
-    --color-primary-fg:   #18100E;
-    --color-secondary:    #8FA882;
-    --color-secondary-fg: #18100E;
+    --color-primary:      #D59A86;
+    --color-primary-fg:   #111827;
+    --color-secondary:    #7BC7D8;
+    --color-secondary-fg: #111827;
 
-    --status-error:   #F05252;
-    --status-warning: #FB923C;
-    --status-success: #4ADE80;
-    --status-info:    #38BDF8;
+    --helper-warning:             #FDB022;
+    --helper-warning-pastel:      #3A2A0A;
+    --helper-link:                #84CAFF;
+    --helper-link-pastel:         #102A43;
+    --helper-information:         #84CAFF;
+    --helper-information-pastel:  #102A43;
+    --helper-error:               #F97066;
+    --helper-error-pastel:        #3B1C1A;
+    --helper-success:             #32D583;
+    --helper-success-pastel:      #0B2F22;
+
+    --status-error:      var(--helper-error);
+    --status-warning:    var(--helper-warning);
+    --status-success:    var(--helper-success);
+    --status-info:       var(--helper-information);
+    --status-error-bg:   var(--helper-error-pastel);
+    --status-warning-bg: var(--helper-warning-pastel);
+    --status-success-bg: var(--helper-success-pastel);
+    --status-info-bg:    var(--helper-information-pastel);
   }
 }
 

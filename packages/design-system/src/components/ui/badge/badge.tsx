@@ -1,6 +1,10 @@
 import { cn } from '@/lib/utils';
 import { BadgeStatus, BadgeStatusConfig } from '../../../types/badgw';
-import { defaultBadgeStatusConfig, makeCustomColors } from './badgeColors';
+import {
+  defaultBadgeStatusConfig,
+  getDefaultBadgeStatusStyle,
+  makeCustomColors,
+} from './badgeColors';
 import { badgeVariants } from './badgeVariants';
 
 interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -16,7 +20,7 @@ interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function Badge({
   className,
-  variant = 'filled',
+  variant = 'pastel',
   size = 'md',
   status,
   statusConfig,
@@ -24,9 +28,10 @@ export function Badge({
   icon: Icon,
   iconPosition = 'start',
   children,
+  style,
   ...props
 }: BadgeProps) {
-  let colors = '';
+  let colors = getDefaultBadgeStatusStyle(colorStatus || status, variant);
   let label = '';
 
   // Use colorStatus for colors if provided, otherwise use status
@@ -62,7 +67,6 @@ export function Badge({
     label = status
       ? status.charAt(0).toUpperCase() + status.slice(1)
       : defaultConfig.label;
-    colors = defaultConfig.colors[variant as keyof typeof defaultConfig.colors];
   }
   // Fallback for unknown statuses
   else if (status) {
@@ -76,6 +80,7 @@ export function Badge({
   return (
     <div
       className={cn(badgeVariants({ variant, size }), colors, className)}
+      style={style}
       {...props}
     >
       {Icon && iconPosition === 'start' && <Icon className='mr-2 h-4 w-4' />}

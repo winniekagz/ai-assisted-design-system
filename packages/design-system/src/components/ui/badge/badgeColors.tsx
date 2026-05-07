@@ -1,64 +1,125 @@
 import { BadgeVariants } from '../../../types/badgw';
 
-// Fully literal Tailwind class map for known statuses
+export type BadgeVariantName = 'filled' | 'outlined' | 'pastel';
+
+const statusColorClasses = {
+  success: {
+    filled:
+      'bg-[color:var(--helper-success)] text-[color:var(--text-inverse)] border-[color:var(--helper-success)]',
+    outlined:
+      'bg-transparent text-[color:var(--helper-success)] border-[color:var(--helper-success)]',
+    pastel:
+      'bg-[color:var(--helper-success-pastel)] text-[color:var(--helper-success)] border-[color:var(--helper-success)]',
+  },
+  warning: {
+    filled:
+      'bg-[color:var(--helper-warning)] text-[color:var(--text-inverse)] border-[color:var(--helper-warning)]',
+    outlined:
+      'bg-transparent text-[color:var(--helper-warning)] border-[color:var(--helper-warning)]',
+    pastel:
+      'bg-[color:var(--helper-warning-pastel)] text-[color:var(--helper-warning)] border-[color:var(--helper-warning)]',
+  },
+  error: {
+    filled:
+      'bg-[color:var(--helper-error)] text-[color:var(--text-inverse)] border-[color:var(--helper-error)]',
+    outlined:
+      'bg-transparent text-[color:var(--helper-error)] border-[color:var(--helper-error)]',
+    pastel:
+      'bg-[color:var(--helper-error-pastel)] text-[color:var(--helper-error)] border-[color:var(--helper-error)]',
+  },
+  info: {
+    filled:
+      'bg-[color:var(--helper-information)] text-[color:var(--text-inverse)] border-[color:var(--helper-information)]',
+    outlined:
+      'bg-transparent text-[color:var(--helper-information)] border-[color:var(--helper-information)]',
+    pastel:
+      'bg-[color:var(--helper-information-pastel)] text-[color:var(--helper-information)] border-[color:var(--helper-information)]',
+  },
+  link: {
+    filled:
+      'bg-[color:var(--helper-link)] text-[color:var(--text-inverse)] border-[color:var(--helper-link)]',
+    outlined:
+      'bg-transparent text-[color:var(--helper-link)] border-[color:var(--helper-link)]',
+    pastel:
+      'bg-[color:var(--helper-link-pastel)] text-[color:var(--helper-link)] border-[color:var(--helper-link)]',
+  },
+  neutral: {
+    filled:
+      'bg-[color:var(--bg-secondary)] text-[color:var(--text-secondary)] border-[color:var(--border-default)]',
+    outlined:
+      'bg-transparent text-[color:var(--text-secondary)] border-[color:var(--border-default)]',
+    pastel:
+      'bg-[color:var(--bg-secondary)] text-[color:var(--text-secondary)] border-[color:var(--border-default)]',
+  },
+} satisfies Record<string, BadgeVariants>;
+
+type StatusColorKey = keyof typeof statusColorClasses;
+
+function isStatusColorKey(value: string): value is StatusColorKey {
+  return value in statusColorClasses;
+}
+
+function getStatusColorKey(status: string | undefined) {
+  if (!status) {
+    return 'neutral';
+  }
+
+  const normalizedStatus = status.toLowerCase();
+
+  if (normalizedStatus === 'pending') {
+    return 'warning';
+  }
+
+  if (normalizedStatus === 'completed') {
+    return 'info';
+  }
+
+  if (normalizedStatus === 'danger') {
+    return 'error';
+  }
+
+  return isStatusColorKey(normalizedStatus) ? normalizedStatus : 'neutral';
+}
+
+export function getDefaultBadgeStatusStyle(
+  status: string | undefined,
+  variant: BadgeVariantName
+) {
+  return statusColorClasses[getStatusColorKey(status)][variant];
+}
+
 export const defaultBadgeStatusConfig = {
   success: {
     label: 'Success',
-    colors: {
-      filled: 'bg-success-500 dark:bg-success-600 text-white',
-      outlined:
-        'bg-transparent text-success-500 dark:text-success-600 border-success-500 dark:border-success-600',
-      pastel: 'bg-success-50 text-success-500',
-    },
+    colors: statusColorClasses.success,
   },
   pending: {
     label: 'Pending',
-    colors: {
-      filled: 'bg-warning-500 dark:bg-warning-600 text-white',
-      outlined:
-        'bg-transparent text-warning-500 dark:text-warning-600 border-warning-500 dark:border-warning-600',
-      pastel: 'bg-warning-50 text-warning-500',
-    },
+    colors: statusColorClasses.warning,
   },
   error: {
     label: 'Error',
-    colors: {
-      filled: 'bg-error-500 dark:bg-error-600 text-white',
-      outlined:
-        'bg-transparent text-error-500 dark:text-error-600 border-error-500 dark:border-error-600',
-      pastel: 'bg-error-50 text-error-500',
-    },
+    colors: statusColorClasses.error,
   },
   completed: {
     label: 'Completed',
-    colors: {
-      filled: 'bg-info-500 dark:bg-info-600 text-white',
-      outlined:
-        'bg-transparent text-info-500 dark:text-info-600 border-info-500 dark:border-info-600',
-      pastel: 'bg-info-50 text-info-500',
-    },
+    colors: statusColorClasses.info,
   },
   neutral: {
     label: 'Neutral',
-    colors: {
-      filled: 'bg-neutral-500 dark:bg-neutral-600 text-white',
-      outlined:
-        'bg-transparent text-neutral-500 dark:text-neutral-600 border-neutral-500 dark:border-neutral-600',
-      pastel: 'bg-neutral-50 text-neutral-500',
-    },
+    colors: statusColorClasses.neutral,
   },
 } as const;
 
-// Fallback dynamic generator for custom colors
 export const makeCustomColors = (
   colorName: string,
   status: string
 ): BadgeVariants => {
-  console.log('[makeCustomColors] generating colors for:', colorName);
+  const normalizedColor = colorName.toLowerCase();
+  const statusKey = getStatusColorKey(status);
+  const key = statusKey === 'neutral' ? normalizedColor : statusKey;
 
-  return {
-    filled: `bg-${colorName}-500 dark:bg-${colorName}-600 text-white`,
-    outlined: `bg-transparent text-${colorName}-500 dark:text-${colorName}-600 border-${colorName}-500 dark:border-${colorName}-600`,
-    pastel: `bg-${colorName}-50 text-${colorName}-500`,
-  };
+  return isStatusColorKey(key)
+    ? statusColorClasses[key]
+    : statusColorClasses.neutral;
 };

@@ -1,371 +1,173 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
+  PaginationControl,
+  type PaginationControlProps,
 } from '@/components/ui/pagination/pagination';
-import { DataTablePagination } from '@/components/ui/pagination/data-table-pagination';
-import { EnhancedPagination } from '@/components/ui/pagination/enhanced-pagination';
-import { usePagination } from '@/hooks/use-pagination';
 
-// Base Pagination Components Stories
-const basePaginationMeta = {
-  title: 'Components/Pagination/Base Components',
+const meta = {
+  title: 'Components/Pagination',
+  component: PaginationControl,
   parameters: {
-    layout: 'padded',
-  },
-  tags: ['autodocs'],
-} satisfies Meta;
-
-export default basePaginationMeta;
-type BaseStory = StoryObj<typeof basePaginationMeta>;
-
-// Interactive Base Pagination
-export const InteractiveBasePagination: BaseStory = {
-  render: () => {
-    const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = 10;
-
-    const pagination = usePagination({
-      currentPage,
-      totalPages,
-      siblingCount: 1,
-      boundaryCount: 1,
-    });
-
-    return (
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              href='#'
-              onClick={e => {
-                e.preventDefault();
-                if (pagination.hasPreviousPage) {
-                  setCurrentPage(pagination.previousPage);
-                }
-              }}
-              className={
-                !pagination.hasPreviousPage
-                  ? 'pointer-events-none opacity-50'
-                  : ''
-              }
-            />
-          </PaginationItem>
-
-          {pagination.items.map((item, index) => (
-            <PaginationItem key={index}>
-              {item === 'ellipsis' ? (
-                <PaginationEllipsis />
-              ) : (
-                <PaginationLink
-                  href='#'
-                  isActive={item === currentPage}
-                  onClick={e => {
-                    e.preventDefault();
-                    setCurrentPage(item);
-                  }}
-                >
-                  {item}
-                </PaginationLink>
-              )}
-            </PaginationItem>
-          ))}
-
-          <PaginationItem>
-            <PaginationNext
-              href='#'
-              onClick={e => {
-                e.preventDefault();
-                if (pagination.hasNextPage) {
-                  setCurrentPage(pagination.nextPage);
-                }
-              }}
-              className={
-                !pagination.hasNextPage ? 'pointer-events-none opacity-50' : ''
-              }
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    );
-  },
-};
-
-// DataTablePagination Stories
-const dataTablePaginationMeta = {
-  title: 'Components/Pagination/DataTablePagination',
-  component: DataTablePagination,
-  parameters: {
-    layout: 'padded',
+    layout: 'centered',
+    docs: {
+      description: {
+        component:
+          'Atomic pagination controls built on ComponentIQ buttons and semantic tokens. Use the controlled currentPage prop and onPageChange callback to move between first, previous, numbered, next, and last pages.',
+      },
+    },
   },
   tags: ['autodocs'],
   argTypes: {
+    variant: {
+      control: { type: 'select' },
+      options: ['numbered', 'labeled', 'jump', 'table', 'simple'],
+    },
     currentPage: { control: { type: 'number', min: 1 } },
     totalPages: { control: { type: 'number', min: 1 } },
-    pageSize: { control: { type: 'number', min: 1 } },
-    totalItems: { control: { type: 'number', min: 1 } },
-    showPageSizeSelector: { control: 'boolean' },
-    showItemCount: { control: 'boolean' },
     siblingCount: { control: { type: 'number', min: 0, max: 3 } },
     boundaryCount: { control: { type: 'number', min: 0, max: 3 } },
+    showFirstLast: { control: 'boolean' },
+    showPageNumbers: { control: 'boolean' },
   },
-} satisfies Meta<typeof DataTablePagination>;
+} satisfies Meta<typeof PaginationControl>;
 
-export const DataTablePaginationStory = {
-  ...dataTablePaginationMeta,
-  render: (args: any) => {
-    const [currentPage, setCurrentPage] = useState(args.currentPage || 1);
-    const [pageSize, setPageSize] = useState(args.pageSize || 10);
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-    return (
-      <DataTablePagination
+function ControlledPagination(args: PaginationControlProps) {
+  const [currentPage, setCurrentPage] = useState(args.currentPage);
+  const [pageSize, setPageSize] = useState(args.pageSize ?? 50);
+
+  return (
+    <div className='w-[min(620px,calc(100vw-48px))] rounded-md border border-[color:var(--border-subtle)] bg-[color:var(--bg-surface)] p-4'>
+      <PaginationControl
         {...args}
         currentPage={currentPage}
         pageSize={pageSize}
         onPageChange={setCurrentPage}
         onPageSizeChange={setPageSize}
       />
-    );
-  },
+    </div>
+  );
+}
+
+export const Numbered: Story = {
+  render: args => <ControlledPagination {...args} />,
   args: {
     currentPage: 1,
     totalPages: 10,
-    pageSize: 10,
-    totalItems: 100,
-    pageSizeOptions: [5, 10, 20, 50, 100],
-    showPageSizeSelector: true,
-    showItemCount: true,
+    variant: 'numbered',
     siblingCount: 1,
     boundaryCount: 1,
+    showFirstLast: false,
+    onPageChange: () => {},
   },
 };
 
-// EnhancedPagination Stories
-const enhancedPaginationMeta = {
-  title: 'Components/Pagination/EnhancedPagination',
-  component: EnhancedPagination,
-  parameters: {
-    layout: 'padded',
-  },
-  tags: ['autodocs'],
-  argTypes: {
-    totalItems: { control: { type: 'number', min: 1 } },
-    initialPageSize: { control: { type: 'number', min: 1 } },
-    initialPage: { control: { type: 'number', min: 1 } },
-    variant: {
-      control: { type: 'select' },
-      options: ['default', 'compact', 'minimal'],
-    },
-    showPageSizeSelector: { control: 'boolean' },
-    showItemCount: { control: 'boolean' },
-    showPageInfo: { control: 'boolean' },
-    siblingCount: { control: { type: 'number', min: 0, max: 3 } },
-    boundaryCount: { control: { type: 'number', min: 0, max: 3 } },
-  },
-} satisfies Meta<typeof EnhancedPagination>;
-
-export const EnhancedPaginationStory = {
-  ...enhancedPaginationMeta,
-  render: (args: any) => {
-    const [currentPage, setCurrentPage] = useState(args.initialPage || 1);
-    const [pageSize, setPageSize] = useState(args.initialPageSize || 10);
-
-    return (
-      <EnhancedPagination
-        {...args}
-        initialPage={currentPage}
-        initialPageSize={pageSize}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
-      />
-    );
-  },
-  args: {
-    totalItems: 100,
-    initialPage: 1,
-    initialPageSize: 10,
-    variant: 'default',
-    showPageSizeSelector: true,
-    showItemCount: true,
-    showPageInfo: true,
-    siblingCount: 1,
-    boundaryCount: 1,
-    pageSizeOptions: [5, 10, 20, 50],
-  },
-};
-
-// Compact Variant Story
-export const CompactVariantStory = {
-  ...enhancedPaginationMeta,
-  render: (args: any) => {
-    const [currentPage, setCurrentPage] = useState(args.initialPage || 1);
-    const [pageSize, setPageSize] = useState(args.initialPageSize || 10);
-
-    return (
-      <EnhancedPagination
-        {...args}
-        initialPage={currentPage}
-        initialPageSize={pageSize}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
-      />
-    );
-  },
-  args: {
-    totalItems: 100,
-    initialPage: 1,
-    initialPageSize: 10,
-    variant: 'compact',
-    showPageSizeSelector: true,
-    showItemCount: true,
-    showPageInfo: false,
-    siblingCount: 1,
-    boundaryCount: 1,
-    pageSizeOptions: [5, 10, 20, 50],
-  },
-};
-
-// Minimal Variant Story
-export const MinimalVariantStory = {
-  ...enhancedPaginationMeta,
-  render: (args: any) => {
-    const [currentPage, setCurrentPage] = useState(args.initialPage || 1);
-    const [pageSize, setPageSize] = useState(args.initialPageSize || 10);
-
-    return (
-      <EnhancedPagination
-        {...args}
-        initialPage={currentPage}
-        initialPageSize={pageSize}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
-      />
-    );
-  },
-  args: {
-    totalItems: 100,
-    initialPage: 1,
-    initialPageSize: 10,
-    variant: 'minimal',
-    showPageSizeSelector: false,
-    showItemCount: false,
-    showPageInfo: false,
-    siblingCount: 1,
-    boundaryCount: 1,
-    pageSizeOptions: [5, 10, 20, 50],
-  },
-};
-
-// Example Stories
-export const LargeDatasetExample = {
-  ...dataTablePaginationMeta,
-  render: (args: any) => {
-    const [currentPage, setCurrentPage] = useState(args.currentPage || 15);
-    const [pageSize, setPageSize] = useState(args.pageSize || 20);
-
-    return (
-      <DataTablePagination
-        {...args}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
-      />
-    );
-  },
-  args: {
-    currentPage: 15,
-    totalPages: 50,
-    pageSize: 20,
-    totalItems: 1000,
-    pageSizeOptions: [10, 20, 50, 100],
-    showPageSizeSelector: true,
-    showItemCount: true,
-    siblingCount: 2,
-    boundaryCount: 1,
-  },
-};
-
-export const CompactExample = {
-  ...dataTablePaginationMeta,
-  render: (args: any) => {
-    const [currentPage, setCurrentPage] = useState(args.currentPage || 1);
-    const [pageSize, setPageSize] = useState(args.pageSize || 5);
-
-    return (
-      <DataTablePagination
-        {...args}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
-      />
-    );
-  },
-  args: {
-    currentPage: 1,
-    totalPages: 3,
-    pageSize: 5,
-    totalItems: 15,
-    pageSizeOptions: [5, 10],
-    showPageSizeSelector: false,
-    showItemCount: false,
-  },
-};
-
-export const WithoutPageSizeSelector = {
-  ...dataTablePaginationMeta,
-  render: (args: any) => {
-    const [currentPage, setCurrentPage] = useState(args.currentPage || 1);
-
-    return (
-      <DataTablePagination
-        {...args}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
-    );
-  },
+export const PreviousNext: Story = {
+  render: args => <ControlledPagination {...args} />,
   args: {
     currentPage: 1,
     totalPages: 8,
-    pageSize: 10,
-    totalItems: 80,
-    pageSizeOptions: [10, 20, 50],
-    showPageSizeSelector: false,
-    showItemCount: true,
+    variant: 'labeled',
+    siblingCount: 0,
+    boundaryCount: 1,
+    showFirstLast: false,
+    onPageChange: () => {},
   },
 };
 
-export const WithoutItemCount = {
-  ...dataTablePaginationMeta,
-  render: (args: any) => {
-    const [currentPage, setCurrentPage] = useState(args.currentPage || 1);
-    const [pageSize, setPageSize] = useState(args.pageSize || 10);
-
-    return (
-      <DataTablePagination
-        {...args}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
-      />
-    );
+export const FirstBackNextLast: Story = {
+  render: args => <ControlledPagination {...args} />,
+  args: {
+    currentPage: 3,
+    totalPages: 20,
+    variant: 'jump',
+    showFirstLast: true,
+    onPageChange: () => {},
   },
+};
+
+export const RowsPerPage: Story = {
+  render: args => <ControlledPagination {...args} />,
   args: {
     currentPage: 1,
     totalPages: 6,
-    pageSize: 10,
-    totalItems: 60,
-    pageSizeOptions: [10, 20, 50],
+    totalItems: 300,
+    pageSize: 50,
+    pageSizeOptions: [10, 20, 50, 100],
+    variant: 'table',
+    showFirstLast: false,
     showPageSizeSelector: true,
-    showItemCount: false,
+    showItemRange: true,
+    showPageNumbers: false,
+    onPageChange: () => {},
+  },
+};
+
+export const SimplePageName: Story = {
+  render: args => <ControlledPagination {...args} />,
+  args: {
+    currentPage: 4,
+    totalPages: 56,
+    variant: 'simple',
+    pageName: 'Page name',
+    onPageChange: () => {},
+  },
+};
+
+export const VariantBoard: Story = {
+  render: () => {
+    const [numberedPage, setNumberedPage] = useState(1);
+    const [labeledPage, setLabeledPage] = useState(1);
+    const [jumpPage, setJumpPage] = useState(3);
+    const [tablePage, setTablePage] = useState(1);
+    const [simplePage, setSimplePage] = useState(4);
+    const [pageSize, setPageSize] = useState(50);
+
+    return (
+      <div className='grid w-[min(620px,calc(100vw-48px))] gap-4 rounded-md border border-[color:var(--border-subtle)] bg-[color:var(--bg-surface)] p-4'>
+        <PaginationControl
+          currentPage={numberedPage}
+          totalPages={10}
+          variant='numbered'
+          onPageChange={setNumberedPage}
+        />
+        <PaginationControl
+          currentPage={labeledPage}
+          totalPages={8}
+          variant='labeled'
+          siblingCount={0}
+          boundaryCount={1}
+          onPageChange={setLabeledPage}
+        />
+        <PaginationControl
+          currentPage={jumpPage}
+          totalPages={20}
+          variant='jump'
+          showFirstLast
+          onPageChange={setJumpPage}
+        />
+        <PaginationControl
+          currentPage={tablePage}
+          totalPages={6}
+          totalItems={300}
+          pageSize={pageSize}
+          pageSizeOptions={[10, 20, 50, 100]}
+          variant='table'
+          showPageNumbers={false}
+          onPageChange={setTablePage}
+          onPageSizeChange={setPageSize}
+        />
+        <PaginationControl
+          currentPage={simplePage}
+          totalPages={56}
+          variant='simple'
+          pageName='Page name'
+          onPageChange={setSimplePage}
+        />
+      </div>
+    );
   },
 };

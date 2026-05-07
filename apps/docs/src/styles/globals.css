@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '@heroui/styles/css';
 @import 'tw-animate-css';
 @import './tokens.css';
 
@@ -71,7 +72,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-rubik, 'Rubik', ui-sans-serif, system-ui, sans-serif);
 
-  /* Primary Colors */
+  /* Internal Tailwind scale utilities. Prefer semantic tokens for new CSS. */
   --color-primary-50: var(--primary-50);
   --color-primary-100: var(--primary-100);
   --color-primary-200: var(--primary-200);
@@ -84,7 +85,6 @@
   --color-primary-900: var(--primary-900);
   --color-primary-950: var(--primary-950);
 
-  /* Secondary Colors */
   --color-secondary-50: var(--secondary-50);
   --color-secondary-100: var(--secondary-100);
   --color-secondary-200: var(--secondary-200);
@@ -97,7 +97,6 @@
   --color-secondary-900: var(--secondary-900);
   --color-secondary-950: var(--secondary-950);
 
-  /* Error Colors */
   --color-error-50: var(--error-50);
   --color-error-100: var(--error-100);
   --color-error-200: var(--error-200);
@@ -110,7 +109,6 @@
   --color-error-900: var(--error-900);
   --color-error-950: var(--error-950);
 
-  /* Warning Colors */
   --color-warning-50: var(--warning-50);
   --color-warning-100: var(--warning-100);
   --color-warning-200: var(--warning-200);
@@ -123,7 +121,6 @@
   --color-warning-900: var(--warning-900);
   --color-warning-950: var(--warning-950);
 
-  /* Info Colors */
   --color-info-50: var(--info-50);
   --color-info-100: var(--info-100);
   --color-info-200: var(--info-200);
@@ -136,7 +133,6 @@
   --color-info-900: var(--info-900);
   --color-info-950: var(--info-950);
 
-  /* Success Colors */
   --color-success-50: var(--success-50);
   --color-success-100: var(--success-100);
   --color-success-200: var(--success-200);
@@ -149,7 +145,6 @@
   --color-success-900: var(--success-900);
   --color-success-950: var(--success-950);
 
-  /* Neutral Colors */
   --color-neutral-50: var(--neutral-50);
   --color-neutral-100: var(--neutral-100);
   --color-neutral-200: var(--neutral-200);
@@ -162,20 +157,19 @@
   --color-neutral-900: var(--neutral-900);
   --color-neutral-950: var(--neutral-950);
 
-  /* Background Colors */
+  /* Semantic background utilities */
   --color-background-default: var(--bg-default);
   --color-background-paper: var(--bg-surface);
   --color-background-secondary: var(--bg-secondary);
-  --color-background-tertiary: var(--bg-secondary);
   --color-background-hover: var(--bg-hover);
 
   /* Text Colors */
   --color-text-title: var(--text-title);
   --color-text-paragraph: var(--text-paragraph);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
   --color-text-brand: var(--text-brand);
-  --color-text-primary: var(--text-paragraph);
-  --color-text-secondary: var(--text-muted);
   --color-text-disabled: var(--text-disabled);
   --color-text-inverse: var(--text-inverse);
 
@@ -186,22 +180,23 @@
   --color-bg-hover: var(--bg-hover);
   --color-bg-card-active: var(--bg-card-active);
 
-  /* Border Colors */
+  /* Semantic border utilities */
   --color-border-default: var(--border-default);
   --color-border-subtle: var(--border-subtle);
-  --color-border-secondary: var(--border-subtle);
   --color-border-focus: var(--border-focus);
-  --color-border-error: var(--status-error);
+  --color-border-error: var(--helper-error);
 
-  /* Status Colors */
-  --color-status-error: var(--status-error);
-  --color-status-warning: var(--status-warning);
-  --color-status-success: var(--status-success);
-  --color-status-info: var(--status-info);
-  --color-status-error-bg: var(--status-error-bg);
-  --color-status-warning-bg: var(--status-warning-bg);
-  --color-status-success-bg: var(--status-success-bg);
-  --color-status-info-bg: var(--status-info-bg);
+  /* Semantic helper utilities */
+  --color-helper-warning: var(--helper-warning);
+  --color-helper-warning-pastel: var(--helper-warning-pastel);
+  --color-helper-link: var(--helper-link);
+  --color-helper-link-pastel: var(--helper-link-pastel);
+  --color-helper-information: var(--helper-information);
+  --color-helper-information-pastel: var(--helper-information-pastel);
+  --color-helper-error: var(--helper-error);
+  --color-helper-error-pastel: var(--helper-error-pastel);
+  --color-helper-success: var(--helper-success);
+  --color-helper-success-pastel: var(--helper-success-pastel);
 
   /* Existing shadcn variables */
   --color-sidebar-ring: var(--sidebar-ring);
@@ -247,26 +242,48 @@ body {
 
 .dark {
   /* Override semantic tokens for dark mode */
-  --bg-default:     #18100E;
-  --bg-surface:     #231511;
-  --bg-secondary:   #2E1C17;
-  --bg-hover:       rgba(208, 184, 168, 0.08);
-  --bg-card-active: rgba(141, 73, 58, 0.18);
+  --bg-default:     #111827;
+  --bg-surface:     #1F2937;
+  --bg-secondary:   #374151;
+  --bg-hover:       #374151;
+  --bg-card-active: rgba(213, 154, 134, 0.18);
 
-  --text-title:     rgba(253, 250, 249, 0.95);
-  --text-paragraph: rgba(253, 250, 249, 0.88);
-  --text-muted:     rgba(208, 184, 168, 0.68);
-  --text-brand:     #C4896F;
-  --text-inverse:   #18100E;
+  --text-title:     #F9FAFB;
+  --text-primary:   #F3F4F6;
+  --text-paragraph: #E5E7EB;
+  --text-secondary: #D1D5DB;
+  --text-muted:     #9CA3AF;
+  --text-disabled:  #6B7280;
+  --text-brand:     #D59A86;
+  --text-inverse:   #111827;
 
-  --border-default: rgba(208, 184, 168, 0.47);
-  --border-subtle:  rgba(208, 184, 168, 0.28);
-  --border-focus:   #C4896F;
+  --border-default: #374151;
+  --border-subtle:  #4B5563;
+  --border-focus:   #D59A86;
 
-  --color-primary:      #C4896F;
-  --color-primary-fg:   #18100E;
-  --color-secondary:    #8FA882;
-  --color-secondary-fg: #18100E;
+  --color-primary:      #D59A86;
+  --color-primary-fg:   #111827;
+  --color-secondary:    #7BC7D8;
+  --color-secondary-fg: #111827;
+
+  --helper-warning:             #FDB022;
+  --helper-warning-pastel:      #3A2A0A;
+  --helper-link:                #84CAFF;
+  --helper-link-pastel:         #102A43;
+  --helper-information:         #84CAFF;
+  --helper-information-pastel:  #102A43;
+  --helper-error:               #F97066;
+  --helper-error-pastel:        #3B1C1A;
+  --helper-success:             #32D583;
+  --helper-success-pastel:      #0B2F22;
+  --status-error:               var(--helper-error);
+  --status-warning:             var(--helper-warning);
+  --status-success:             var(--helper-success);
+  --status-info:                var(--helper-information);
+  --status-error-bg:            var(--helper-error-pastel);
+  --status-warning-bg:          var(--helper-warning-pastel);
+  --status-success-bg:          var(--helper-success-pastel);
+  --status-info-bg:             var(--helper-information-pastel);
 
   /* Re-wire shadcn vars to dark semantic tokens */
   --background:          var(--bg-default);
@@ -283,7 +300,7 @@ body {
   --muted-foreground:    var(--text-muted);
   --accent:              var(--bg-hover);
   --accent-foreground:   var(--text-paragraph);
-  --destructive:         #F05252;
+  --destructive:         var(--helper-error);
   --border:              var(--border-default);
   --input:               var(--border-default);
   --ring:                var(--color-primary);

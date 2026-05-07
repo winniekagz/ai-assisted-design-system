@@ -28,7 +28,8 @@ const radioVariants = cva(
 );
 
 export interface RadioProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
     VariantProps<typeof radioVariants> {
   error?: boolean;
   success?: boolean;
@@ -97,7 +98,9 @@ const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
               }
             }}
           >
-            {checked && <div className='h-2 w-2 rounded-full bg-white' />}
+            {checked && (
+              <div className='h-2 w-2 rounded-full bg-[color:var(--text-inverse)]' />
+            )}
           </div>
         </div>
         {label && (

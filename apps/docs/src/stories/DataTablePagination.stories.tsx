@@ -40,13 +40,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Interactive story with state management
-export const Interactive: Story = {
-  render: args => {
-    const [currentPage, setCurrentPage] = useState(args.currentPage || 1);
-    const [pageSize, setPageSize] = useState(args.pageSize || 10);
+function ControlledDataTablePagination(args: Story['args']) {
+  const [currentPage, setCurrentPage] = useState(args?.currentPage || 1);
+  const [pageSize, setPageSize] = useState(args?.pageSize || 10);
 
-    return (
+  return (
+    <div className='w-[min(680px,calc(100vw-48px))]'>
       <DataTablePagination
         {...args}
         currentPage={currentPage}
@@ -54,8 +53,13 @@ export const Interactive: Story = {
         onPageChange={setCurrentPage}
         onPageSizeChange={setPageSize}
       />
-    );
-  },
+    </div>
+  );
+}
+
+// Interactive story with state management
+export const Interactive: Story = {
+  render: args => <ControlledDataTablePagination {...args} />,
   args: {
     currentPage: 1,
     totalPages: 10,
@@ -71,6 +75,7 @@ export const Interactive: Story = {
 
 // Basic pagination
 export const Basic: Story = {
+  render: args => <ControlledDataTablePagination {...args} />,
   args: {
     currentPage: 1,
     totalPages: 5,
@@ -84,20 +89,7 @@ export const Basic: Story = {
 
 // Large dataset pagination
 export const LargeDataset: Story = {
-  render: args => {
-    const [currentPage, setCurrentPage] = useState(args.currentPage || 1);
-    const [pageSize, setPageSize] = useState(args.pageSize || 20);
-
-    return (
-      <DataTablePagination
-        {...args}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
-      />
-    );
-  },
+  render: args => <ControlledDataTablePagination {...args} />,
   args: {
     currentPage: 15,
     totalPages: 50,
@@ -113,6 +105,7 @@ export const LargeDataset: Story = {
 
 // Compact pagination
 export const Compact: Story = {
+  render: args => <ControlledDataTablePagination {...args} />,
   args: {
     currentPage: 1,
     totalPages: 3,
@@ -126,17 +119,7 @@ export const Compact: Story = {
 
 // Without page size selector
 export const WithoutPageSizeSelector: Story = {
-  render: args => {
-    const [currentPage, setCurrentPage] = useState(args.currentPage || 1);
-
-    return (
-      <DataTablePagination
-        {...args}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
-    );
-  },
+  render: args => <ControlledDataTablePagination {...args} />,
   args: {
     currentPage: 1,
     totalPages: 8,
@@ -150,20 +133,7 @@ export const WithoutPageSizeSelector: Story = {
 
 // Without item count
 export const WithoutItemCount: Story = {
-  render: args => {
-    const [currentPage, setCurrentPage] = useState(args.currentPage || 1);
-    const [pageSize, setPageSize] = useState(args.pageSize || 10);
-
-    return (
-      <DataTablePagination
-        {...args}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
-      />
-    );
-  },
+  render: args => <ControlledDataTablePagination {...args} />,
   args: {
     currentPage: 1,
     totalPages: 6,
@@ -177,20 +147,7 @@ export const WithoutItemCount: Story = {
 
 // Custom sibling and boundary counts
 export const CustomCounts: Story = {
-  render: args => {
-    const [currentPage, setCurrentPage] = useState(args.currentPage || 1);
-    const [pageSize, setPageSize] = useState(args.pageSize || 10);
-
-    return (
-      <DataTablePagination
-        {...args}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        onPageChange={setCurrentPage}
-        onPageSizeChange={setPageSize}
-      />
-    );
-  },
+  render: args => <ControlledDataTablePagination {...args} />,
   args: {
     currentPage: 10,
     totalPages: 20,
@@ -203,7 +160,3 @@ export const CustomCounts: Story = {
     boundaryCount: 2,
   },
 };
-
-
-
-

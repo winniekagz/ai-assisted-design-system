@@ -74,13 +74,26 @@ export function generateCSSVariables(mode: ColorMode = 'light'): string {
     `--background-default: ${colors.background.default};`,
     `--background-paper: ${colors.background.paper};`,
     `--background-secondary: ${colors.background.secondary};`,
-    `--background-tertiary: ${colors.background.tertiary};`,
 
     // Text variables
     `--text-primary: ${colors.text.primary};`,
+    `--text-paragraph: ${colors.text.paragraph};`,
     `--text-secondary: ${colors.text.secondary};`,
+    `--text-muted: ${colors.text.muted};`,
     `--text-disabled: ${colors.text.disabled};`,
     `--text-inverse: ${colors.text.inverse};`,
+
+    // Helper / feedback variables
+    `--helper-warning: ${colors.warning[500]};`,
+    `--helper-warning-pastel: ${colors.warning[50]};`,
+    `--helper-link: ${colors.info[500]};`,
+    `--helper-link-pastel: ${colors.info[50]};`,
+    `--helper-information: ${colors.info[500]};`,
+    `--helper-information-pastel: ${colors.info[50]};`,
+    `--helper-error: ${colors.error[500]};`,
+    `--helper-error-pastel: ${colors.error[50]};`,
+    `--helper-success: ${colors.success[500]};`,
+    `--helper-success-pastel: ${colors.success[50]};`,
 
     // Border variables
     `--border-default: ${colors.border.default};`,

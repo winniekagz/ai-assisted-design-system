@@ -23,6 +23,10 @@ export interface ComponentIqColorTokens {
   surface?: string;
   secondaryBackground?: string;
   hover?: string;
+  textPrimary?: string;
+  textSecondary?: string;
+  textMuted?: string;
+  textDisabled?: string;
   foreground?: string;
   title?: string;
   muted?: string;
@@ -30,9 +34,17 @@ export interface ComponentIqColorTokens {
   border?: string;
   borderSubtle?: string;
   focus?: string;
-  destructive?: string;
-  success?: string;
+  error?: string;
+  errorPastel?: string;
   warning?: string;
+  warningPastel?: string;
+  success?: string;
+  successPastel?: string;
+  information?: string;
+  informationPastel?: string;
+  link?: string;
+  linkPastel?: string;
+  destructive?: string;
   info?: string;
 }
 
@@ -41,6 +53,18 @@ export interface ComponentIqTypographyTokens {
   headingFontFamily?: string;
   monoFontFamily?: string;
   baseSize?: string;
+  bodySize?: string;
+  bodySmallSize?: string;
+  captionSize?: string;
+  heading1Size?: string;
+  heading2Size?: string;
+  heading3Size?: string;
+  heading4Size?: string;
+  heading5Size?: string;
+  heading6Size?: string;
+  display1Size?: string;
+  display2Size?: string;
+  display3Size?: string;
   headingWeight?: string | number;
   bodyWeight?: string | number;
 }
@@ -69,10 +93,18 @@ export interface ComponentIqShadowTokens {
   lg?: string;
 }
 
+export interface ComponentIqStrokeWidthTokens {
+  hairline?: string;
+  thin?: string;
+  md?: string;
+  lg?: string;
+}
+
 export interface ComponentIqTokens {
   colors?: ComponentIqColorTokens;
   typography?: ComponentIqTypographyTokens;
   radius?: ComponentIqRadiusTokens;
   spacing?: ComponentIqSpacingTokens;
   shadows?: ComponentIqShadowTokens;
+  strokeWidth?: ComponentIqStrokeWidthTokens;
 }

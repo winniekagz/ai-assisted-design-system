@@ -1,0 +1,150 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title='Configure your project/Installation' />
+
+<div className='ciq-doc ciq-narrow'>
+  <section className='ciq-page-head'>
+    <p className='ciq-kicker'>Step 01</p>
+    <h1>Install ComponentIQ</h1>
+    <p>
+      Add the package to your app, import the global styles once, and wrap your
+      app with the provider so every component can read the design tokens.
+    </p>
+  </section>
+
+  <section className='ciq-checklist'>
+    <div>
+      <span>1</span>
+      <h2>Install the package</h2>
+      <p>Install ComponentIQ and make sure your app has React available.</p>
+
+```bash
+npm install @winniekagendo/componentiq
+```
+
+    </div>
+    <div>
+      <span>2</span>
+      <h2>Import CSS once</h2>
+      <p>Put your global stylesheet in your app root, layout, or main entry file.</p>
+
+```tsx
+import './globals.css';
+```
+
+```css
+@import 'tailwindcss';
+@import '@heroui/styles/css';
+```
+
+    </div>
+    <div>
+      <span>3</span>
+      <h2>Add the provider</h2>
+      <p>The provider writes CSS variables into its subtree.</p>
+
+```tsx
+import { ComponentIqProvider } from '@winniekagendo/componentiq';
+
+export function RootLayout({ children }: { children: React.ReactNode }) {
+  return <ComponentIqProvider>{children}</ComponentIqProvider>;
+}
+```
+
+    </div>
+
+  </section>
+
+<section className='ciq-callout'>
+  <h2>For Next.js</h2>
+  <p>
+    Import the CSS in <code>app/layout.tsx</code> or your global stylesheet. If
+    a component uses browser interaction, keep it inside a client component
+    boundary.
+  </p>
+</section>
+
+  <section className='ciq-next'>
+    <a href='?path=/docs/configure-your-project-theming-tokens--docs'>Next: connect tokens</a>
+  </section>
+</div>
+
+<style>
+  {`
+.ciq-doc {
+  color: #111827;
+  max-width: 980px;
+}
+.ciq-narrow {
+  max-width: 860px;
+}
+.ciq-doc h1,
+.ciq-doc h2 {
+  color: #111827;
+  letter-spacing: 0;
+}
+.ciq-doc p {
+  color: #111827;
+  line-height: 1.65;
+}
+.ciq-doc code {
+  color: #111827;
+  padding: 1px 5px;
+}
+.ciq-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 700;
+  color: #111827;
+}
+.ciq-page-head {
+  padding-bottom: 20px;
+  margin-bottom: 22px;
+}
+.ciq-page-head h1 {
+  margin: 8px 0 8px;
+  font-size: 32px;
+}
+.ciq-page-head p {
+  max-width: 700px;
+}
+.ciq-checklist {
+  display: grid;
+  gap: 18px;
+}
+.ciq-checklist > div,
+.ciq-callout {
+  padding: 20px;
+}
+.ciq-checklist span {
+  display: inline-block;
+  color: #111827;
+  font-weight: 700;
+  font-size: 12px;
+}
+.ciq-checklist h2,
+.ciq-callout h2 {
+  margin-top: 12px;
+}
+.ciq-checklist pre {
+  margin-top: 14px !important;
+}
+.ciq-callout {
+  margin-top: 22px;
+}
+.ciq-next {
+  margin-top: 28px;
+}
+.ciq-next a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  color: #111827;
+  text-decoration: none;
+  font-weight: 600;
+}
+`}
+</style>

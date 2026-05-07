@@ -244,51 +244,6 @@ export const CustomStatusConfig: Story = {
   ),
 };
 
-export const InteractiveExamples: Story = {
-  render: () => (
-    <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-      <div className='p-4 border rounded-lg'>
-        <h3 className='font-medium mb-3'>Order Status</h3>
-        <div className='space-y-2'>
-          <Badge status='pending' icon={Clock} size='sm' />
-          <Badge status='completed' icon={CheckCircle} size='sm' />
-          <Badge status='error' icon={XCircle} size='sm' />
-        </div>
-      </div>
-
-      <div className='p-4 border rounded-lg'>
-        <h3 className='font-medium mb-3'>User Roles</h3>
-        <div className='space-y-2'>
-          <Badge variant='outlined' icon={CheckCircle} iconPosition='start'>
-            Admin
-          </Badge>
-          <Badge variant='outlined' icon={Clock} iconPosition='start'>
-            Moderator
-          </Badge>
-          <Badge variant='outlined' icon={Info} iconPosition='start'>
-            User
-          </Badge>
-        </div>
-      </div>
-
-      <div className='p-4 border rounded-lg'>
-        <h3 className='font-medium mb-3'>Priority Levels</h3>
-        <div className='space-y-2'>
-          <Badge variant='pastel' status='error' icon={AlertCircle}>
-            High Priority
-          </Badge>
-          <Badge variant='pastel' status='pending' icon={Clock}>
-            Medium Priority
-          </Badge>
-          <Badge variant='pastel' status='completed' icon={CheckCircle}>
-            Low Priority
-          </Badge>
-        </div>
-      </div>
-    </div>
-  ),
-};
-
 export const AllVariants: Story = {
   render: () => (
     <div className='space-y-6'>

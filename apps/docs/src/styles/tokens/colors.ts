@@ -1,262 +1,264 @@
 export const lightColors = {
-  // Primary colors
+  // Primary scale - internal Tailwind compatibility.
   primary: {
-    50: '#E6F7EF',
-    100: '#CCEFDF',
-    200: '#99DFBF',
-    300: '#66CF9F',
-    400: '#33BF7F',
-    500: '#009966', // main
-    600: '#008759', // dark
-    700: '#006B47',
-    800: '#004F35',
-    900: '#003323',
-    950: '#001A12',
+    50: '#F8EDE3',
+    100: '#EDDDD2',
+    200: '#D9B8A6',
+    300: '#BC8A76',
+    400: '#A56855',
+    500: '#8D493A',
+    600: '#7A3F33',
+    700: '#66352B',
+    800: '#4D271F',
+    900: '#331812',
+    950: '#1A0C09',
   },
 
-  // Secondary colors
+  // Secondary scale - internal Tailwind compatibility.
   secondary: {
-    50: '#FFE5EE',
-    100: '#FFCCDD',
-    200: '#FF99BB',
-    300: '#FF6699',
-    400: '#FF3377',
-    500: '#F9286C', // main
-    600: '#D12164', // dark
-    700: '#A91A4F',
-    800: '#81133A',
-    900: '#590C25',
-    950: '#2D0613',
+    50: '#EEF9FB',
+    100: '#D7F0F4',
+    200: '#B2E0E8',
+    300: '#82CAD7',
+    400: '#58AEBD',
+    500: '#347887', // muted teal complement
+    600: '#2F6F7D',
+    700: '#285D68',
+    800: '#214B54',
+    900: '#1C3E45',
+    950: '#0D2025',
   },
 
-  // Error colors
+  // Helper scale - internal Tailwind compatibility.
   error: {
-    50: '#FFEBEE',
-    100: '#FFCDD2',
-    200: '#EF9A9A',
-    300: '#E57373',
-    400: '#EF5350',
-    500: '#D32F2F', // main
-    600: '#C62828', // dark
-    700: '#B71C1C',
-    800: '#8E0000',
-    900: '#5D0000',
-    950: '#2E0000',
+    50: '#FEF3F2',
+    100: '#FEE4E2',
+    200: '#FECDCA',
+    300: '#FDA29B',
+    400: '#F97066',
+    500: '#B42318', // main
+    600: '#912018',
+    700: '#7A271A',
+    800: '#6B0E0E',
+    900: '#460909',
+    950: '#230404',
   },
 
-  // Warning colors
+  // Helper scale - internal Tailwind compatibility.
   warning: {
-    50: '#FFF3E0',
-    100: '#FFE0B2',
-    200: '#FFCC80',
-    300: '#FFB74D',
-    400: '#FFA726',
-    500: '#EF6C00', // main
-    600: '#E65100', // dark
-    700: '#E64A19',
-    800: '#D84315',
-    900: '#BF360C',
-    950: '#8D2F0A',
+    50: '#FFF4E5',
+    100: '#FEF0C7',
+    200: '#FEDF89',
+    300: '#FEC84B',
+    400: '#FDB022',
+    500: '#B54708', // main
+    600: '#93370D',
+    700: '#7A2E0E',
+    800: '#742A00',
+    900: '#4D1B00',
+    950: '#260D00',
   },
 
-  // Info colors
+  // Helper scale - internal Tailwind compatibility.
   info: {
-    50: '#E1F5FE',
-    100: '#B3E5FC',
-    200: '#81D4FA',
-    300: '#4FC3F7',
-    400: '#29B6F6',
-    500: '#0288D1', // main
-    600: '#01579B', // dark
-    700: '#0277BD',
-    800: '#01579B',
-    900: '#014377',
-    950: '#012B4A',
+    50: '#EFF8FF',
+    100: '#D1E9FF',
+    200: '#B2DDFF',
+    300: '#84CAFF',
+    400: '#53B1FD',
+    500: '#175CD3', // main
+    600: '#1849A9',
+    700: '#194185',
+    800: '#013259',
+    900: '#01203A',
+    950: '#00101D',
   },
 
-  // Success colors
+  // Helper scale - internal Tailwind compatibility.
   success: {
-    50: '#E8F5E8',
-    100: '#C8E6C9',
-    200: '#A5D6A7',
-    300: '#81C784',
-    400: '#66BB6A',
-    500: '#2E7D32', // main
-    600: '#1B5E20', // dark
-    700: '#388E3C',
+    50: '#ECFDF3',
+    100: '#D1FADF',
+    200: '#A6F4C5',
+    300: '#6CE9A6',
+    400: '#32D583',
+    500: '#067647', // main
+    600: '#05603A',
+    700: '#054F31',
     800: '#2E7D32',
     900: '#1B5E20',
     950: '#0D2E10',
   },
 
-  // Neutral colors
+  // Neutral scale - internal Tailwind compatibility.
   neutral: {
-    50: '#FAFAFA',
-    100: '#F5F5F5',
-    200: '#EEEEEE',
-    300: '#E0E0E0',
-    400: '#BDBDBD',
-    500: '#9E9E9E',
-    600: '#757575',
-    700: '#616161',
-    800: '#424242',
-    900: '#212121',
-    950: '#0A0A0A',
+    50: '#F9FAFB',
+    100: '#F3F4F6',
+    200: '#E5E7EB',
+    300: '#D1D5DB',
+    400: '#9CA3AF',
+    500: '#6B7280',
+    600: '#4B5563',
+    700: '#374151',
+    800: '#1F2937',
+    900: '#111827',
+    950: '#030712',
   },
 
   // Background colors
   background: {
-    default: '#F5F5F5',
+    default: '#FDFAF9',
     paper: '#FFFFFF',
-    secondary: '#FAFAFA',
-    tertiary: '#F0F0F0',
+    secondary: '#F9FAFB',
   },
 
   // Text colors
   text: {
-    primary: 'rgba(0, 0, 0, 0.87)',
-    secondary: 'rgba(0, 0, 0, 0.6)',
-    disabled: 'rgba(0, 0, 0, 0.38)',
-    inverse: '#FFFFFF',
+    primary: '#111827',
+    paragraph: '#374151',
+    secondary: '#4B5563',
+    muted: '#707683',
+    disabled: '#9CA3AF',
+    inverse: '#FDFAF9',
   },
 
   // Border colors
   border: {
-    default: 'rgba(0, 0, 0, 0.23)',
-    secondary: 'rgba(0, 0, 0, 0.12)',
-    focus: '#009966',
-    error: '#D32F2F',
+    default: '#D1D5DB',
+    secondary: '#E5E7EB',
+    focus: '#8D493A',
+    error: '#B42318',
   },
 } as const;
 
 export const darkColors = {
-  // Primary colors
+  // Primary scale - internal Tailwind compatibility.
   primary: {
-    50: '#001A12',
-    100: '#003323',
-    200: '#004F35',
-    300: '#006B47',
-    400: '#008759',
-    500: '#9BDDBF', // main
-    600: '#4AC693', // dark
-    700: '#E6F7EF', // light
-    800: '#F0FBF6',
-    900: '#F8FDFA',
-    950: '#FDFFFE',
+    50: '#1A0C09',
+    100: '#331812',
+    200: '#4D271F',
+    300: '#66352B',
+    400: '#7A3F33',
+    500: '#D59A86',
+    600: '#BC8A76',
+    700: '#D9B8A6',
+    800: '#EDDDD2',
+    900: '#F8EDE3',
+    950: '#FDFAF9',
   },
 
-  // Secondary colors
+  // Secondary scale - internal Tailwind compatibility.
   secondary: {
-    50: '#2D0613',
-    100: '#590C25',
-    200: '#81133A',
-    300: '#A91A4F',
-    400: '#D12164',
-    500: '#FE93B7', // main
-    600: '#FA4683', // dark
-    700: '#FFE5EE', // light
-    800: '#FFF0F5',
-    900: '#FFF8FA',
-    950: '#FFFDFE',
+    50: '#0D2025',
+    100: '#1C3E45',
+    200: '#214B54',
+    300: '#285D68',
+    400: '#2F6F7D',
+    500: '#7BC7D8', // main
+    600: '#58AEBD',
+    700: '#B2E0E8',
+    800: '#D7F0F4',
+    900: '#EEF9FB',
+    950: '#F8FDFF',
   },
 
-  // Error colors
+  // Helper scale - internal Tailwind compatibility.
   error: {
-    50: '#2E0000',
-    100: '#5D0000',
-    200: '#8E0000',
-    300: '#B71C1C',
-    400: '#C62828',
-    500: '#F44336', // main
-    600: '#D32F2F', // dark
-    700: '#FF5252',
-    800: '#FF8A80',
-    900: '#FFCDD2',
-    950: '#FFEBEE',
+    50: '#3B1C1A',
+    100: '#5D2420',
+    200: '#7A271A',
+    300: '#912018',
+    400: '#D92D20',
+    500: '#F97066',
+    600: '#FDA29B',
+    700: '#FECDCA',
+    800: '#FEE4E2',
+    900: '#FEF3F2',
+    950: '#FFFBFA',
   },
 
-  // Warning colors
+  // Helper scale - internal Tailwind compatibility.
   warning: {
-    50: '#8D2F0A',
-    100: '#BF360C',
-    200: '#D84315',
-    300: '#E64A19',
-    400: '#E65100',
-    500: '#FFA726', // main
-    600: '#F57C00', // dark
-    700: '#FFB74D',
-    800: '#FFCC80',
-    900: '#FFE0B2',
-    950: '#FFF3E0',
+    50: '#3A2A0A',
+    100: '#4D1B00',
+    200: '#742A00',
+    300: '#93370D',
+    400: '#DC6803',
+    500: '#FDB022',
+    600: '#FEC84B',
+    700: '#FEDF89',
+    800: '#FEF0C7',
+    900: '#FFF4E5',
+    950: '#FFFCF5',
   },
 
-  // Info colors
+  // Helper scale - internal Tailwind compatibility.
   info: {
-    50: '#012B4A',
-    100: '#014377',
-    200: '#01579B',
-    300: '#0277BD',
-    400: '#0288D1',
-    500: '#29B6F6', // main
-    600: '#0288D1', // dark
-    700: '#4FC3F7',
-    800: '#81D4FA',
-    900: '#B3E5FC',
-    950: '#E1F5FE',
+    50: '#102A43',
+    100: '#01203A',
+    200: '#013259',
+    300: '#194185',
+    400: '#1849A9',
+    500: '#84CAFF',
+    600: '#B2DDFF',
+    700: '#D1E9FF',
+    800: '#EFF8FF',
+    900: '#F5FBFF',
+    950: '#FCFEFF',
   },
 
-  // Success colors
+  // Helper scale - internal Tailwind compatibility.
   success: {
-    50: '#0D2E10',
-    100: '#1B5E20',
-    200: '#2E7D32',
-    300: '#388E3C',
-    400: '#4CAF50',
-    500: '#66BB6A', // main
-    600: '#388E3C', // dark
-    700: '#81C784',
-    800: '#A5D6A7',
-    900: '#C8E6C9',
-    950: '#E8F5E8',
+    50: '#0B2F22',
+    100: '#0D2E10',
+    200: '#054F31',
+    300: '#05603A',
+    400: '#067647',
+    500: '#32D583',
+    600: '#6CE9A6',
+    700: '#A6F4C5',
+    800: '#D1FADF',
+    900: '#ECFDF3',
+    950: '#F6FEF9',
   },
 
-  // Neutral colors
+  // Neutral scale - internal Tailwind compatibility.
   neutral: {
-    50: '#0A0A0A',
-    100: '#121212',
-    200: '#1E1E1E',
-    300: '#2D2D2D',
-    400: '#424242',
-    500: '#616161',
-    600: '#757575',
-    700: '#9E9E9E',
-    800: '#BDBDBD',
-    900: '#E0E0E0',
-    950: '#F5F5F5',
+    50: '#030712',
+    100: '#111827',
+    200: '#1F2937',
+    300: '#374151',
+    400: '#4B5563',
+    500: '#6B7280',
+    600: '#9CA3AF',
+    700: '#D1D5DB',
+    800: '#E5E7EB',
+    900: '#F3F4F6',
+    950: '#F9FAFB',
   },
 
   // Background colors
   background: {
-    default: '#121212',
-    paper: '#1E1E1E',
-    secondary: '#2D2D2D',
-    tertiary: '#424242',
+    default: '#111827',
+    paper: '#1F2937',
+    secondary: '#374151',
   },
 
   // Text colors
   text: {
-    primary: '#FFFFFF',
-    secondary: 'rgba(255, 255, 255, 0.7)',
-    disabled: 'rgba(255, 255, 255, 0.5)',
-    inverse: 'rgba(0, 0, 0, 0.87)',
+    primary: '#F3F4F6',
+    paragraph: '#E5E7EB',
+    secondary: '#D1D5DB',
+    muted: '#9CA3AF',
+    disabled: '#6B7280',
+    inverse: '#111827',
   },
 
   // Border colors
   border: {
-    default: 'rgba(255, 255, 255, 0.23)',
-    secondary: 'rgba(255, 255, 255, 0.12)',
-    focus: '#9BDDBF',
-    error: '#F44336',
+    default: '#374151',
+    secondary: '#4B5563',
+    focus: '#D59A86',
+    error: '#F97066',
   },
 } as const;
 

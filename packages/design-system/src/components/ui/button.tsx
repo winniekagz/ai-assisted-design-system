@@ -50,7 +50,8 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
@@ -122,7 +123,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           cy='12'
           r='10'
           stroke='currentColor'
-          strokeWidth='4'
+          strokeWidth='var(--stroke-lg)'
         />
         <path
           className='opacity-75'

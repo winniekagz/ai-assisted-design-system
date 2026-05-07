@@ -1,0 +1,259 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title='Configure your project/Theming tokens' />
+
+<div className='ciq-doc'>
+  <section className='ciq-page-head'>
+    <p className='ciq-kicker'>Step 02</p>
+    <h1>Connect your design tokens</h1>
+    <p>
+      ComponentIQ themes are plain objects. Pass them to
+      <code>ComponentIqProvider</code> and the provider converts them into CSS
+      variables for the components.
+    </p>
+  </section>
+
+<section className='ciq-grid'>
+  <div>
+    <h2>Token roles users should edit</h2>
+    <p>
+      Keep colors semantic. Text should use neutral grays. Brand colors should
+      be reserved for action, selection, and emphasis.
+    </p>
+    <ul>
+      <li>
+        <code>primary</code> and <code>primaryForeground</code> for main
+        actions.
+      </li>
+      <li>
+        <code>secondary</code> as a complementary support color.
+      </li>
+      <li>
+        <code>textPrimary</code>, <code>foreground</code>,{' '}
+        <code>textSecondary</code>, <code>textMuted</code>, and{' '}
+        <code>textDisabled</code> for gray text hierarchy.
+      </li>
+      <li>
+        <code>background</code>, <code>surface</code>,{' '}
+        <code>secondaryBackground</code>, and <code>hover</code> for layout
+        surfaces.
+      </li>
+      <li>
+        <code>warning</code>, <code>error</code>, <code>success</code>,{' '}
+        <code>information</code>, and their pastel pairs for feedback.
+      </li>
+      <li>
+        <code>spacing</code>, <code>shadows</code>, <code>typography</code>,{' '}
+        <code>radius</code>, and <code>strokeWidth</code> for component
+        structure.
+      </li>
+    </ul>
+  </div>
+  <div className='ciq-token-card'>
+    <h3>WCAG habit</h3>
+    <p>
+      Check foreground colors against the surface they sit on. Normal text
+      should meet at least 4.5:1 contrast. Large text and icons should meet at
+      least 3:1.
+    </p>
+  </div>
+</section>
+
+```tsx
+import {
+  ComponentIqProvider,
+  type ComponentIqTokens,
+} from '@winniekagendo/componentiq';
+
+const brandTheme: ComponentIqTokens = {
+  colors: {
+    primary: '#8D493A',
+    primaryForeground: '#FDFAF9',
+    secondary: '#347887',
+    secondaryForeground: '#FDFAF9',
+
+    background: '#FDFAF9',
+    surface: '#FFFFFF',
+    secondaryBackground: '#F9FAFB',
+    hover: '#F3F4F6',
+
+    textPrimary: '#111827',
+    foreground: '#374151',
+    textSecondary: '#4B5563',
+    textMuted: '#6B7280',
+    textDisabled: '#9CA3AF',
+
+    error: '#B42318',
+    errorPastel: '#FEF3F2',
+    warning: '#B54708',
+    warningPastel: '#FFF4E5',
+    success: '#067647',
+    successPastel: '#ECFDF3',
+    information: '#175CD3',
+    informationPastel: '#EFF8FF',
+    link: '#175CD3',
+    linkPastel: '#EFF8FF',
+  },
+  radius: {
+    sm: '0.25rem',
+    md: '0.5rem',
+    lg: '0.75rem',
+  },
+  spacing: {
+    xs: '0.25rem',
+    sm: '0.5rem',
+    md: '1rem',
+    lg: '1.5rem',
+    xl: '2rem',
+  },
+  shadows: {
+    sm: '0 1px 2px rgb(0 0 0 / 0.05)',
+    md: '0 4px 12px rgb(0 0 0 / 0.08)',
+    lg: '0 10px 30px rgb(0 0 0 / 0.12)',
+  },
+  typography: {
+    fontFamily: "'Rubik', ui-sans-serif, system-ui, sans-serif",
+    headingFontFamily: "'Rubik', ui-sans-serif, system-ui, sans-serif",
+    baseSize: '1rem',
+    headingWeight: 700,
+    bodyWeight: 400,
+  },
+  strokeWidth: {
+    hairline: '0.5px',
+    thin: '1px',
+    md: '1.5px',
+    lg: '2px',
+  },
+};
+
+export function AppTheme({ children }: { children: React.ReactNode }) {
+  return (
+    <ComponentIqProvider tokens={brandTheme}>{children}</ComponentIqProvider>
+  );
+}
+```
+
+<section className='ciq-token-board'>
+  <div>
+    <p className='ciq-kicker'>Calendar example</p>
+    <h2>Minimal color behavior</h2>
+    <p>
+      DatePicker uses text roles for calendar states and primary only for the
+      selected date. This keeps dynamic user themes readable in light and dark
+      mode.
+    </p>
+  </div>
+  <div className='ciq-swatches'>
+    <div>
+      <span style={{ background: 'var(--text-primary)' }} />
+      Current month dates
+    </div>
+    <div>
+      <span style={{ background: 'var(--text-secondary)' }} />
+      Weekdays and outside month
+    </div>
+    <div>
+      <span style={{ background: 'var(--text-disabled)' }} />
+      Disabled dates
+    </div>
+    <div>
+      <span style={{ background: 'var(--color-primary)' }} />
+      Selected date
+    </div>
+  </div>
+</section>
+
+  <section className='ciq-next'>
+    <a href='?path=/docs/configure-your-project-using-components--docs'>Next: use components</a>
+  </section>
+</div>
+
+<style>
+  {`
+.ciq-doc {
+  color: #111827;
+  max-width: 980px;
+}
+.ciq-doc h1,
+.ciq-doc h2,
+.ciq-doc h3 {
+  color: #111827;
+  letter-spacing: 0;
+}
+.ciq-doc p,
+.ciq-doc li {
+  color: #111827;
+  line-height: 1.65;
+}
+.ciq-doc code {
+  color: #111827;
+  padding: 1px 5px;
+}
+.ciq-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 700;
+  color: #111827;
+}
+.ciq-page-head {
+  padding-bottom: 20px;
+  margin-bottom: 22px;
+}
+.ciq-page-head h1 {
+  margin: 8px 0;
+  font-size: 32px;
+}
+.ciq-grid {
+  display: grid;
+  grid-template-columns: 1fr 0.7fr;
+  gap: 22px;
+  margin-bottom: 20px;
+}
+.ciq-token-card {
+  padding: 20px;
+}
+.ciq-token-board {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 20px;
+  padding: 22px;
+  margin-top: 24px;
+}
+.ciq-swatches {
+  display: grid;
+  gap: 12px;
+}
+.ciq-swatches div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #111827;
+  font-size: 14px;
+}
+.ciq-swatches span {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+}
+.ciq-next {
+  margin-top: 28px;
+}
+.ciq-next a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  color: #111827;
+  text-decoration: none;
+  font-weight: 600;
+}
+@media (max-width: 760px) {
+  .ciq-grid,
+  .ciq-token-board {
+    grid-template-columns: 1fr;
+  }
+}
+`}
+</style>

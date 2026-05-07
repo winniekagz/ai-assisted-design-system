@@ -1,0 +1,172 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title='Configure your project/Using components' />
+
+<div className='ciq-doc'>
+  <section className='ciq-page-head'>
+    <p className='ciq-kicker'>Step 03</p>
+    <h1>Use components in product screens</h1>
+    <p>
+      Import components from the package and compose them inside your app. The
+      components inherit theme values from <code>ComponentIqProvider</code>.
+    </p>
+  </section>
+
+  <section className='ciq-layout'>
+    <div className='ciq-panel'>
+      <p className='ciq-kicker'>Recommended pattern</p>
+      <h2>Controlled fields</h2>
+      <p>
+        Inputs like DatePicker are controlled. Store the value in state, pass it
+        to the component, and update it through the callback.
+      </p>
+
+```tsx
+import { DatePicker, type DatePickerValue } from '@winniekagendo/componentiq';
+
+function ReportFilter() {
+  const [range, setRange] = React.useState<DatePickerValue>({
+    startDate: null,
+    endDate: null,
+  });
+
+  return (
+    <DatePicker
+      value={range}
+      onChange={setRange}
+      variant='range'
+      placeholder='Select report period'
+    />
+  );
+}
+```
+
+    </div>
+
+    <div className='ciq-panel'>
+      <p className='ciq-kicker'>Common imports</p>
+      <h2>Start small</h2>
+
+```tsx
+import {
+  Button,
+  Badge,
+  Input,
+  Select,
+  Textarea,
+  DatePicker,
+  EnhancedDataTable,
+} from '@winniekagendo/componentiq';
+```
+
+    </div>
+
+  </section>
+
+<section className='ciq-rules'>
+  <div>
+    <h3>Do</h3>
+    <ul>
+      <li>Use component props before writing custom CSS.</li>
+      <li>Use semantic tokens for layout-specific styling.</li>
+      <li>Keep form fields compact and aligned in predictable grids.</li>
+      <li>Use helper tokens for validation and feedback states.</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Do not</h3>
+    <ul>
+      <li>Use raw hex colors inside product components.</li>
+      <li>Use primary color for normal body text.</li>
+      <li>Expose internal scale tokens as the main design API.</li>
+      <li>Duplicate field wrappers unless a form library really needs it.</li>
+    </ul>
+  </div>
+</section>
+
+  <section className='ciq-next'>
+    <a href='?path=/docs/configure-your-project--docs'>Back to setup overview</a>
+  </section>
+</div>
+
+<style>
+  {`
+.ciq-doc {
+  color: #111827;
+  max-width: 980px;
+}
+.ciq-doc h1,
+.ciq-doc h2,
+.ciq-doc h3 {
+  color: #111827;
+  letter-spacing: 0;
+}
+.ciq-doc p,
+.ciq-doc li {
+  color: #111827;
+  line-height: 1.65;
+}
+.ciq-doc code {
+  color: #111827;
+  padding: 1px 5px;
+}
+.ciq-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 700;
+  color: #111827;
+}
+.ciq-page-head {
+  padding-bottom: 20px;
+  margin-bottom: 22px;
+}
+.ciq-page-head h1 {
+  margin: 8px 0;
+  font-size: 32px;
+}
+.ciq-layout {
+  display: grid;
+  grid-template-columns: 1fr 0.85fr;
+  gap: 18px;
+}
+.ciq-panel,
+.ciq-rules > div {
+  padding: 20px;
+}
+.ciq-panel pre {
+  margin-top: 16px !important;
+}
+.ciq-rules {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+.ciq-rules ul {
+  padding-left: 20px;
+}
+.ciq-rules li {
+  margin: 8px 0;
+}
+.ciq-next {
+  margin-top: 28px;
+}
+.ciq-next a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  color: #111827;
+  text-decoration: none;
+  font-weight: 600;
+}
+@media (max-width: 760px) {
+  .ciq-layout,
+  .ciq-rules {
+    grid-template-columns: 1fr;
+  }
+}
+`}
+</style>
