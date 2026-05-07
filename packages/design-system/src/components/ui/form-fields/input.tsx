@@ -1,9 +1,10 @@
 import { cn } from '@/lib/utils';
+import { Input as HeroInput } from '@heroui/react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
 const inputVariants = cva(
-  'flex w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[color:var(--color-text-secondary)] max-h-14 h-auto px-2 py-2 rounded border border-[color:var(--color-border-default)] bg-transparent transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+  'h-11 min-w-0 w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[color:var(--color-text-secondary)] px-3 py-2 rounded border bg-transparent shadow-none outline-none transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary-500)] focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -11,15 +12,15 @@ const inputVariants = cva(
           'border-[color:var(--color-border-default)] focus:border-[color:var(--color-primary-500)]',
         outline:
           'border-[color:var(--color-border-default)] focus:border-[color:var(--color-primary-500)] bg-transparent',
-        text: 'border-transparent bg-transparent focus:border-transparent hover:bg-[color:var(--color-neutral-50)]',
+        text: 'border-transparent bg-transparent focus:border-transparent hover:bg-[color:var(--color-neutral-50)] shadow-none',
         error:
           'border-[color:var(--color-error-500)] focus:border-[color:var(--color-error-500)]',
         success:
           'border-[color:var(--color-success-500)] focus:border-[color:var(--color-success-500)]',
       },
       size: {
-        default: 'h-10 px-3',
-        sm: 'h-8 px-2 text-sm',
+        default: 'h-11 px-3',
+        sm: 'h-9 px-2 text-sm',
         lg: 'h-12 px-4 text-lg',
       },
     },
@@ -31,7 +32,8 @@ const inputVariants = cva(
 );
 
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
     VariantProps<typeof inputVariants> {
   error?: boolean;
   success?: boolean;
@@ -64,13 +66,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className='relative'>
-        <input
+        <HeroInput
           className={cn(
             inputVariants({ variant: finalVariant, size, className }),
             startIcon && 'pl-10',
             endIcon && 'pr-10'
           )}
           ref={ref}
+          aria-invalid={error || undefined}
           {...props}
         />
         {startIcon && (

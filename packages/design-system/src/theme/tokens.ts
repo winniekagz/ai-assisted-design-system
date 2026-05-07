@@ -23,6 +23,10 @@ export interface ComponentIqColorTokens {
   surface?: string;
   secondaryBackground?: string;
   hover?: string;
+  textPrimary?: string;
+  textSecondary?: string;
+  textMuted?: string;
+  textDisabled?: string;
   foreground?: string;
   title?: string;
   muted?: string;
@@ -30,9 +34,17 @@ export interface ComponentIqColorTokens {
   border?: string;
   borderSubtle?: string;
   focus?: string;
-  destructive?: string;
-  success?: string;
+  error?: string;
+  errorPastel?: string;
   warning?: string;
+  warningPastel?: string;
+  success?: string;
+  successPastel?: string;
+  information?: string;
+  informationPastel?: string;
+  link?: string;
+  linkPastel?: string;
+  destructive?: string;
   info?: string;
 }
 

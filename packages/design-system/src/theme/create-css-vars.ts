@@ -25,6 +25,21 @@ export function createComponentIqCssVariables(
   const spacing = merged.spacing;
   const shadows = merged.shadows;
   const vars: ComponentIqCssVariables = {};
+  const textPrimary =
+    colors?.textPrimary ?? colors?.title ?? colors?.foreground;
+  const textParagraph = colors?.foreground ?? textPrimary;
+  const textSecondary = colors?.textSecondary ?? colors?.muted ?? textParagraph;
+  const textMuted = colors?.textMuted ?? colors?.muted ?? textSecondary;
+  const textDisabled =
+    colors?.textDisabled ??
+    (textPrimary
+      ? `color-mix(in oklab, ${textPrimary} 35%, transparent)`
+      : undefined);
+  const error = colors?.error ?? colors?.destructive;
+  const warning = colors?.warning;
+  const success = colors?.success;
+  const information = colors?.information ?? colors?.info;
+  const link = colors?.link ?? information;
 
   setVar(vars, '--color-primary', colors?.primary);
   setVar(vars, '--color-primary-fg', colors?.primaryForeground);
@@ -37,19 +52,37 @@ export function createComponentIqCssVariables(
   setVar(vars, '--bg-hover', colors?.hover);
   setVar(vars, '--bg-card-active', colors?.secondaryBackground);
 
-  setVar(vars, '--text-title', colors?.title ?? colors?.foreground);
-  setVar(vars, '--text-paragraph', colors?.foreground);
-  setVar(vars, '--text-muted', colors?.muted);
+  setVar(vars, '--text-title', colors?.title ?? textPrimary);
+  setVar(vars, '--text-primary', textPrimary);
+  setVar(vars, '--text-paragraph', textParagraph);
+  setVar(vars, '--text-secondary', textSecondary);
+  setVar(vars, '--text-muted', textMuted);
+  setVar(vars, '--text-disabled', textDisabled);
   setVar(vars, '--text-brand', colors?.primary);
   setVar(vars, '--text-inverse', colors?.inverse ?? colors?.primaryForeground);
 
   setVar(vars, '--border-default', colors?.border);
   setVar(vars, '--border-subtle', colors?.borderSubtle);
   setVar(vars, '--border-focus', colors?.focus ?? colors?.primary);
-  setVar(vars, '--status-error', colors?.destructive);
-  setVar(vars, '--status-success', colors?.success);
-  setVar(vars, '--status-warning', colors?.warning);
-  setVar(vars, '--status-info', colors?.info);
+  setVar(vars, '--helper-error', error);
+  setVar(vars, '--helper-error-pastel', colors?.errorPastel);
+  setVar(vars, '--helper-warning', warning);
+  setVar(vars, '--helper-warning-pastel', colors?.warningPastel);
+  setVar(vars, '--helper-success', success);
+  setVar(vars, '--helper-success-pastel', colors?.successPastel);
+  setVar(vars, '--helper-information', information);
+  setVar(vars, '--helper-information-pastel', colors?.informationPastel);
+  setVar(vars, '--helper-link', link);
+  setVar(vars, '--helper-link-pastel', colors?.linkPastel);
+
+  setVar(vars, '--status-error', error);
+  setVar(vars, '--status-error-bg', colors?.errorPastel);
+  setVar(vars, '--status-success', success);
+  setVar(vars, '--status-success-bg', colors?.successPastel);
+  setVar(vars, '--status-warning', warning);
+  setVar(vars, '--status-warning-bg', colors?.warningPastel);
+  setVar(vars, '--status-info', information);
+  setVar(vars, '--status-info-bg', colors?.informationPastel);
 
   Object.entries(colors?.primaryScale ?? {}).forEach(([step, value]) => {
     setVar(vars, `--primary-${step}` as `--${string}`, value);
@@ -59,7 +92,7 @@ export function createComponentIqCssVariables(
   });
 
   setVar(vars, '--background', colors?.background);
-  setVar(vars, '--foreground', colors?.foreground);
+  setVar(vars, '--foreground', textParagraph);
   setVar(vars, '--card', colors?.surface);
   setVar(vars, '--card-foreground', colors?.foreground);
   setVar(vars, '--popover', colors?.surface);
@@ -69,21 +102,36 @@ export function createComponentIqCssVariables(
   setVar(vars, '--secondary', colors?.secondary);
   setVar(vars, '--secondary-foreground', colors?.secondaryForeground);
   setVar(vars, '--muted', colors?.secondaryBackground);
-  setVar(vars, '--muted-foreground', colors?.muted);
+  setVar(vars, '--muted-foreground', textMuted);
   setVar(vars, '--accent', colors?.hover);
   setVar(vars, '--accent-foreground', colors?.foreground);
-  setVar(vars, '--destructive', colors?.destructive);
+  setVar(vars, '--destructive', error);
   setVar(vars, '--border', colors?.border);
   setVar(vars, '--input', colors?.border);
   setVar(vars, '--ring', colors?.focus ?? colors?.primary);
   setVar(vars, '--sidebar', colors?.secondaryBackground);
-  setVar(vars, '--sidebar-foreground', colors?.foreground);
+  setVar(vars, '--sidebar-foreground', textParagraph);
   setVar(vars, '--sidebar-primary', colors?.primary);
   setVar(vars, '--sidebar-primary-foreground', colors?.primaryForeground);
   setVar(vars, '--sidebar-accent', colors?.hover);
   setVar(vars, '--sidebar-accent-foreground', colors?.foreground);
   setVar(vars, '--sidebar-border', colors?.border);
   setVar(vars, '--sidebar-ring', colors?.focus ?? colors?.primary);
+  setVar(vars, '--color-text-primary', textPrimary);
+  setVar(vars, '--color-text-paragraph', textParagraph);
+  setVar(vars, '--color-text-secondary', textSecondary);
+  setVar(vars, '--color-text-muted', textMuted);
+  setVar(vars, '--color-text-disabled', textDisabled);
+  setVar(vars, '--color-helper-warning', warning);
+  setVar(vars, '--color-helper-warning-pastel', colors?.warningPastel);
+  setVar(vars, '--color-helper-link', link);
+  setVar(vars, '--color-helper-link-pastel', colors?.linkPastel);
+  setVar(vars, '--color-helper-information', information);
+  setVar(vars, '--color-helper-information-pastel', colors?.informationPastel);
+  setVar(vars, '--color-helper-error', error);
+  setVar(vars, '--color-helper-error-pastel', colors?.errorPastel);
+  setVar(vars, '--color-helper-success', success);
+  setVar(vars, '--color-helper-success-pastel', colors?.successPastel);
 
   setVar(vars, '--font-sans', typography?.fontFamily);
   setVar(vars, '--font-rubik', typography?.fontFamily);
