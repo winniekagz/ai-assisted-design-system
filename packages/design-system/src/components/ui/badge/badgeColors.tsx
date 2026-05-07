@@ -1,172 +1,59 @@
 import { BadgeVariants } from '../../../types/badgw';
 
 export type BadgeVariantName = 'filled' | 'outlined' | 'pastel';
-export type BadgeColorStyle = {
-  backgroundColor: string;
-  borderColor?: string;
-  color: string;
-};
 
 const statusColorClasses = {
   success: {
     filled:
-      'bg-[color:var(--helper-success,#067647)] text-[color:var(--text-inverse,#ffffff)]',
+      'bg-[color:var(--helper-success)] text-[color:var(--text-inverse)] border-[color:var(--helper-success)]',
     outlined:
-      'bg-transparent text-[color:var(--helper-success,#067647)] border-[color:var(--helper-success,#067647)]',
+      'bg-transparent text-[color:var(--helper-success)] border-[color:var(--helper-success)]',
     pastel:
-      'bg-[color:var(--helper-success-pastel,#ECFDF3)] text-[color:var(--helper-success,#067647)]',
+      'bg-[color:var(--helper-success-pastel)] text-[color:var(--helper-success)] border-[color:var(--helper-success)]',
   },
   warning: {
     filled:
-      'bg-[color:var(--helper-warning,#B54708)] text-[color:var(--text-inverse,#ffffff)]',
+      'bg-[color:var(--helper-warning)] text-[color:var(--text-inverse)] border-[color:var(--helper-warning)]',
     outlined:
-      'bg-transparent text-[color:var(--helper-warning,#B54708)] border-[color:var(--helper-warning,#B54708)]',
+      'bg-transparent text-[color:var(--helper-warning)] border-[color:var(--helper-warning)]',
     pastel:
-      'bg-[color:var(--helper-warning-pastel,#FFF4E5)] text-[color:var(--helper-warning,#B54708)]',
+      'bg-[color:var(--helper-warning-pastel)] text-[color:var(--helper-warning)] border-[color:var(--helper-warning)]',
   },
   error: {
     filled:
-      'bg-[color:var(--helper-error,#B42318)] text-[color:var(--text-inverse,#ffffff)]',
+      'bg-[color:var(--helper-error)] text-[color:var(--text-inverse)] border-[color:var(--helper-error)]',
     outlined:
-      'bg-transparent text-[color:var(--helper-error,#B42318)] border-[color:var(--helper-error,#B42318)]',
+      'bg-transparent text-[color:var(--helper-error)] border-[color:var(--helper-error)]',
     pastel:
-      'bg-[color:var(--helper-error-pastel,#FEF3F2)] text-[color:var(--helper-error,#B42318)]',
+      'bg-[color:var(--helper-error-pastel)] text-[color:var(--helper-error)] border-[color:var(--helper-error)]',
   },
   info: {
     filled:
-      'bg-[color:var(--helper-information,#175CD3)] text-[color:var(--text-inverse,#ffffff)]',
+      'bg-[color:var(--helper-information)] text-[color:var(--text-inverse)] border-[color:var(--helper-information)]',
     outlined:
-      'bg-transparent text-[color:var(--helper-information,#175CD3)] border-[color:var(--helper-information,#175CD3)]',
+      'bg-transparent text-[color:var(--helper-information)] border-[color:var(--helper-information)]',
     pastel:
-      'bg-[color:var(--helper-information-pastel,#EFF8FF)] text-[color:var(--helper-information,#175CD3)]',
+      'bg-[color:var(--helper-information-pastel)] text-[color:var(--helper-information)] border-[color:var(--helper-information)]',
   },
   link: {
     filled:
-      'bg-[color:var(--helper-link,#0284C7)] text-[color:var(--text-inverse,#ffffff)]',
+      'bg-[color:var(--helper-link)] text-[color:var(--text-inverse)] border-[color:var(--helper-link)]',
     outlined:
-      'bg-transparent text-[color:var(--helper-link,#0284C7)] border-[color:var(--helper-link,#0284C7)]',
+      'bg-transparent text-[color:var(--helper-link)] border-[color:var(--helper-link)]',
     pastel:
-      'bg-[color:var(--helper-link-pastel,#E0F2FE)] text-[color:var(--helper-link,#0284C7)]',
+      'bg-[color:var(--helper-link-pastel)] text-[color:var(--helper-link)] border-[color:var(--helper-link)]',
   },
   neutral: {
     filled:
-      'bg-[color:var(--bg-secondary,#F3F4F6)] text-[color:var(--text-secondary,#374151)]',
+      'bg-[color:var(--bg-secondary)] text-[color:var(--text-secondary)] border-[color:var(--border-default)]',
     outlined:
-      'bg-transparent text-[color:var(--text-secondary,#374151)] border-[color:var(--border-default,var(--border-subtle,#D1D5DB))]',
+      'bg-transparent text-[color:var(--text-secondary)] border-[color:var(--border-default)]',
     pastel:
-      'bg-[color:var(--bg-secondary,#F3F4F6)] text-[color:var(--text-secondary,#374151)]',
+      'bg-[color:var(--bg-secondary)] text-[color:var(--text-secondary)] border-[color:var(--border-default)]',
   },
 } satisfies Record<string, BadgeVariants>;
 
 type StatusColorKey = keyof typeof statusColorClasses;
-
-const statusColorStyles: Record<
-  StatusColorKey,
-  Record<BadgeVariantName, BadgeColorStyle>
-> = {
-  success: {
-    filled: {
-      backgroundColor: 'var(--helper-success,#067647)',
-      borderColor: 'var(--helper-success,#067647)',
-      color: 'var(--text-inverse,#ffffff)',
-    },
-    outlined: {
-      backgroundColor: 'transparent',
-      borderColor: 'var(--helper-success,#067647)',
-      color: 'var(--helper-success,#067647)',
-    },
-    pastel: {
-      backgroundColor: 'var(--helper-success-pastel,#ECFDF3)',
-      borderColor: 'var(--helper-success,#067647)',
-      color: 'var(--helper-success,#067647)',
-    },
-  },
-  warning: {
-    filled: {
-      backgroundColor: 'var(--helper-warning,#B54708)',
-      borderColor: 'var(--helper-warning,#B54708)',
-      color: 'var(--text-inverse,#ffffff)',
-    },
-    outlined: {
-      backgroundColor: 'transparent',
-      borderColor: 'var(--helper-warning,#B54708)',
-      color: 'var(--helper-warning,#B54708)',
-    },
-    pastel: {
-      backgroundColor: 'var(--helper-warning-pastel,#FFF4E5)',
-      borderColor: 'var(--helper-warning,#B54708)',
-      color: 'var(--helper-warning,#B54708)',
-    },
-  },
-  error: {
-    filled: {
-      backgroundColor: 'var(--helper-error,#B42318)',
-      borderColor: 'var(--helper-error,#B42318)',
-      color: 'var(--text-inverse,#ffffff)',
-    },
-    outlined: {
-      backgroundColor: 'transparent',
-      borderColor: 'var(--helper-error,#B42318)',
-      color: 'var(--helper-error,#B42318)',
-    },
-    pastel: {
-      backgroundColor: 'var(--helper-error-pastel,#FEF3F2)',
-      borderColor: 'var(--helper-error,#B42318)',
-      color: 'var(--helper-error,#B42318)',
-    },
-  },
-  info: {
-    filled: {
-      backgroundColor: 'var(--helper-information,#175CD3)',
-      borderColor: 'var(--helper-information,#175CD3)',
-      color: 'var(--text-inverse,#ffffff)',
-    },
-    outlined: {
-      backgroundColor: 'transparent',
-      borderColor: 'var(--helper-information,#175CD3)',
-      color: 'var(--helper-information,#175CD3)',
-    },
-    pastel: {
-      backgroundColor: 'var(--helper-information-pastel,#EFF8FF)',
-      borderColor: 'var(--helper-information,#175CD3)',
-      color: 'var(--helper-information,#175CD3)',
-    },
-  },
-  link: {
-    filled: {
-      backgroundColor: 'var(--helper-link,#0284C7)',
-      borderColor: 'var(--helper-link,#0284C7)',
-      color: 'var(--text-inverse,#ffffff)',
-    },
-    outlined: {
-      backgroundColor: 'transparent',
-      borderColor: 'var(--helper-link,#0284C7)',
-      color: 'var(--helper-link,#0284C7)',
-    },
-    pastel: {
-      backgroundColor: 'var(--helper-link-pastel,#E0F2FE)',
-      borderColor: 'var(--helper-link,#0284C7)',
-      color: 'var(--helper-link,#0284C7)',
-    },
-  },
-  neutral: {
-    filled: {
-      backgroundColor: 'var(--bg-secondary,#F3F4F6)',
-      borderColor: 'var(--border-default,var(--border-subtle,#D1D5DB))',
-      color: 'var(--text-secondary,#374151)',
-    },
-    outlined: {
-      backgroundColor: 'transparent',
-      borderColor: 'var(--border-default,var(--border-subtle,#D1D5DB))',
-      color: 'var(--text-secondary,#374151)',
-    },
-    pastel: {
-      backgroundColor: 'var(--bg-secondary,#F3F4F6)',
-      borderColor: 'var(--border-default,var(--border-subtle,#D1D5DB))',
-      color: 'var(--text-secondary,#374151)',
-    },
-  },
-};
 
 function isStatusColorKey(value: string): value is StatusColorKey {
   return value in statusColorClasses;
@@ -198,7 +85,7 @@ export function getDefaultBadgeStatusStyle(
   status: string | undefined,
   variant: BadgeVariantName
 ) {
-  return statusColorStyles[getStatusColorKey(status)][variant];
+  return statusColorClasses[getStatusColorKey(status)][variant];
 }
 
 export const defaultBadgeStatusConfig = {

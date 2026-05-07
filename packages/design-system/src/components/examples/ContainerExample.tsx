@@ -1,261 +1,94 @@
 import { Container } from '@/components/ui/container';
 import { Typography } from '../ui/typography';
-import { T } from 'vitest/dist/chunks/reporters.d.BFLkQcL6.js';
+
+function ExampleBlock({ children }: { children: React.ReactNode }) {
+  return (
+    <div className='rounded-[var(--radius-sm)] bg-[color:var(--bg-secondary)] p-[var(--spacing-sm)] text-[color:var(--text-paragraph)]'>
+      {children}
+    </div>
+  );
+}
 
 export function ContainerExample() {
   return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-      <Typography variant='h4' className='mb-4 font-bold'>
+    <div className='mx-auto max-w-[800px] p-[var(--spacing-lg)]'>
+      <Typography variant='h4' className='mb-[var(--spacing-md)] font-bold'>
         Container Component Examples
       </Typography>
 
-      {/* Basic Usage */}
-      <section style={{ marginBottom: '40px' }}>
-        <Typography variant='h5' className='mb-2'>
-          Basic Usage (Default Settings)
+      <section className='mb-[var(--spacing-2xl)]'>
+        <Typography variant='h5' className='mb-[var(--spacing-sm)]'>
+          Basic Usage
         </Typography>
         <Container>
-          <div
-            style={{
-              padding: '8px',
-              background: '#f0f0f0',
-              borderRadius: '4px',
-            }}
-          >
-            Default container with white background, 16px gap, 2px padding, 10px
-            radius
-          </div>
-          <div
-            style={{
-              padding: '8px',
-              background: '#f0f0f0',
-              borderRadius: '4px',
-            }}
-          >
-            No border, no shadow, fit width
-          </div>
+          <ExampleBlock>
+            Default token surface, gap, padding, and radius.
+          </ExampleBlock>
+          <ExampleBlock>No border, no shadow, fit width.</ExampleBlock>
         </Container>
       </section>
 
-      {/* Full Width */}
-      <section style={{ marginBottom: '40px' }}>
-        <Typography variant='h5' className='mb-2'>
+      <section className='mb-[var(--spacing-2xl)]'>
+        <Typography variant='h5' className='mb-[var(--spacing-sm)]'>
           Full Width Container
         </Typography>
-        <Container width='full' padding={16}>
-          <div
-            style={{
-              padding: '8px',
-              background: '#e3f2fd',
-              borderRadius: '4px',
-            }}
-          >
-            This container takes the full width of its parent
-          </div>
-          <div
-            style={{
-              padding: '8px',
-              background: '#e3f2fd',
-              borderRadius: '4px',
-            }}
-          >
-            Useful for layout containers and sections
-          </div>
+        <Container width='full' padding='md'>
+          <ExampleBlock>
+            This container takes the full width of its parent.
+          </ExampleBlock>
+          <ExampleBlock>
+            Useful for layout containers and sections.
+          </ExampleBlock>
         </Container>
       </section>
 
-      {/* Different Variants */}
-      <section style={{ marginBottom: '40px' }}>
-        <Typography variant='h5' className='mb-2'>
+      <section className='mb-[var(--spacing-2xl)]'>
+        <Typography variant='h5' className='mb-[var(--spacing-sm)]'>
           Background Variants
         </Typography>
-
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-          <Container variant='white' bordered={true} padding={12} radius={8}>
-            <div style={{ padding: '4px' }}>White Background</div>
+        <div className='flex flex-wrap gap-[var(--spacing-md)]'>
+          <Container variant='surface' bordered padding='sm' radius='md'>
+            Surface
           </Container>
-
-          <Container
-            variant='transparent'
-            bordered={true}
-            padding={12}
-            radius={8}
-          >
-            <div style={{ padding: '4px' }}>Transparent Background</div>
+          <Container variant='transparent' bordered padding='sm' radius='md'>
+            Transparent
           </Container>
-
-          <Container variant='gray' bordered={true} padding={12} radius={8}>
-            <div style={{ padding: '4px' }}>Gray Background</div>
+          <Container variant='secondary' bordered padding='sm' radius='md'>
+            Secondary
           </Container>
-
-          <Container variant='primary' padding={12} radius={8}>
-            <div style={{ padding: '4px', color: 'white' }}>
-              Primary Background
-            </div>
-          </Container>
-
-          <Container variant='secondary' padding={12} radius={8}>
-            <div style={{ padding: '4px', color: 'white' }}>
-              Secondary Background
-            </div>
+          <Container variant='primary' padding='sm' radius='md'>
+            Primary
           </Container>
         </div>
       </section>
 
-      {/* Custom Spacing */}
-      <section style={{ marginBottom: '40px' }}>
-        <Typography variant='h5' className='mb-2'>
-          Custom Spacing
+      <section className='mb-[var(--spacing-2xl)]'>
+        <Typography variant='h5' className='mb-[var(--spacing-sm)]'>
+          Token Spacing
         </Typography>
-
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-          <Container gap={8} padding={8} radius={8}>
-            <div
-              style={{
-                padding: '4px',
-                background: '#f0f0f0',
-                borderRadius: '4px',
-              }}
-            >
-              Small Gap (8px)
-            </div>
-            <div
-              style={{
-                padding: '4px',
-                background: '#f0f0f0',
-                borderRadius: '4px',
-              }}
-            >
-              Small Padding (8px)
-            </div>
+        <div className='flex flex-wrap gap-[var(--spacing-md)]'>
+          <Container gap='sm' padding='sm' radius='md'>
+            <ExampleBlock>Small gap</ExampleBlock>
+            <ExampleBlock>Small padding</ExampleBlock>
           </Container>
-
-          <Container gap={32} padding={20} radius={16}>
-            <div
-              style={{
-                padding: '4px',
-                background: '#f0f0f0',
-                borderRadius: '4px',
-              }}
-            >
-              Large Gap (32px)
-            </div>
-            <div
-              style={{
-                padding: '4px',
-                background: '#f0f0f0',
-                borderRadius: '4px',
-              }}
-            >
-              Large Padding (20px)
-            </div>
+          <Container gap='xl' padding='lg' radius='xl'>
+            <ExampleBlock>Large gap</ExampleBlock>
+            <ExampleBlock>Large padding</ExampleBlock>
           </Container>
         </div>
       </section>
 
-      {/* With Border and Shadow */}
-      <section style={{ marginBottom: '40px' }}>
-        <Typography variant='h5' className='mb-2'>
+      <section className='mb-[var(--spacing-2xl)]'>
+        <Typography variant='h5' className='mb-[var(--spacing-sm)]'>
           With Border and Shadow
         </Typography>
-        <Container
-          width='full'
-          bordered={true}
-          shadowed={true}
-          padding={16}
-          radius={12}
-        >
-          <div
-            style={{
-              padding: '8px',
-              background: '#f8f9fa',
-              borderRadius: '4px',
-            }}
-          >
-            This container has a border and shadow for enhanced visual depth
-          </div>
-          <div
-            style={{
-              padding: '8px',
-              background: '#f8f9fa',
-              borderRadius: '4px',
-            }}
-          >
-            Perfect for cards, modals, and elevated content
-          </div>
-        </Container>
-      </section>
-
-      {/* Interactive Example */}
-      <section style={{ marginBottom: '40px' }}>
-        <Typography variant='h5' className='mb-2'>
-          Interactive Container
-        </Typography>
-        <Container
-          width='full'
-          bordered={true}
-          shadowed={true}
-          padding={16}
-          radius={12}
-          className='hover:shadow-lg transition-shadow cursor-pointer'
-        >
-          <div
-            style={{
-              fontWeight: 'bold',
-              fontSize: '16px',
-              marginBottom: '8px',
-            }}
-          >
-            Interactive Container
-          </div>
-          <div style={{ color: '#666', marginBottom: '8px' }}>
-            Hover over this container to see the shadow effect
-          </div>
-          <div
-            style={{
-              padding: '8px',
-              background: '#f8f9fa',
-              borderRadius: '4px',
-            }}
-          >
-            Click me for interaction!
-          </div>
-        </Container>
-      </section>
-
-      {/* Nested Containers */}
-      <section style={{ marginBottom: '40px' }}>
-        <h2
-          style={{ marginBottom: '16px', fontSize: '18px', fontWeight: '600' }}
-        >
-          Nested Containers
-        </h2>
-        <Container width='full' gap={16} padding={16}>
-          <Container width='fit' variant='gray' gap={8} padding={8} radius={8}>
-            <div style={{ padding: '4px' }}>Nested Container 1</div>
-          </Container>
-          <Container
-            width='fit'
-            variant='primary'
-            gap={8}
-            padding={8}
-            radius={8}
-          >
-            <div style={{ padding: '4px', color: 'white' }}>
-              Nested Container 2
-            </div>
-          </Container>
-          <Container
-            width='fit'
-            variant='secondary'
-            gap={8}
-            padding={8}
-            radius={8}
-          >
-            <div style={{ padding: '4px', color: 'white' }}>
-              Nested Container 3
-            </div>
-          </Container>
+        <Container width='full' bordered shadowed padding='md' radius='lg'>
+          <ExampleBlock>
+            This container has token-driven border and shadow treatment.
+          </ExampleBlock>
+          <ExampleBlock>
+            Useful for cards, modals, and elevated content.
+          </ExampleBlock>
         </Container>
       </section>
     </div>

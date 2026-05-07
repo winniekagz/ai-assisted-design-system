@@ -31,12 +31,8 @@ export function Badge({
   style,
   ...props
 }: BadgeProps) {
-  let colors = '';
+  let colors = getDefaultBadgeStatusStyle(colorStatus || status, variant);
   let label = '';
-  let statusStyle: React.CSSProperties | undefined = getDefaultBadgeStatusStyle(
-    colorStatus || status,
-    variant
-  );
 
   // Use colorStatus for colors if provided, otherwise use status
   const colorKey = colorStatus || status;
@@ -56,7 +52,6 @@ export function Badge({
       if (variantColors) {
         colors =
           `${variantColors.bg} ${variantColors.text} ${variantColors.border || ''}`.trim();
-        statusStyle = undefined;
       }
     }
   }
@@ -85,7 +80,7 @@ export function Badge({
   return (
     <div
       className={cn(badgeVariants({ variant, size }), colors, className)}
-      style={{ ...statusStyle, ...style }}
+      style={style}
       {...props}
     >
       {Icon && iconPosition === 'start' && <Icon className='mr-2 h-4 w-4' />}

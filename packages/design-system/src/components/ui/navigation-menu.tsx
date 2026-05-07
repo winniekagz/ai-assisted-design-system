@@ -34,8 +34,7 @@ const NavigationMenuItem = React.forwardRef<
 ));
 NavigationMenuItem.displayName = 'NavigationMenuItem';
 
-interface NavigationMenuLinkProps
-  extends React.HTMLAttributes<HTMLAnchorElement> {
+interface NavigationMenuLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   children: React.ReactNode;
   href?: string;
   active?: boolean;
@@ -49,8 +48,10 @@ const NavigationMenuLink = React.forwardRef<
     ref={ref}
     href={href}
     className={cn(
-      'text-sm font-medium transition-colors hover:text-primary',
-      active ? 'text-black dark:text-white' : 'text-muted-foreground',
+      'text-sm font-medium transition-colors hover:text-[color:var(--color-primary)]',
+      active
+        ? 'text-[color:var(--text-title)]'
+        : 'text-[color:var(--text-muted)]',
       className
     )}
     {...props}

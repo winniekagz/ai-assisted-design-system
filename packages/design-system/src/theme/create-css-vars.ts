@@ -44,14 +44,17 @@ export function createComponentIqCssVariables(
 
   setVar(vars, '--color-primary', colors?.primary);
   setVar(vars, '--color-primary-fg', colors?.primaryForeground);
+  setVar(vars, '--color-primary-500', colors?.primary);
   setVar(vars, '--color-secondary', colors?.secondary);
   setVar(vars, '--color-secondary-fg', colors?.secondaryForeground);
+  setVar(vars, '--color-secondary-500', colors?.secondary);
 
   setVar(vars, '--bg-default', colors?.background);
   setVar(vars, '--bg-surface', colors?.surface);
   setVar(vars, '--bg-secondary', colors?.secondaryBackground);
   setVar(vars, '--bg-hover', colors?.hover);
   setVar(vars, '--bg-card-active', colors?.secondaryBackground);
+  setVar(vars, '--bg-paper', colors?.surface);
 
   setVar(vars, '--text-title', colors?.title ?? textPrimary);
   setVar(vars, '--text-primary', textPrimary);
@@ -65,6 +68,7 @@ export function createComponentIqCssVariables(
   setVar(vars, '--border-default', colors?.border);
   setVar(vars, '--border-subtle', colors?.borderSubtle);
   setVar(vars, '--border-focus', colors?.focus ?? colors?.primary);
+  setVar(vars, '--color-border-default', colors?.border);
   setVar(vars, '--helper-error', error);
   setVar(vars, '--helper-error-pastel', colors?.errorPastel);
   setVar(vars, '--helper-warning', warning);
@@ -133,6 +137,10 @@ export function createComponentIqCssVariables(
   setVar(vars, '--color-helper-error-pastel', colors?.errorPastel);
   setVar(vars, '--color-helper-success', success);
   setVar(vars, '--color-helper-success-pastel', colors?.successPastel);
+  setVar(vars, '--color-error-500', error);
+  setVar(vars, '--color-success-500', success);
+  setVar(vars, '--color-warning-500', warning);
+  setVar(vars, '--color-information-500', information);
 
   setVar(vars, '--font-sans', typography?.fontFamily);
   setVar(vars, '--font-rubik', typography?.fontFamily);

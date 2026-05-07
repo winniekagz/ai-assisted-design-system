@@ -13,38 +13,41 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={false}
-      className={cn('p-3  min-w-72', className)}
+      className={cn('p-3 min-w-72', className)}
       classNames={{
         months:
-          'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 gap-4 ',
-        month: 'space-y-4 bg-paper rounded-1',
+          'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 gap-4',
+        month:
+          'space-y-4 bg-[color:var(--bg-surface)] rounded-[var(--radius-md)]',
         caption: 'hidden',
         caption_label: 'hidden',
-        nav: 'space-x-1 flex gap-4  bg-primary',
+        nav: 'space-x-1 flex gap-4',
         nav_button: cn(
-          'h-7 w-7 bg-blue-50 p-0 opacity-50 hover:opacity-100 hover:bg-accent rounded-sm'
+          'h-7 w-7 bg-[color:var(--bg-secondary)] p-0 text-[color:var(--text-secondary)] hover:bg-[color:var(--bg-hover)] hover:text-[color:var(--text-title)] rounded-[var(--radius-sm)]'
         ),
         button_previous:
-          'absolute left-1 bg-primary-500 text-white rounded-[4px]',
-        button_next: 'absolute right-1 bg-primary-500 text-white rounded-[4px]',
+          'absolute left-1 bg-[color:var(--color-primary)] text-[color:var(--text-inverse)] rounded-[var(--radius-sm)]',
+        button_next:
+          'absolute right-1 bg-[color:var(--color-primary)] text-[color:var(--text-inverse)] rounded-[var(--radius-sm)]',
 
-        table: 'w-full border-collapse space-y-1 bg-red-500',
-        head_row: 'flex flex-row bg-yellow-500',
+        table: 'w-full border-collapse space-y-1',
+        head_row: 'flex flex-row',
         head_cell:
-          'text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] ',
+          'text-[color:var(--text-secondary)] rounded-[var(--radius-md)] w-9 font-normal text-[length:var(--font-size-caption)]',
         row: 'flex w-full mt-2',
-        cell: 'h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20',
+        cell: 'h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-[var(--radius-md)] [&:has([aria-selected].day-outside)]:bg-[color:var(--bg-hover)] [&:has([aria-selected])]:bg-[color:var(--bg-hover)] first:[&:has([aria-selected])]:rounded-l-[var(--radius-md)] last:[&:has([aria-selected])]:rounded-r-[var(--radius-md)] focus-within:relative focus-within:z-20',
         day: cn(
-          'h-9 w-9 p-0 font-normal aria-selected:bg-primary aria-selected:rounded-full  aria-selected:text-white text-center hover:bg-accent hover:text-primary rounded-md'
+          'h-9 w-9 p-0 font-normal aria-selected:bg-[color:var(--color-primary)] aria-selected:rounded-full aria-selected:text-[color:var(--text-inverse)] text-center hover:bg-[color:var(--bg-hover)] hover:text-[color:var(--color-primary)] rounded-[var(--radius-md)]'
         ),
         day_range_end: 'day-range-end',
-        day_selected: 'rdp-day_selected bg-primary-500',
-        day_today: 'bg-primary-500 rounded-full text-primary',
+        day_selected: 'rdp-day_selected bg-[color:var(--color-primary)]',
+        day_today:
+          'bg-[color:var(--color-primary)] rounded-full text-[color:var(--text-inverse)]',
         day_outside:
-          'day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30',
-        day_disabled: 'text-muted-foreground opacity-50',
+          'day-outside text-[color:var(--text-disabled)] aria-selected:bg-[color:var(--bg-hover)] aria-selected:text-[color:var(--text-disabled)]',
+        day_disabled: 'text-[color:var(--text-disabled)]',
         day_range_middle:
-          'aria-selected:bg-accent aria-selected:text-accent-foreground',
+          'aria-selected:bg-[color:var(--bg-hover)] aria-selected:text-[color:var(--text-paragraph)]',
         day_hidden: 'invisible',
         dropdown_month: 'rdp-dropdown_month',
         dropdown_year: 'rdp-dropdown_year',
