@@ -39,5 +39,7 @@ export function mergeComponentIqTokens(
       defaultComponentIqTokens.strokeWidth,
       tokens?.strokeWidth
     ),
+    motion: mergeTokenGroup(defaultComponentIqTokens.motion, tokens?.motion),
+    zIndex: mergeTokenGroup(defaultComponentIqTokens.zIndex, tokens?.zIndex),
   };
 }

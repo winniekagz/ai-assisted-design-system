@@ -110,4 +110,18 @@ export const defaultComponentIqTokens: ComponentIqTokens = {
     md: '1.5px',
     lg: '2px',
   },
+  motion: {
+    fast: '120ms',
+    normal: '200ms',
+    slow: '320ms',
+    easing: 'cubic-bezier(0.2, 0, 0, 1)',
+  },
+  zIndex: {
+    base: 0,
+    dropdown: 50,
+    sticky: 100,
+    overlay: 200,
+    modal: 300,
+    toast: 400,
+  },
 };

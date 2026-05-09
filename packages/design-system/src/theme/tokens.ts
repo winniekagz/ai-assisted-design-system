@@ -100,6 +100,22 @@ export interface ComponentIqStrokeWidthTokens {
   lg?: string;
 }
 
+export interface ComponentIqMotionTokens {
+  fast?: string;
+  normal?: string;
+  slow?: string;
+  easing?: string;
+}
+
+export interface ComponentIqZIndexTokens {
+  base?: string | number;
+  dropdown?: string | number;
+  sticky?: string | number;
+  overlay?: string | number;
+  modal?: string | number;
+  toast?: string | number;
+}
+
 export interface ComponentIqTokens {
   colors?: ComponentIqColorTokens;
   typography?: ComponentIqTypographyTokens;
@@ -107,4 +123,6 @@ export interface ComponentIqTokens {
   spacing?: ComponentIqSpacingTokens;
   shadows?: ComponentIqShadowTokens;
   strokeWidth?: ComponentIqStrokeWidthTokens;
+  motion?: ComponentIqMotionTokens;
+  zIndex?: ComponentIqZIndexTokens;
 }

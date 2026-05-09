@@ -25,6 +25,8 @@ export function createComponentIqCssVariables(
   const spacing = merged.spacing;
   const shadows = merged.shadows;
   const strokeWidth = merged.strokeWidth;
+  const motion = merged.motion;
+  const zIndex = merged.zIndex;
   const vars: ComponentIqCssVariables = {};
   const textPrimary =
     colors?.textPrimary ?? colors?.title ?? colors?.foreground;
@@ -190,6 +192,18 @@ export function createComponentIqCssVariables(
   setVar(vars, '--border-width-sm', strokeWidth?.thin);
   setVar(vars, '--border-width-md', strokeWidth?.md);
   setVar(vars, '--border-width-lg', strokeWidth?.lg);
+
+  setVar(vars, '--motion-fast', motion?.fast);
+  setVar(vars, '--motion-normal', motion?.normal);
+  setVar(vars, '--motion-slow', motion?.slow);
+  setVar(vars, '--motion-easing', motion?.easing);
+
+  setVar(vars, '--z-base', zIndex?.base);
+  setVar(vars, '--z-dropdown', zIndex?.dropdown);
+  setVar(vars, '--z-sticky', zIndex?.sticky);
+  setVar(vars, '--z-overlay', zIndex?.overlay);
+  setVar(vars, '--z-modal', zIndex?.modal);
+  setVar(vars, '--z-toast', zIndex?.toast);
 
   return vars;
 }
