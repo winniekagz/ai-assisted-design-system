@@ -23,8 +23,47 @@ const meta = {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'A highly customizable button component with multiple variants, sizes, icons, and accessibility features.',
+        component: `
+Token-driven button with seven variants, five sizes, icon slots, loading state, and full-width layout. Built on Radix \`Slot\` so it composes with \`<a>\`, \`<Link>\`, or any other element via \`asChild\`.
+
+### When to use
+- **contained** — primary CTA, one per surface.
+- **outlined** — secondary action alongside a contained button.
+- **text / ghost** — low-emphasis actions in toolbars or cards.
+- **destructive** — irreversible actions (delete, remove). Confirm first when possible.
+- **link** — inline navigation that must look like a link.
+- **secondary** — alternate brand emphasis when primary is already in use.
+
+### Usage
+\`\`\`tsx
+import { Button } from '@winniekagendo/componentiq';
+import { Save, Trash2 } from 'lucide-react';
+
+<Button startIcon={<Save />}>Save changes</Button>
+<Button variant="outlined">Cancel</Button>
+<Button variant="destructive" startIcon={<Trash2 />}>Delete</Button>
+
+// Compose with Next.js Link
+<Button asChild variant="text">
+  <Link href="/dashboard">Dashboard</Link>
+</Button>
+
+// Loading state
+<Button loading>Saving…</Button>
+\`\`\`
+
+### Props cheat sheet
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| \`variant\` | \`"contained" \\| "outlined" \\| "text" \\| "secondary" \\| "destructive" \\| "ghost" \\| "link"\` | "contained" | Visual emphasis and intent |
+| \`size\` | \`"sm" \\| "default" \\| "lg" \\| "xl" \\| "icon"\` | "default" | Height and padding |
+| \`loading\` | boolean | false | Shows a spinner and disables interaction |
+| \`disabled\` | boolean | false | Prevents interaction |
+| \`fullWidth\` | boolean | false | Stretches to fill the parent width |
+| \`startIcon\` | ReactNode | — | Icon before the label |
+| \`endIcon\` | ReactNode | — | Icon after the label |
+| \`asChild\` | boolean | false | Merges props onto the first child element (Radix Slot) |
+        `,
       },
     },
   },
@@ -32,45 +71,45 @@ const meta = {
   argTypes: {
     variant: {
       control: { type: 'select' },
-      options: [
-        'contained',
-        'outlined',
-        'text',
-        'secondary',
-        'destructive',
-        'ghost',
-        'link',
-      ],
-      description: 'The visual style variant of the button',
+      options: ['contained','outlined','text','secondary','destructive','ghost','link'],
+      description: 'Visual emphasis and intent.',
+      table: { type: { summary: "'contained' | 'outlined' | 'text' | 'secondary' | 'destructive' | 'ghost' | 'link'" }, defaultValue: { summary: "'contained'" } },
     },
     size: {
       control: { type: 'select' },
       options: ['sm', 'default', 'lg', 'xl', 'icon'],
-      description: 'The size of the button',
+      description: 'Height and padding. Use `icon` for square icon-only buttons.',
+      table: { type: { summary: "'sm' | 'default' | 'lg' | 'xl' | 'icon'" }, defaultValue: { summary: "'default'" } },
     },
     fullWidth: {
-      control: { type: 'boolean' },
-      description: 'Whether the button should take full width',
+      control: 'boolean',
+      description: 'Stretch the button to fill its parent container.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
     },
     loading: {
-      control: { type: 'boolean' },
-      description: 'Whether to show loading state',
+      control: 'boolean',
+      description: 'Show a spinner and disable interaction.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
     },
     disabled: {
-      control: { type: 'boolean' },
-      description: 'Whether the button is disabled',
+      control: 'boolean',
+      description: 'Prevent interaction and reduce opacity.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
     },
     startIcon: {
       control: false,
-      description: 'Icon to display at the start of the button',
+      description: 'ReactNode rendered before the label (use a 16–20 px Lucide icon).',
+      table: { type: { summary: 'ReactNode' } },
     },
     endIcon: {
       control: false,
-      description: 'Icon to display at the end of the button',
+      description: 'ReactNode rendered after the label.',
+      table: { type: { summary: 'ReactNode' } },
     },
     children: {
       control: 'text',
-      description: 'Button content',
+      description: 'Button label.',
+      table: { type: { summary: 'ReactNode' } },
     },
   },
   args: {

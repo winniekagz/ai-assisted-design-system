@@ -117,7 +117,7 @@ function VariantShowcase({
             <span className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] font-[family-name:var(--font-rubik)]'>
               {v.label}
             </span>
-            <div>{v.node}</div>
+            <div onClick={e => e.stopPropagation()}>{v.node}</div>
           </div>
         ))}
       </div>

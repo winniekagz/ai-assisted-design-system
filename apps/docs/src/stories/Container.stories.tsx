@@ -8,8 +8,45 @@ const meta = {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'A highly reusable container component with customizable styling and layout options. Features include flexible width, customizable styling, pixel-perfect control, and full TypeScript support.',
+        component: `
+Token-driven layout wrapper with configurable background, spacing, radius, border, and shadow. Use it when you need consistent token-based surface styling without writing one-off Tailwind utilities.
+
+### When to use
+- Wrapping a group of related content that needs a distinct background or elevation.
+- Building card-like surfaces that aren't full **Card** components (no header/content structure).
+- Use **Card** instead when the content has a title/body structure — Container is the lower-level primitive.
+
+### Usage
+\`\`\`tsx
+import { Container } from '@winniekagendo/componentiq';
+
+// Surface card
+<Container variant="surface" padding="md" radius="lg" bordered>
+  <p>Content here</p>
+</Container>
+
+// Full-width section with shadow
+<Container width="full" variant="secondary" padding="lg" shadowed>
+  <Stats />
+</Container>
+
+// Brand highlight panel
+<Container variant="primary" padding="lg" radius="md">
+  <h2>Call to action</h2>
+</Container>
+\`\`\`
+
+### Props cheat sheet
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| \`variant\` | \`"surface" \\| "transparent" \\| "secondary" \\| "primary"\` | "surface" | Background colour token |
+| \`width\` | \`"full" \\| "fit"\` | "fit" | Stretch to parent or shrink to content |
+| \`padding\` | \`SpacingToken\` | "xs" | Inner spacing from the token scale |
+| \`gap\` | \`SpacingToken\` | "md" | Gap between direct children |
+| \`radius\` | \`RadiusToken\` | "md" | Corner rounding from the token scale |
+| \`bordered\` | boolean | false | Show a 1 px \`border-default\` border |
+| \`shadowed\` | boolean | false | Apply \`shadow-md\` elevation |
+      `,
       },
     },
   },
@@ -18,36 +55,44 @@ const meta = {
     width: {
       control: { type: 'select' },
       options: ['full', 'fit'],
-      description: 'The width variant of the container',
+      description: 'Stretch to fill the parent (`full`) or shrink to content (`fit`).',
+      table: { type: { summary: "'full' | 'fit'" }, defaultValue: { summary: "'fit'" } },
     },
     variant: {
       control: { type: 'select' },
-      options: ['white', 'transparent', 'gray', 'primary', 'secondary'],
-      description: 'The background color variant',
+      options: ['surface', 'transparent', 'secondary', 'primary', 'white', 'gray', 'brand'],
+      description: 'Background colour token.',
+      table: { type: { summary: "'surface' | 'transparent' | 'secondary' | 'primary'" }, defaultValue: { summary: "'surface'" } },
     },
     gap: {
       control: { type: 'number', min: 0, max: 100 },
-      description: 'The gap between child elements in pixels',
+      description: 'Gap between direct child elements (accepts token name or legacy px value).',
+      table: { type: { summary: 'SpacingToken | number' }, defaultValue: { summary: "'md'" } },
     },
     padding: {
       control: { type: 'number', min: 0, max: 50 },
-      description: 'The padding in pixels',
+      description: 'Inner padding (accepts token name or legacy px value).',
+      table: { type: { summary: 'SpacingToken | number' }, defaultValue: { summary: "'xs'" } },
     },
     radius: {
       control: { type: 'number', min: 0, max: 50 },
-      description: 'The border radius in pixels',
+      description: 'Corner radius (accepts token name or legacy px value).',
+      table: { type: { summary: 'RadiusToken | number' }, defaultValue: { summary: "'md'" } },
     },
     bordered: {
-      control: { type: 'boolean' },
-      description: 'Whether to show a border',
+      control: 'boolean',
+      description: 'Show a 1 px border using the `border-default` token.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
     },
     shadowed: {
-      control: { type: 'boolean' },
-      description: 'Whether to show a shadow',
+      control: 'boolean',
+      description: 'Apply `shadow-md` elevation.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
     },
     children: {
       control: 'text',
-      description: 'Container content',
+      description: 'Container children.',
+      table: { type: { summary: 'ReactNode' } },
     },
   },
   args: {
