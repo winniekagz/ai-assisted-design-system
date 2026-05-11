@@ -9,7 +9,7 @@ import {
   Checkbox,
   DatePicker,
   Input,
-  Radio,
+  RadioGroup,
   Select,
   Textarea,
   type DatePickerValue,
@@ -187,19 +187,11 @@ export function FormDemo() {
                 Notification Preferences
               </Typography>
               <div className='space-y-2'>
-                {notificationOptions.map(option => (
-                  <Radio
-                    key={option.value}
-                    id={option.value}
-                    name='notifications'
-                    value={option.value}
-                    checked={formData.notifications === option.value}
-                    onChange={event =>
-                      updateField('notifications', event.target.value)
-                    }
-                    label={option.label}
-                  />
-                ))}
+                <RadioGroup
+                  options={notificationOptions}
+                  value={formData.notifications}
+                  onValueChange={v => updateField('notifications', v)}
+                />
               </div>
             </div>
 

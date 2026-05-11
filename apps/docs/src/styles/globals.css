@@ -3,6 +3,8 @@
 @import 'tw-animate-css';
 @import './tokens.css';
 
+@source '../../../../packages/design-system/src';
+
 /* @import '../../node_modules/react-tailwindcss-datepicker/dist/index.esm.{js\,ts}'; */
 
 @custom-variant dark (&:is(.dark *));
@@ -232,6 +234,19 @@
   --radius-md: var(--radius-sm, calc(var(--radius) - 2px));
   --radius-lg: var(--radius-md, var(--radius));
   --radius-xl: var(--radius-lg, calc(var(--radius) + 4px));
+
+  --animate-accordion-down: accordion-down var(--motion-normal, 200ms) ease-out;
+  --animate-accordion-up: accordion-up var(--motion-normal, 200ms) ease-out;
+}
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to   { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to   { height: 0; }
 }
 
 body {
@@ -257,7 +272,7 @@ body {
   --text-brand:     #D59A86;
   --text-inverse:   #111827;
 
-  --border-default: #374151;
+  --border-default: #6B7280; /* gray-500 — clearly visible on dark surfaces */
   --border-subtle:  #4B5563;
   --border-focus:   #D59A86;
 
@@ -316,7 +331,7 @@ body {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-primary focus-visible:ring-primary;
   }
   body {
     @apply bg-background text-foreground;

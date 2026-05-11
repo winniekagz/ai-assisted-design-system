@@ -6,10 +6,12 @@ export { componentIqThemes } from './presets';
 export type {
   ComponentIqColorScale,
   ComponentIqColorTokens,
+  ComponentIqMotionTokens,
   ComponentIqRadiusTokens,
   ComponentIqShadowTokens,
   ComponentIqSpacingTokens,
   ComponentIqStrokeWidthTokens,
   ComponentIqTokens,
   ComponentIqTypographyTokens,
+  ComponentIqZIndexTokens,
 } from './tokens';

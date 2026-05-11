@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import { mergeComponentIqTokens } from './merge-tokens';
 import type { ComponentIqTokens } from './tokens';
 
 export type ComponentIqCssVariables = CSSProperties &
@@ -16,15 +15,16 @@ function setVar(
 }
 
 export function createComponentIqCssVariables(
-  tokens?: ComponentIqTokens
+  tokens: ComponentIqTokens
 ): ComponentIqCssVariables {
-  const merged = mergeComponentIqTokens(tokens);
-  const colors = merged.colors;
-  const typography = merged.typography;
-  const radius = merged.radius;
-  const spacing = merged.spacing;
-  const shadows = merged.shadows;
-  const strokeWidth = merged.strokeWidth;
+  const colors = tokens.colors;
+  const typography = tokens.typography;
+  const radius = tokens.radius;
+  const spacing = tokens.spacing;
+  const shadows = tokens.shadows;
+  const strokeWidth = tokens.strokeWidth;
+  const motion = tokens.motion;
+  const zIndex = tokens.zIndex;
   const vars: ComponentIqCssVariables = {};
   const textPrimary =
     colors?.textPrimary ?? colors?.title ?? colors?.foreground;
@@ -90,10 +90,10 @@ export function createComponentIqCssVariables(
   setVar(vars, '--status-info-bg', colors?.informationPastel);
 
   Object.entries(colors?.primaryScale ?? {}).forEach(([step, value]) => {
-    setVar(vars, `--primary-${step}` as `--${string}`, value);
+    setVar(vars, `--primary-${step}` as `--${string}`, value as string);
   });
   Object.entries(colors?.secondaryScale ?? {}).forEach(([step, value]) => {
-    setVar(vars, `--secondary-${step}` as `--${string}`, value);
+    setVar(vars, `--secondary-${step}` as `--${string}`, value as string);
   });
 
   setVar(vars, '--background', colors?.background);
@@ -148,8 +148,16 @@ export function createComponentIqCssVariables(
   setVar(vars, '--font-mono', typography?.monoFontFamily);
   setVar(vars, '--font-size-base', typography?.baseSize);
   setVar(vars, '--font-size-body', typography?.bodySize);
+  // alias: components still reference --font-size-body1 (legacy name)
+  setVar(vars, '--font-size-body1', typography?.bodySize);
   setVar(vars, '--font-size-body-sm', typography?.bodySmallSize);
+  // --font-size-xs / caption (helper text, badges)
   setVar(vars, '--font-size-caption', typography?.captionSize);
+  setVar(vars, '--font-size-xs', typography?.captionSize);
+  // --font-size-sm / label size
+  setVar(vars, '--font-size-sm', typography?.labelSize);
+  // --font-size-lg / large form field variant
+  setVar(vars, '--font-size-lg', typography?.largeFontSize);
   setVar(vars, '--font-size-heading-1', typography?.heading1Size);
   setVar(vars, '--font-size-heading-2', typography?.heading2Size);
   setVar(vars, '--font-size-heading-3', typography?.heading3Size);
@@ -161,6 +169,11 @@ export function createComponentIqCssVariables(
   setVar(vars, '--font-size-display-3', typography?.display3Size);
   setVar(vars, '--font-weight-bold', typography?.headingWeight);
   setVar(vars, '--font-weight-regular', typography?.bodyWeight);
+  setVar(vars, '--font-weight-medium', typography?.mediumWeight);
+  setVar(vars, '--line-height-normal', typography?.lineHeightNormal);
+  setVar(vars, '--line-height-snug', typography?.lineHeightSnug);
+  // alias: components reference both --line-height-body1 and --line-height-snug
+  setVar(vars, '--line-height-body1', typography?.lineHeightBody ?? typography?.lineHeightNormal);
 
   setVar(vars, '--radius-xs', radius?.xs);
   setVar(vars, '--radius-sm', radius?.sm);
@@ -190,6 +203,22 @@ export function createComponentIqCssVariables(
   setVar(vars, '--border-width-sm', strokeWidth?.thin);
   setVar(vars, '--border-width-md', strokeWidth?.md);
   setVar(vars, '--border-width-lg', strokeWidth?.lg);
+
+  setVar(vars, '--motion-fast', motion?.fast);
+  setVar(vars, '--motion-normal', motion?.normal);
+  setVar(vars, '--motion-slow', motion?.slow);
+  setVar(vars, '--motion-easing', motion?.easing);
+  // aliases: some components still reference --duration-* (legacy naming)
+  setVar(vars, '--duration-fast', motion?.fast);
+  setVar(vars, '--duration-normal', motion?.normal);
+  setVar(vars, '--duration-slow', motion?.slow);
+
+  setVar(vars, '--z-base', zIndex?.base);
+  setVar(vars, '--z-dropdown', zIndex?.dropdown);
+  setVar(vars, '--z-sticky', zIndex?.sticky);
+  setVar(vars, '--z-overlay', zIndex?.overlay);
+  setVar(vars, '--z-modal', zIndex?.modal);
+  setVar(vars, '--z-toast', zIndex?.toast);
 
   return vars;
 }
