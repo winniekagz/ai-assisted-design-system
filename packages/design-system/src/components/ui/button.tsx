@@ -59,7 +59,7 @@ export interface ButtonProps
   endIcon?: React.ReactNode;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   fullWidth?: boolean;
 }
 

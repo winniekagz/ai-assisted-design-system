@@ -1,94 +1,133 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import * as React from 'react';
-import { Radio, type RadioProps } from './radio';
+import { RadioGroup as RadioGroupPrimitive } from 'radix-ui';
+import { cn } from '@/lib/utils';
 
 export interface RadioGroupOption {
-  value: string;
-  label: string;
+  value:     string;
+  label:     string;
   disabled?: boolean;
 }
 
-export interface RadioGroupProps extends Omit<
-  React.HTMLAttributes<HTMLDivElement>,
-  'onChange'
-> {
-  options: RadioGroupOption[];
-  value?: string;
-  defaultValue?: string;
+export interface RadioGroupProps {
+  options:        RadioGroupOption[];
+  value?:         string;
+  defaultValue?:  string;
   onValueChange?: (value: string) => void;
-  name?: string;
-  label?: string;
-  error?: boolean;
-  success?: boolean;
-  size?: RadioProps['size'];
+  name?:          string;
+  label?:         string;
+  error?:         boolean;
+  success?:       boolean;
+  size?:          'sm' | 'default' | 'lg';
+  orientation?:   'vertical' | 'horizontal';
+  disabled?:      boolean;
+  className?:     string;
 }
 
-const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
-  (
-    {
-      className,
-      options,
-      value,
-      defaultValue,
-      onValueChange,
-      name,
-      label,
-      error,
-      success,
-      size,
-      ...props
-    },
-    ref
-  ) => {
-    const generatedName = React.useId();
-    const groupName = name ?? generatedName;
-    const [internalValue, setInternalValue] = React.useState(
-      defaultValue ?? ''
-    );
-    const isControlled = value !== undefined;
-    const selectedValue = isControlled ? value : internalValue;
+const sizeMap = {
+  sm:      { item: 'size-4',      dot: 'size-2'      },
+  default: { item: 'size-5',      dot: 'size-[10px]' },
+  lg:      { item: 'size-6',      dot: 'size-3'      },
+};
 
-    const handleValueChange = (nextValue: string) => {
-      if (!isControlled) {
-        setInternalValue(nextValue);
-      }
-      onValueChange?.(nextValue);
-    };
+const RadioGroup = React.forwardRef<
+  React.ComponentRef<typeof RadioGroupPrimitive.Root>,
+  RadioGroupProps
+>(({
+  options,
+  value,
+  defaultValue,
+  onValueChange,
+  name,
+  label,
+  error,
+  success,
+  size        = 'default',
+  orientation = 'vertical',
+  disabled,
+  className,
+}, ref) => {
+  const groupId           = React.useId();
+  const resolvedName      = name ?? groupId;
+  const { item, dot }     = sizeMap[size];
 
-    return (
-      <div
+  const dotColorCls =
+    error   ? 'bg-[color:var(--helper-error)]'   :
+    success ? 'bg-[color:var(--helper-success)]' :
+              'bg-[color:var(--color-primary)]';
+
+  const itemVariantCls =
+    error   ? 'border-[color:var(--helper-error)]   data-[state=checked]:border-[color:var(--helper-error)]'   :
+    success ? 'border-[color:var(--helper-success)] data-[state=checked]:border-[color:var(--helper-success)]' :
+              // unchecked: neutral-300 (gray-300); checked: primary border
+              'border-[color:var(--border-default)] data-[state=checked]:border-[color:var(--color-primary)]';
+
+  return (
+    <div className={cn('flex flex-col gap-[var(--spacing-xs)]', className)}>
+      {label && (
+        <span className='text-[length:var(--font-size-sm)] font-[var(--font-weight-medium)] text-[color:var(--text-secondary)] font-[family-name:var(--font-rubik)]'>
+          {label}
+        </span>
+      )}
+      <RadioGroupPrimitive.Root
         ref={ref}
-        role='radiogroup'
-        aria-label={label}
-        className={cn('grid gap-[var(--spacing-sm)]', className)}
-        {...props}
-      >
-        {label && (
-          <div className='text-[length:var(--font-size-body-sm)] font-medium text-[color:var(--text-title)] [font-family:var(--font-heading)]'>
-            {label}
-          </div>
+        value={value}
+        defaultValue={defaultValue}
+        onValueChange={onValueChange}
+        name={resolvedName}
+        disabled={disabled}
+        orientation={orientation === 'horizontal' ? 'horizontal' : 'vertical'}
+        data-slot='radio-group'
+        className={cn(
+          orientation === 'horizontal'
+            ? 'flex flex-wrap gap-[var(--spacing-md)]'
+            : 'grid gap-[var(--spacing-xs)]',
         )}
-        {options.map(option => (
-          <Radio
-            key={option.value}
-            name={groupName}
-            value={option.value}
-            label={option.label}
-            checked={selectedValue === option.value}
-            disabled={option.disabled}
-            error={error}
-            success={success}
-            size={size}
-            onChange={() => handleValueChange(option.value)}
-          />
-        ))}
-      </div>
-    );
-  }
-);
+      >
+        {options.map(option => {
+          const itemId = `${resolvedName}-${option.value}`;
+          return (
+            <div key={option.value} className='flex items-center gap-[var(--spacing-sm)]'>
+              <RadioGroupPrimitive.Item
+                value={option.value}
+                id={itemId}
+                disabled={option.disabled}
+                data-slot='radio-group-item'
+                className={cn(
+                  item,
+                  'aspect-square shrink-0 rounded-full border-2',
+                  'transition-[color,box-shadow] outline-none',
+                  'focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)]/40',
+                  'disabled:cursor-not-allowed disabled:opacity-40',
+                  itemVariantCls,
+                )}
+              >
+                <RadioGroupPrimitive.Indicator
+                  data-slot='radio-group-indicator'
+                  className='flex items-center justify-center'
+                >
+                  <span className={cn(dot, 'rounded-full', dotColorCls)} aria-hidden='true' />
+                </RadioGroupPrimitive.Indicator>
+              </RadioGroupPrimitive.Item>
 
+              <label
+                htmlFor={itemId}
+                className={cn(
+                  'text-[length:var(--font-size-sm)] font-[var(--font-weight-medium)] leading-[var(--line-height-snug)]',
+                  'font-[family-name:var(--font-rubik)] text-[color:var(--text-secondary)]',
+                  option.disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer',
+                )}
+              >
+                {option.label}
+              </label>
+            </div>
+          );
+        })}
+      </RadioGroupPrimitive.Root>
+    </div>
+  );
+});
 RadioGroup.displayName = 'RadioGroup';
 
 export { RadioGroup };

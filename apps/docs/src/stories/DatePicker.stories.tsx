@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import type React from 'react';
+import * as React from 'react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { useState } from 'react';
 import DatePicker, {
   DatePickerValue,
 } from '@/components/ui/form-fields/DatePicker';
 
-const meta: Meta<typeof DatePicker> = {
+const meta = {
   title: 'Components/DatePicker',
   component: DatePicker,
   parameters: {
-    layout: 'centered',
+    layout: 'padded',
     docs: {
       description: {
         component: `
@@ -92,6 +92,112 @@ Use \`variant="single"\` for due dates, appointments, birthdays, and one-day fil
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+function VariantShowcase({
+  title,
+  variants,
+}: {
+  title: string;
+  variants: Array<{ label: string; code: string; node: React.ReactNode }>;
+}) {
+  const [sel, setSel] = React.useState(0);
+  return (
+    <div className='w-full space-y-[var(--spacing-md)]'>
+      <h2 className='font-[family-name:var(--font-heading)] font-[var(--font-weight-bold)] text-[color:var(--text-title)] text-[length:var(--font-size-heading-6)]'>
+        {title}
+      </h2>
+      <div className='grid grid-cols-2 gap-[var(--spacing-sm)] sm:grid-cols-3'>
+        {variants.map((v, i) => (
+          <div
+            key={v.label}
+            onClick={() => setSel(i)}
+            className={`flex flex-col items-start gap-[var(--spacing-sm)] rounded-[var(--radius-md)] border p-[var(--spacing-md)] transition-colors cursor-pointer ${
+              sel === i
+                ? 'bg-[color:var(--bg-hover)] border-[color:var(--color-primary)]'
+                : 'bg-[color:var(--bg-surface)] border-[color:var(--border-subtle)] hover:bg-[color:var(--bg-hover)]'
+            }`}
+          >
+            <span className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] font-[family-name:var(--font-rubik)]'>
+              {v.label}
+            </span>
+            <div className='w-full'>{v.node}</div>
+          </div>
+        ))}
+      </div>
+      <div className='rounded-[var(--radius-md)] bg-[color:var(--bg-secondary)] border border-[color:var(--border-subtle)] p-[var(--spacing-md)]'>
+        <p className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] font-[family-name:var(--font-rubik)] mb-[var(--spacing-sm)]'>
+          {variants[sel].label}
+        </p>
+        <pre className='text-[length:var(--font-size-xs)] text-[color:var(--text-paragraph)] font-mono overflow-x-auto whitespace-pre-wrap'>
+          <code>{variants[sel].code}</code>
+        </pre>
+      </div>
+    </div>
+  );
+}
+
+function SingleDateCard() {
+  const [value, setValue] = useState<DatePickerValue>({ startDate: null, endDate: null });
+  return <DatePicker value={value} onChange={setValue} variant='single' placeholder='Pick a date' />;
+}
+
+function RangeDateCard() {
+  const [value, setValue] = useState<DatePickerValue>({ startDate: null, endDate: null });
+  return <DatePicker value={value} onChange={setValue} variant='range' placeholder='Pick a range' />;
+}
+
+function PreSelectedCard() {
+  const [value, setValue] = useState<DatePickerValue>({ startDate: new Date(), endDate: null });
+  return <DatePicker value={value} onChange={setValue} variant='single' placeholder='Pick a date' />;
+}
+
+function ErrorCard() {
+  const [value, setValue] = useState<DatePickerValue>({ startDate: null, endDate: null });
+  return <DatePicker value={value} onChange={setValue} variant='single' placeholder='Pick a date' error />;
+}
+
+export const AllVariants: Story = {
+  render: () => (
+    <VariantShowcase
+      title='DatePicker'
+      variants={[
+        {
+          label: 'Single date picker',
+          code: `const [value, setValue] = useState({ startDate: null, endDate: null });\n<DatePicker value={value} onChange={setValue} variant="single" placeholder="Pick a date" />`,
+          node: <SingleDateCard />,
+        },
+        {
+          label: 'Date range picker',
+          code: `const [value, setValue] = useState({ startDate: null, endDate: null });\n<DatePicker value={value} onChange={setValue} variant="range" placeholder="Pick a range" />`,
+          node: <RangeDateCard />,
+        },
+        {
+          label: 'Pre-selected single',
+          code: `const [value, setValue] = useState({ startDate: new Date(), endDate: null });\n<DatePicker value={value} onChange={setValue} variant="single" />`,
+          node: <PreSelectedCard />,
+        },
+        {
+          label: 'Error state',
+          code: `<DatePicker value={value} onChange={setValue} variant="single" error={true} />`,
+          node: <ErrorCard />,
+        },
+        {
+          label: 'Disabled',
+          code: `<DatePicker value={value} onChange={setValue} variant="single" disabled />`,
+          node: (
+            <DatePicker
+              value={{ startDate: null, endDate: null }}
+              onChange={() => {}}
+              variant='single'
+              placeholder='Pick a date'
+              disabled
+            />
+          ),
+        },
+      ]}
+    />
+  ),
+};
 
 const emptyValue: DatePickerValue = {
   startDate: null,

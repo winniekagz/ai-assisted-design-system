@@ -1,4 +1,6 @@
 export { Autocomplete } from './autocomplete';
+export { Menu } from './menu';
+export type { MenuItem, MenuProps } from './menu';
 export { Checkbox } from './checkbox';
 export { default as DatePicker } from './DatePicker';
 export type { DatePickerProps, DatePickerValue } from './DatePicker';

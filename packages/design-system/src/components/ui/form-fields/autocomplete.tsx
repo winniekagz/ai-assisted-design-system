@@ -2,25 +2,37 @@
 
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { ChevronDown, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import * as React from 'react';
 
 const autocompleteVariants = cva(
-  'flex w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[color:var(--color-text-secondary)] max-h-14 h-auto px-3 py-2 rounded border border-[color:var(--color-border-default)] bg-[color:var(--bg-paper)] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+  [
+    'w-full bg-[color:var(--bg-surface)]',
+    'font-[family-name:var(--font-rubik)] text-[length:var(--font-size-body1)]',
+    'font-[var(--font-weight-regular)] leading-[var(--line-height-body1)] tracking-[0.15px]',
+    'text-[color:var(--text-paragraph)]',
+    'rounded-[var(--radius-md)] border',
+    'outline-none',
+    'transition-colors duration-[var(--duration-normal)]',
+    'focus:outline-none focus-visible:outline-none',
+    'focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)] focus-visible:ring-offset-0',
+    'disabled:cursor-not-allowed disabled:opacity-50',
+    'placeholder:text-[color:var(--text-disabled)]',
+  ],
   {
     variants: {
       variant: {
         default:
-          'border-[color:var(--color-border-default)] focus:border-[color:var(--color-primary-500)]',
+          'border-[color:var(--border-default)] hover:border-[color:var(--text-muted)] focus:border-[color:var(--border-focus)]',
         error:
-          'border-[color:var(--color-error-500)] focus:border-[color:var(--color-error-500)]',
+          'border-[color:var(--helper-error)] focus-visible:ring-[color:var(--helper-error)]',
         success:
-          'border-[color:var(--color-success-500)] focus:border-[color:var(--color-success-500)]',
+          'border-[color:var(--helper-success)] focus-visible:ring-[color:var(--helper-success)]',
       },
       size: {
-        default: 'h-10 px-3',
-        sm: 'h-8 px-2 text-sm',
-        lg: 'h-12 px-4 text-lg',
+        default: 'h-11 px-3',
+        sm: 'h-9 px-2 text-[length:var(--font-size-sm)]',
+        lg: 'h-12 px-4 text-[length:var(--font-size-lg)]',
       },
     },
     defaultVariants: {
@@ -36,8 +48,7 @@ export interface AutocompleteOption {
 }
 
 export interface AutocompleteProps
-  extends
-    Omit<
+  extends Omit<
       React.InputHTMLAttributes<HTMLInputElement>,
       'size' | 'onChange' | 'onSelect'
     >,
@@ -52,6 +63,8 @@ export interface AutocompleteProps
   multiple?: boolean;
   selectedValues?: string[];
   onSelectedValuesChange?: (values: string[]) => void;
+  label?: string;
+  helperText?: string;
 }
 
 const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps>(
@@ -70,70 +83,69 @@ const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps>(
       multiple = false,
       selectedValues = [],
       onSelectedValuesChange,
+      label,
+      helperText,
+      id,
       ...props
     },
     ref
   ) => {
-    const [isOpen, setIsOpen] = React.useState(false);
-    const [inputValue, setInputValue] = React.useState(() => {
-      if (typeof value === 'string') return value;
-      if (value && typeof value === 'object' && 'value' in value)
-        return String((value as any).value);
-      return '';
-    });
-    const [filteredOptions, setFilteredOptions] = React.useState(options);
-    const containerRef = React.useRef<HTMLDivElement>(null);
+    const inputId = id ?? React.useId();
+    const listboxId = `${inputId}-listbox`;
+    const helperId = helperText ? `${inputId}-helper` : undefined;
 
-    // Determine variant based on error/success states
+    const [isOpen, setIsOpen] = React.useState(false);
+    const [inputValue, setInputValue] = React.useState(() =>
+      typeof value === 'string' ? value : ''
+    );
+    const [activeIndex, setActiveIndex] = React.useState(-1);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
     let finalVariant = variant;
     if (error) finalVariant = 'error';
     if (success) finalVariant = 'success';
 
-    React.useEffect(() => {
-      const inputValueStr = typeof inputValue === 'string' ? inputValue : '';
-      const filtered = options.filter(option =>
-        option.label.toLowerCase().includes(inputValueStr.toLowerCase())
-      );
-      setFilteredOptions(filtered);
-    }, [inputValue, options]);
+    const filteredOptions = React.useMemo(
+      () =>
+        options.filter(o =>
+          o.label.toLowerCase().includes(inputValue.toLowerCase())
+        ),
+      [inputValue, options]
+    );
 
-    // Update inputValue when value prop changes
     React.useEffect(() => {
-      if (typeof value === 'string') {
-        setInputValue(value);
-      } else if (value && typeof value === 'object' && 'value' in value) {
-        setInputValue(String((value as any).value));
-      }
+      if (typeof value === 'string') setInputValue(value);
     }, [value]);
 
+    // Reset active index when dropdown opens/filter changes
     React.useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (
-          containerRef.current &&
-          !containerRef.current.contains(event.target as Node)
-        ) {
+      setActiveIndex(-1);
+    }, [isOpen, inputValue]);
+
+    React.useEffect(() => {
+      const handleClickOutside = (e: MouseEvent) => {
+        if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
           setIsOpen(false);
         }
       };
-
       document.addEventListener('mousedown', handleClickOutside);
-      return () =>
-        document.removeEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = e.target.value;
-      setInputValue(newValue);
+      const v = e.target.value;
+      setInputValue(v);
       setIsOpen(true);
-      onChange?.(newValue);
+      onChange?.(v);
     };
 
-    const handleOptionClick = (option: AutocompleteOption) => {
+    const selectOption = (option: AutocompleteOption) => {
       if (multiple) {
-        const newSelectedValues = selectedValues.includes(option.value)
+        const next = selectedValues.includes(option.value)
           ? selectedValues.filter(v => v !== option.value)
           : [...selectedValues, option.value];
-        onSelectedValuesChange?.(newSelectedValues);
+        onSelectedValuesChange?.(next);
         setInputValue('');
       } else {
         setInputValue(option.label);
@@ -141,75 +153,159 @@ const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps>(
         onSelect?.(option);
         onChange?.(option.value);
       }
+      inputRef.current?.focus();
     };
 
-    const handleRemoveValue = (valueToRemove: string) => {
-      const newSelectedValues = selectedValues.filter(v => v !== valueToRemove);
-      onSelectedValuesChange?.(newSelectedValues);
+    const handleRemoveValue = (val: string) => {
+      onSelectedValuesChange?.(selectedValues.filter(v => v !== val));
     };
 
-    const selectedOptions = options.filter(option =>
-      selectedValues.includes(option.value)
-    );
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!isOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+        setIsOpen(true);
+        return;
+      }
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        return;
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveIndex(i => Math.min(i + 1, filteredOptions.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveIndex(i => Math.max(i - 1, 0));
+      } else if (e.key === 'Enter' && activeIndex >= 0) {
+        e.preventDefault();
+        const opt = filteredOptions[activeIndex];
+        if (opt) selectOption(opt);
+      }
+    };
+
+    const selectedOptions = options.filter(o => selectedValues.includes(o.value));
+
+    const helperColor = error
+      ? 'text-[color:var(--helper-error)]'
+      : success
+        ? 'text-[color:var(--helper-success)]'
+        : 'text-[color:var(--text-muted)]';
 
     return (
-      <div className='relative' ref={containerRef}>
-        <div className='relative'>
-          <input
+      <div className='flex flex-col gap-[var(--spacing-xs)] w-full' ref={containerRef}>
+        {label && (
+          <label
+            htmlFor={inputId}
             className={cn(
-              autocompleteVariants({ variant: finalVariant, size, className }),
-              'pr-10'
+              'text-[length:var(--font-size-sm)] font-[var(--font-weight-medium)] leading-[var(--line-height-snug)] font-[family-name:var(--font-rubik)]',
+              error ? 'text-[color:var(--helper-error)]' : 'text-[color:var(--text-secondary)]'
             )}
-            ref={ref}
+          >
+            {label}
+          </label>
+        )}
+        {/* Input wrapper — position:relative anchors the dropdown */}
+        <div className='relative w-full'>
+          <input
+            id={inputId}
+            ref={ref ?? inputRef}
+            role='combobox'
+            aria-expanded={isOpen}
+            aria-autocomplete='list'
+            aria-controls={listboxId}
+            aria-activedescendant={
+              activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
+            }
+            aria-invalid={error ? 'true' : undefined}
+            aria-describedby={helperId}
+            className={cn(
+              autocompleteVariants({ variant: finalVariant, size }),
+              className
+            )}
             value={inputValue}
             onChange={handleInputChange}
             onFocus={() => setIsOpen(true)}
+            onKeyDown={handleKeyDown}
             placeholder={placeholder}
+            autoComplete='off'
             {...props}
           />
-          <ChevronDown className='absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none' />
+
+          {/* Dropdown listbox — anchored to input */}
+          {isOpen && filteredOptions.length > 0 && (
+            <ul
+              id={listboxId}
+              role='listbox'
+              aria-label={label ?? placeholder ?? 'Options'}
+              className='absolute z-50 w-full top-[calc(100%+4px)] bg-[color:var(--bg-surface)] border border-[color:var(--border-subtle)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] max-h-60 overflow-auto p-[var(--spacing-xs)]'
+            >
+              {filteredOptions.map((option, index) => {
+                const isActive = index === activeIndex;
+                const isSelected = multiple
+                  ? selectedValues.includes(option.value)
+                  : inputValue === option.label;
+                return (
+                  <li
+                    key={option.value}
+                    id={`${listboxId}-option-${index}`}
+                    role='option'
+                    aria-selected={isSelected}
+                    className={cn(
+                      'w-full px-3 py-[var(--spacing-sm)] text-left cursor-pointer select-none',
+                      'rounded-[var(--radius-md)]',
+                      'font-[family-name:var(--font-rubik)] text-[length:var(--font-size-body1)] text-[color:var(--text-paragraph)]',
+                      'transition-colors duration-[var(--duration-fast)]',
+                      isActive
+                        ? 'bg-[color:var(--bg-hover)]'
+                        : isSelected
+                          ? 'bg-[color:var(--bg-secondary)] font-[var(--font-weight-medium)]'
+                          : 'hover:bg-[color:var(--bg-hover)]'
+                    )}
+                    onMouseDown={e => {
+                      e.preventDefault(); // keep input focused
+                      selectOption(option);
+                    }}
+                    onMouseEnter={() => setActiveIndex(index)}
+                  >
+                    {option.label}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
 
-        {/* Selected values display for multiple mode */}
+        {/* Multi-select chips */}
         {multiple && selectedOptions.length > 0 && (
-          <div className='flex flex-wrap gap-1 mt-2  rounded'>
+          <div className='flex flex-wrap gap-[var(--spacing-xs)]'>
             {selectedOptions.map(option => (
               <span
                 key={option.value}
-                className='inline-flex items-center gap-1 px-2 py-1 text-xs bg-primary text-primary-foreground rounded '
+                className='inline-flex items-center gap-[var(--spacing-xs)] px-[var(--spacing-sm)] py-1 text-[length:var(--font-size-xs)] font-[var(--font-weight-medium)] bg-[color:var(--bg-surface)] text-[color:var(--text-paragraph)] rounded-[var(--radius-sm)] shadow-[var(--shadow-md)] border border-[color:var(--border-default)] font-[family-name:var(--font-rubik)]'
               >
                 {option.label}
                 <button
                   type='button'
                   onClick={() => handleRemoveValue(option.value)}
-                  className='ml-1 hover:bg-primary-50 rounded-full p-0.5'
+                  aria-label={`Remove ${option.label}`}
+                  className='rounded-full p-0.5 text-[color:var(--text-muted)] hover:text-[color:var(--text-paragraph)] hover:bg-[color:var(--bg-hover)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--color-primary)]'
                 >
-                  <X className='h-3 w-3' />
+                  <X className='size-3' aria-hidden='true' />
                 </button>
               </span>
             ))}
           </div>
         )}
 
-        {/* Dropdown */}
-        {isOpen && filteredOptions.length > 0 && (
-          <div className='absolute z-50 w-full mt-1 bg-[color:var(--bg-surface)] border border-[color:var(--border-subtle)] rounded-[var(--radius-md)] shadow-[var(--shadow-lg)] max-h-60 overflow-auto'>
-            {filteredOptions.map(option => (
-              <button
-                key={option.value}
-                type='button'
-                className={cn(
-                  'w-full px-3 py-2 text-left hover:bg-[color:var(--bg-hover)] focus:bg-[color:var(--bg-hover)] focus:outline-none font-rubik text-[color:var(--text-paragraph)]',
-                  multiple &&
-                    selectedValues.includes(option.value) &&
-                    'bg-[color:var(--bg-hover)]'
-                )}
-                onClick={() => handleOptionClick(option)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+        {helperText && (
+          <p
+            id={helperId}
+            className={cn(
+              'text-[length:var(--font-size-xs)] leading-[var(--line-height-snug)] font-[family-name:var(--font-rubik)]',
+              helperColor
+            )}
+          >
+            {helperText}
+          </p>
         )}
       </div>
     );

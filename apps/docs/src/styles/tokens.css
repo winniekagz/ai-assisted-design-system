@@ -24,7 +24,7 @@
   --bg-card-active:  #F3F4F6; /* selected / active card state */
 
   /* ── BORDERS (3 semantic tokens) ─────────────────────────────────────── */
-  --border-default:  #D1D5DB; /* input strokes, card outlines */
+  --border-default:  #9CA3AF; /* input strokes, card outlines, interactive control borders */
   --border-subtle:   #E5E7EB; /* light dividers between sections */
   --border-focus:    #8D493A; /* keyboard focus ring */
 
@@ -339,54 +339,53 @@
   --duration-slowest: 700ms;
 }
 
-/* Dark Theme */
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Override semantic tokens for system dark mode preference */
-    --bg-default:     #111827;
-    --bg-surface:     #1F2937;
-    --bg-secondary:   #374151;
-    --bg-hover:       #374151;
-    --bg-card-active: rgba(213, 154, 134, 0.18);
+/* Dark Theme — activated by adding the .dark class to <html> or a wrapper element.
+   Class-based (not @media) so Radix portals rendered outside ComponentIqProvider
+   stay in light mode unless dark mode is explicitly enabled. */
+.dark {
+  --bg-default:     #111827;
+  --bg-surface:     #1F2937;
+  --bg-secondary:   #374151;
+  --bg-hover:       #374151;
+  --bg-card-active: rgba(213, 154, 134, 0.18);
 
-    --text-title:     #F9FAFB;
-    --text-primary:   #F3F4F6;
-    --text-paragraph: #E5E7EB;
-    --text-secondary: #D1D5DB;
-    --text-muted:     #9CA3AF;
-    --text-disabled:  #6B7280;
-    --text-brand:     #D59A86;
-    --text-inverse:   #111827;
+  --text-title:     #F9FAFB;
+  --text-primary:   #F3F4F6;
+  --text-paragraph: #E5E7EB;
+  --text-secondary: #D1D5DB;
+  --text-muted:     #9CA3AF;
+  --text-disabled:  #6B7280;
+  --text-brand:     #D59A86;
+  --text-inverse:   #111827;
 
-    --border-default: #374151;
-    --border-subtle:  #4B5563;
-    --border-focus:   #D59A86;
+  --border-default: #6B7280;
+  --border-subtle:  #4B5563;
+  --border-focus:   #D59A86;
 
-    --color-primary:      #D59A86;
-    --color-primary-fg:   #111827;
-    --color-secondary:    #7BC7D8;
-    --color-secondary-fg: #111827;
+  --color-primary:      #D59A86;
+  --color-primary-fg:   #111827;
+  --color-secondary:    #7BC7D8;
+  --color-secondary-fg: #111827;
 
-    --helper-warning:             #FDB022;
-    --helper-warning-pastel:      #3A2A0A;
-    --helper-link:                #84CAFF;
-    --helper-link-pastel:         #102A43;
-    --helper-information:         #84CAFF;
-    --helper-information-pastel:  #102A43;
-    --helper-error:               #F97066;
-    --helper-error-pastel:        #3B1C1A;
-    --helper-success:             #32D583;
-    --helper-success-pastel:      #0B2F22;
+  --helper-warning:             #FDB022;
+  --helper-warning-pastel:      #3A2A0A;
+  --helper-link:                #84CAFF;
+  --helper-link-pastel:         #102A43;
+  --helper-information:         #84CAFF;
+  --helper-information-pastel:  #102A43;
+  --helper-error:               #F97066;
+  --helper-error-pastel:        #3B1C1A;
+  --helper-success:             #32D583;
+  --helper-success-pastel:      #0B2F22;
 
-    --status-error:      var(--helper-error);
-    --status-warning:    var(--helper-warning);
-    --status-success:    var(--helper-success);
-    --status-info:       var(--helper-information);
-    --status-error-bg:   var(--helper-error-pastel);
-    --status-warning-bg: var(--helper-warning-pastel);
-    --status-success-bg: var(--helper-success-pastel);
-    --status-info-bg:    var(--helper-information-pastel);
-  }
+  --status-error:      var(--helper-error);
+  --status-warning:    var(--helper-warning);
+  --status-success:    var(--helper-success);
+  --status-info:       var(--helper-information);
+  --status-error-bg:   var(--helper-error-pastel);
+  --status-warning-bg: var(--helper-warning-pastel);
+  --status-success-bg: var(--helper-success-pastel);
+  --status-info-bg:    var(--helper-information-pastel);
 }
 
 /* Animation Keyframes */

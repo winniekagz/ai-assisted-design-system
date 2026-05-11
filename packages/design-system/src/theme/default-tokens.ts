@@ -71,6 +71,8 @@ export const defaultComponentIqTokens: ComponentIqTokens = {
     bodySize: '1rem',
     bodySmallSize: '0.875rem',
     captionSize: '0.75rem',
+    labelSize: '0.875rem',
+    largeFontSize: '1.125rem',
     heading1Size: '4rem',
     heading2Size: '3rem',
     heading3Size: '2.25rem',
@@ -82,23 +84,27 @@ export const defaultComponentIqTokens: ComponentIqTokens = {
     display3Size: '2.25rem',
     headingWeight: 700,
     bodyWeight: 400,
+    mediumWeight: 500,
+    lineHeightNormal: 1.5,
+    lineHeightSnug: 1.375,
+    lineHeightBody: 1.5,
   },
-  radius: {
-    xs: '0.125rem',
-    sm: '0.25rem',
-    md: '0.5rem',
-    lg: '0.75rem',
-    xl: '1rem',
-    full: '9999px',
-  },
+radius: {
+  xs: '0.125rem', // 2px
+  sm: '0.25rem',  // 4px
+  md: '0.5rem',   // 8px
+  lg: '0.75rem',  // 12px
+  xl: '1rem',     // 16px
+  full: '9999px',
+},
   spacing: {
-    xs: '0.25rem',
-    sm: '0.5rem',
-    md: '1rem',
-    lg: '1.5rem',
-    xl: '2rem',
-    '2xl': '3rem',
-  },
+  xs: '0.25rem',   // 4
+  sm: '0.5rem',    // 8
+  md: '1rem',      // 16
+  lg: '1.5rem',    // 24
+  xl: '2rem',      // 32
+  '2xl': '3rem',   // 48
+},
   shadows: {
     sm: '0 1px 2px rgb(0 0 0 / 0.05)',
     md: '0 4px 12px rgb(0 0 0 / 0.08)',

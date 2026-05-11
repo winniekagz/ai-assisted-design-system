@@ -1,126 +1,123 @@
-import { cn } from '@/lib/utils';
-import { cva, type VariantProps } from 'class-variance-authority';
-import * as React from 'react';
+'use client';
 
-const radioVariants = cva(
-  'peer h-4 w-4 shrink-0 rounded-full border border-[color:var(--color-border-default)] bg-transparent focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:border-primary data-[state=checked]:bg-primary',
-  {
-    variants: {
-      variant: {
-        default:
-          'border-[color:var(--color-border-default)] data-[state=checked]:border-[color:var(--color-primary-500)] data-[state=checked]:bg-[color:var(--color-primary-500)]',
-        error:
-          'border-[color:var(--color-error-500)] data-[state=checked]:border-[color:var(--color-error-500)] data-[state=checked]:bg-[color:var(--color-error-500)]',
-        success:
-          'border-[color:var(--color-success-500)] data-[state=checked]:border-[color:var(--color-success-500)] data-[state=checked]:bg-[color:var(--color-success-500)]',
-      },
-      size: {
-        default: 'h-4 w-4',
-        sm: 'h-3 w-3',
-        lg: 'h-5 w-5',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
-    },
-  }
-);
+import * as React from 'react';
+import { RadioGroup as RadioGroupPrimitive } from 'radix-ui';
+import { cn } from '@/lib/utils';
+
+export type RadioSize    = 'sm' | 'default' | 'lg';
+export type RadioVariant = 'default' | 'error' | 'success';
 
 export interface RadioProps
-  extends
-    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
-    VariantProps<typeof radioVariants> {
-  error?: boolean;
-  success?: boolean;
-  label?: string;
-  required?: boolean;
+  extends Omit<React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>, 'onChange'> {
+  size?:          RadioSize;
+  variant?:       RadioVariant;
+  error?:         boolean;
+  success?:       boolean;
+  label?:         string;
+  required?:      boolean;
+  checked?:       boolean;
+  defaultChecked?: boolean;
+  onChange?:      (e: { target: { checked: boolean; value: string } }) => void;
 }
 
-const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
-  (
-    {
-      className,
-      variant,
-      size,
-      error,
-      success,
-      label,
-      required,
-      checked,
-      onChange,
-      ...props
-    },
-    ref
-  ) => {
-    // Determine variant based on error/success states
-    let finalVariant = variant;
-    if (error) finalVariant = 'error';
-    if (success) finalVariant = 'success';
+const sizeMap = {
+  sm:      { item: 'size-4',      dot: 'size-2'      },
+  default: { item: 'size-5',      dot: 'size-[10px]' },
+  lg:      { item: 'size-6',      dot: 'size-3'      },
+};
 
-    const handleSelect = () => {
-      if (onChange) {
-        const event = {
-          target: { checked: true },
-        } as React.ChangeEvent<HTMLInputElement>;
-        onChange(event);
-      }
-    };
+/**
+ * Standalone radio. For a controlled group use the RadioGroup component instead.
+ * This wraps a Radix RadioGroup internally so the primitive satisfies its context requirement.
+ */
+const Radio = React.forwardRef<
+  React.ComponentRef<typeof RadioGroupPrimitive.Item>,
+  RadioProps
+>(({
+  className,
+  size     = 'default',
+  variant  = 'default',
+  error,
+  success,
+  label,
+  required,
+  checked,
+  defaultChecked,
+  onChange,
+  disabled,
+  id,
+  value = '',
+  ...props
+}, ref) => {
+  const radioId      = id ?? React.useId();
+  const finalVariant = error ? 'error' : success ? 'success' : variant;
+  const { item, dot } = sizeMap[size];
 
-    return (
-      <div className='flex items-center space-x-2'>
-        <div className='relative'>
-          <input
-            type='radio'
-            className={cn(
-              radioVariants({ variant: finalVariant, size, className }),
-              'sr-only'
-            )}
-            ref={ref}
-            checked={checked}
-            onChange={onChange}
-            {...props}
-          />
-          <div
-            className={cn(
-              radioVariants({ variant: finalVariant, size }),
-              'flex items-center justify-center cursor-pointer hover:bg-primary-50/50 transition-colors'
-            )}
-            data-state={checked ? 'checked' : 'unchecked'}
-            onClick={handleSelect}
-            role='radio'
-            aria-checked={checked}
-            tabIndex={0}
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleSelect();
-              }
-            }}
+  const dotColorCls =
+    finalVariant === 'error'   ? 'bg-[color:var(--helper-error)]'   :
+    finalVariant === 'success' ? 'bg-[color:var(--helper-success)]' :
+                                 'bg-[color:var(--color-primary)]';
+
+  const itemVariantCls =
+    finalVariant === 'error'
+      ? 'border-[color:var(--helper-error)]   data-[state=checked]:border-[color:var(--helper-error)]'
+      : finalVariant === 'success'
+      ? 'border-[color:var(--helper-success)] data-[state=checked]:border-[color:var(--helper-success)]'
+      // unchecked: neutral-300 (gray-300); checked: primary border
+      : 'border-[color:var(--border-default)] data-[state=checked]:border-[color:var(--color-primary)]';
+
+  return (
+    <RadioGroupPrimitive.Root
+      value={checked ? value : undefined}
+      defaultValue={defaultChecked ? value : undefined}
+      onValueChange={v => onChange?.({ target: { checked: v === value, value } })}
+    >
+      <div className='inline-flex items-center gap-[var(--spacing-sm)]'>
+        <RadioGroupPrimitive.Item
+          ref={ref}
+          id={radioId}
+          value={value}
+          disabled={disabled}
+          data-slot='radio-group-item'
+          className={cn(
+            item,
+            'aspect-square shrink-0 rounded-full border-2',
+            'transition-[color,box-shadow] outline-none',
+            'focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)]/40',
+            'disabled:cursor-not-allowed disabled:opacity-40',
+            itemVariantCls,
+            className,
+          )}
+          {...props}
+        >
+          <RadioGroupPrimitive.Indicator
+            data-slot='radio-group-indicator'
+            className='flex items-center justify-center'
           >
-            {checked && (
-              <div className='h-2 w-2 rounded-full bg-[color:var(--text-inverse)]' />
-            )}
-          </div>
-        </div>
+            <span className={cn(dot, 'rounded-full', dotColorCls)} aria-hidden='true' />
+          </RadioGroupPrimitive.Indicator>
+        </RadioGroupPrimitive.Item>
+
         {label && (
           <label
-            htmlFor={props.id}
-            className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-rubik text-[color:var(--color-text-secondary)] cursor-pointer'
-            onClick={handleSelect}
+            htmlFor={radioId}
+            className={cn(
+              'text-[length:var(--font-size-sm)] font-[var(--font-weight-medium)] leading-[var(--line-height-snug)]',
+              'font-[family-name:var(--font-rubik)] text-[color:var(--text-secondary)]',
+              disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer',
+            )}
           >
             {label}
             {required && (
-              <span className='text-[color:var(--color-error-500)] ml-1'>
-                *
-              </span>
+              <span className='ml-1 text-[color:var(--helper-error)]' aria-hidden='true'>*</span>
             )}
           </label>
         )}
       </div>
-    );
-  }
-);
+    </RadioGroupPrimitive.Root>
+  );
+});
 Radio.displayName = 'Radio';
 
-export { Radio, radioVariants };
+export { Radio };
+

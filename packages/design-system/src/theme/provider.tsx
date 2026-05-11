@@ -6,7 +6,7 @@ import { createComponentIqCssVariables } from './create-css-vars';
 import type { ComponentIqTokens } from './tokens';
 
 export interface ComponentIqProviderProps extends React.HTMLAttributes<HTMLDivElement> {
-  tokens?: ComponentIqTokens;
+  tokens: ComponentIqTokens;
   asChild?: boolean;
 }
 

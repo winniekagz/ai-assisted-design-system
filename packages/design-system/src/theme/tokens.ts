@@ -55,7 +55,12 @@ export interface ComponentIqTypographyTokens {
   baseSize?: string;
   bodySize?: string;
   bodySmallSize?: string;
+  /** Maps to --font-size-xs (helper text, badges, captions) */
   captionSize?: string;
+  /** Maps to --font-size-sm (labels, helper text) */
+  labelSize?: string;
+  /** Maps to --font-size-lg (large form field variant) */
+  largeFontSize?: string;
   heading1Size?: string;
   heading2Size?: string;
   heading3Size?: string;
@@ -67,6 +72,13 @@ export interface ComponentIqTypographyTokens {
   display3Size?: string;
   headingWeight?: string | number;
   bodyWeight?: string | number;
+  /** Maps to --font-weight-medium (labels, interactive controls) */
+  mediumWeight?: string | number;
+  lineHeightNormal?: string | number;
+  /** Maps to --line-height-snug (labels, helper text) */
+  lineHeightSnug?: string | number;
+  /** Maps to --line-height-body1 (body text in form fields) */
+  lineHeightBody?: string | number;
 }
 
 export interface ComponentIqRadiusTokens {
