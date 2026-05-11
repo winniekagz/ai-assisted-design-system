@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { StoryObj } from '@storybook/nextjs-vite';
 import { useState } from 'react';
 import DatePicker, {
   DatePickerValue,
@@ -13,79 +13,106 @@ const meta = {
     docs: {
       description: {
         component: `
-DatePicker is the standalone calendar input for ComponentIQ. Use it when users need to select one date or a start/end range.
+Token-driven calendar input for selecting a single date or a start/end range. The component is **controlled**: pass a \`DatePickerValue\` object and update it via \`onChange\`. Calendar states use neutral text tokens; only selected dates receive the primary brand fill.
 
-The component is controlled: pass a \`DatePickerValue\` object and update it through \`onChange\`. It uses the design-token contract directly, so calendar text stays neutral and only selected dates use the primary brand background.
+### When to use
+- **Single** — due dates, appointments, birthdays, one-day filters.
+- **Range** — booking windows, reporting periods, leave requests, analytics filters.
+- Prefer a plain \`<Input type="date">\` when a calendar popover would feel heavy.
 
-Use \`variant="single"\` for due dates, appointments, birthdays, and one-day filters. Use \`variant="range"\` for booking windows, reporting periods, leave requests, and analytics filters.
+### Usage
+\`\`\`tsx
+import DatePicker, { DatePickerValue } from '@winniekagendo/componentiq';
+
+// Single date (controlled)
+const [value, setValue] = useState<DatePickerValue>({ startDate: null, endDate: null });
+<DatePicker value={value} onChange={setValue} variant="single" placeholder="Select date" />
+
+// Date range (controlled)
+const [range, setRange] = useState<DatePickerValue>({ startDate: null, endDate: null });
+<DatePicker value={range} onChange={setRange} variant="range" placeholder="Select range" />
+
+// With date restrictions
+<DatePicker
+  value={value}
+  onChange={setValue}
+  variant="single"
+  minDate={new Date()}
+  maxDate={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)}
+/>
+\`\`\`
+
+### Props cheat sheet
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| \`value\` | \`DatePickerValue\` | **required** | \`{ startDate, endDate }\` — both can be \`null\` |
+| \`onChange\` | \`(val: DatePickerValue) => void\` | **required** | Called on every date selection |
+| \`variant\` | \`"single" \\| "range"\` | "single" | Single date or start/end range |
+| \`placeholder\` | string | — | Empty-state label shown in the trigger |
+| \`disabled\` | boolean | false | Prevents interaction; applies disabled styling |
+| \`readOnly\` | boolean | false | Shows the value without allowing edits |
+| \`error\` | boolean | false | Applies the error border token |
+| \`minDate\` | Date | — | Earliest selectable date |
+| \`maxDate\` | Date | — | Latest selectable date |
+| \`primaryColor\` | string | — | Overrides selected-date fill. Prefer \`ComponentIqProvider\` tokens instead |
+
+### Selected-date colour
+Selected dates use \`--color-primary\` from the design token system. Pass custom tokens to \`ComponentIqProvider\` to change this globally.
         `,
       },
     },
   },
   tags: ['autodocs'],
   argTypes: {
-    value: {
-      table: { disable: true },
-    },
-    onChange: {
-      table: { disable: true },
-    },
-    calendarProps: {
-      table: { disable: true },
-    },
-    configs: {
-      table: { disable: true },
-    },
-    format: {
-      table: { disable: true },
-    },
-    displayFormat: {
-      table: { disable: true },
-    },
-    separator: {
-      table: { disable: true },
-    },
-    showShortcuts: {
-      table: { disable: true },
-    },
-    showFooter: {
-      table: { disable: true },
-    },
+    value: { table: { disable: true } },
+    onChange: { table: { disable: true } },
+    calendarProps: { table: { disable: true } },
+    configs: { table: { disable: true } },
+    format: { table: { disable: true } },
+    displayFormat: { table: { disable: true } },
+    separator: { table: { disable: true } },
+    showShortcuts: { table: { disable: true } },
+    showFooter: { table: { disable: true } },
     variant: {
       control: { type: 'select' },
       options: ['single', 'range'],
-      description:
-        'Controls whether the picker returns one date or a start/end range.',
+      description: 'Single date or start/end date range.',
+      table: { type: { summary: "'single' | 'range'" }, defaultValue: { summary: "'single'" } },
     },
     placeholder: {
-      control: { type: 'text' },
-      description: 'Accessible label and empty-state prompt for the field.',
+      control: 'text',
+      description: 'Label shown in the trigger when no date is selected.',
+      table: { type: { summary: 'string' } },
     },
     disabled: {
-      control: { type: 'boolean' },
+      control: 'boolean',
       description: 'Prevents interaction and applies disabled text styling.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
     },
     readOnly: {
-      control: { type: 'boolean' },
-      description:
-        'Shows the current value without allowing the user to change it.',
+      control: 'boolean',
+      description: 'Shows the current value without allowing edits.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
+    },
+    error: {
+      control: 'boolean',
+      description: 'Applies the error border token to the field.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
     },
     minDate: {
       control: false,
       description: 'Earliest selectable date.',
+      table: { type: { summary: 'Date' } },
     },
     maxDate: {
       control: false,
       description: 'Latest selectable date.',
+      table: { type: { summary: 'Date' } },
     },
     primaryColor: {
       control: { type: 'color' },
-      description:
-        'Optional override for selected-date background. Prefer design tokens for product use.',
-    },
-    error: {
-      control: { type: 'boolean' },
-      description: 'Applies the error border token to the field.',
+      description: 'Override for the selected-date background. Prefer `ComponentIqProvider tokens` for product use.',
+      table: { type: { summary: 'string' } },
     },
   },
 };
@@ -120,7 +147,7 @@ function VariantShowcase({
             <span className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] font-[family-name:var(--font-rubik)]'>
               {v.label}
             </span>
-            <div className='w-full'>{v.node}</div>
+            <div className='w-full' onClick={e => e.stopPropagation()}>{v.node}</div>
           </div>
         ))}
       </div>

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { useState } from 'react';
 import {
   PaginationControl,
@@ -12,8 +12,61 @@ const meta = {
     layout: 'centered',
     docs: {
       description: {
-        component:
-          'Atomic pagination controls built on ComponentIQ buttons and semantic tokens. Use the controlled currentPage prop and onPageChange callback to move between first, previous, numbered, next, and last pages.',
+        component: `
+Token-driven pagination controls with five layout variants. The component is fully controlled — pair \`currentPage\` with \`onPageChange\` and optionally \`pageSize\` with \`onPageSizeChange\`.
+
+### When to use
+- Tables, lists, or search results with more rows than fit on one screen.
+- Use **numbered** for general pagination where users benefit from seeing page numbers.
+- Use **table** variant when rows-per-page selection is also needed.
+- Use **simple** for mobile layouts or anywhere horizontal space is tight.
+
+### Usage
+\`\`\`tsx
+import { PaginationControl } from '@winniekagendo/componentiq';
+
+const [page, setPage] = useState(1);
+
+// Numbered pages
+<PaginationControl
+  variant="numbered"
+  currentPage={page}
+  totalPages={20}
+  onPageChange={setPage}
+/>
+
+// Table variant with page-size selector
+const [size, setSize] = useState(25);
+<PaginationControl
+  variant="table"
+  currentPage={page}
+  totalPages={Math.ceil(500 / size)}
+  totalItems={500}
+  pageSize={size}
+  pageSizeOptions={[10, 25, 50, 100]}
+  showPageSizeSelector
+  showItemRange
+  onPageChange={setPage}
+  onPageSizeChange={setSize}
+/>
+\`\`\`
+
+### Props cheat sheet
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| \`variant\` | \`"numbered" \\| "labeled" \\| "jump" \\| "table" \\| "simple"\` | "numbered" | Layout style |
+| \`currentPage\` | number | — | **required** — 1-based current page |
+| \`totalPages\` | number | — | **required** — total number of pages |
+| \`onPageChange\` | \`(page: number) => void\` | — | **required** — fires on page change |
+| \`siblingCount\` | number | 1 | Pages shown on each side of current |
+| \`boundaryCount\` | number | 1 | Pages shown at start and end |
+| \`showFirstLast\` | boolean | false | Show first/last jump buttons |
+| \`pageSize\` | number | — | Rows per page (table variant) |
+| \`pageSizeOptions\` | number[] | — | Available page sizes |
+| \`showPageSizeSelector\` | boolean | false | Show rows-per-page dropdown |
+| \`showItemRange\` | boolean | false | Show "X–Y of Z" range label |
+| \`pageName\` | string | — | Custom label for simple variant |
+      `,
       },
     },
   },
@@ -22,13 +75,41 @@ const meta = {
     variant: {
       control: { type: 'select' },
       options: ['numbered', 'labeled', 'jump', 'table', 'simple'],
+      description: 'Layout style for the pagination control.',
+      table: { type: { summary: "'numbered' | 'labeled' | 'jump' | 'table' | 'simple'" }, defaultValue: { summary: "'numbered'" } },
     },
-    currentPage: { control: { type: 'number', min: 1 } },
-    totalPages: { control: { type: 'number', min: 1 } },
-    siblingCount: { control: { type: 'number', min: 0, max: 3 } },
-    boundaryCount: { control: { type: 'number', min: 0, max: 3 } },
-    showFirstLast: { control: 'boolean' },
-    showPageNumbers: { control: 'boolean' },
+    currentPage: {
+      control: { type: 'number', min: 1 },
+      description: '1-based current page index.',
+      table: { type: { summary: 'number' } },
+    },
+    totalPages: {
+      control: { type: 'number', min: 1 },
+      description: 'Total number of pages.',
+      table: { type: { summary: 'number' } },
+    },
+    siblingCount: {
+      control: { type: 'number', min: 0, max: 3 },
+      description: 'Number of page buttons shown on each side of the current page.',
+      table: { type: { summary: 'number' }, defaultValue: { summary: '1' } },
+    },
+    boundaryCount: {
+      control: { type: 'number', min: 0, max: 3 },
+      description: 'Number of page buttons shown at the start and end of the list.',
+      table: { type: { summary: 'number' }, defaultValue: { summary: '1' } },
+    },
+    showFirstLast: {
+      control: 'boolean',
+      description: 'Show jump-to-first and jump-to-last buttons.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
+    },
+    showPageNumbers: {
+      control: 'boolean',
+      description: 'Show individual page number buttons.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'true' } },
+    },
+    onPageChange: { table: { disable: true } },
+    onPageSizeChange: { table: { disable: true } },
   },
 } satisfies Meta<typeof PaginationControl>;
 
