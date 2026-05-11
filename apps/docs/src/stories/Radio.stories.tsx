@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import { Radio } from '@/components/ui/form-fields/radio';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';

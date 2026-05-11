@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import { Autocomplete } from '@/components/ui/form-fields/autocomplete';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';

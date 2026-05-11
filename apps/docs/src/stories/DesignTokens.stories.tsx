@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { ComponentIqProvider, componentIqThemes } from '@winniekagendo/componentiq';

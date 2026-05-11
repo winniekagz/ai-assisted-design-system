@@ -1,5 +1,3 @@
-'use client';
-
 import * as React from 'react';
 import { Select } from '@/components/ui/form-fields/select';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
