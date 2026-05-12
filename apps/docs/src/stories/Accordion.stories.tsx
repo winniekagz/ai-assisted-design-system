@@ -95,11 +95,37 @@ const meta: Meta<typeof Accordion> = {
   title: 'UI/Accordion',
   component: Accordion,
   parameters: {
-    layout: 'centered',
+    layout: 'padded',
     docs: {
       description: {
-        component:
-          'A reusable token-driven accordion. Items render as cards, expanded rows use surface tokens, hover uses the hover token, and text follows title and paragraph typography roles.',
+        component: `
+Token-driven accordion built on Radix UI. Items render as surface cards; the expanded row uses surface tokens, hover uses the hover token, and text follows the title and paragraph type roles.
+
+### When to use
+- FAQ sections, settings panels, or any grouped content where users only need one section at a time.
+- Prefer \`allowsMultipleExpanded\` only when users genuinely need to compare sections side-by-side.
+
+### Usage
+\`\`\`tsx
+import { Accordion } from '@winniekagendo/componentiq';
+
+const items = [
+  { id: 'billing', title: 'How does billing work?', content: 'Plans are billed monthly or annually.' },
+  { id: 'cancel',  title: 'Can I cancel?',           content: 'Yes, at any time from account settings.' },
+];
+
+<Accordion items={items} defaultExpandedKeys={['billing']} />
+\`\`\`
+
+### Props cheat sheet
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| \`items\` | \`AccordionItem[]\` | **required** | Array of \`{ id, title, content, startIcon?, endIcon?, disabled? }\` |
+| \`defaultExpandedKeys\` | \`Iterable<string>\` | — | Item ids open on first render (uncontrolled) |
+| \`expandedKeys\` | \`Iterable<string>\` | — | Controlled open ids |
+| \`onExpandedChange\` | \`(keys: Set<string>) => void\` | — | Fires when open ids change |
+| \`allowsMultipleExpanded\` | boolean | false | Allow more than one item open at a time |
+        `,
       },
     },
   },
@@ -111,24 +137,33 @@ const meta: Meta<typeof Accordion> = {
   argTypes: {
     items: {
       control: false,
-      description: 'Accordion item data: id, title, content, and disabled.',
+      description: 'Accordion item data: id, title, content, startIcon, endIcon, and disabled.',
+      table: { type: { summary: 'AccordionItem[]' } },
     },
     defaultExpandedKeys: {
       control: false,
-      description: 'Initial expanded item ids.',
+      description: 'Item ids expanded on first render (uncontrolled).',
+      table: { type: { summary: 'Iterable<string>' } },
     },
     expandedKeys: {
       control: false,
-      description: 'Controlled expanded item ids.',
+      description: 'Controlled open ids — pair with onExpandedChange.',
+      table: { type: { summary: 'Iterable<string>' } },
+    },
+    allowsMultipleExpanded: {
+      control: 'boolean',
+      description: 'Allow more than one item to be open simultaneously.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
     },
     onExpandedChange: {
       action: 'expanded changed',
-      description: 'Called when expanded item ids change.',
+      description: 'Called with the new Set of open item ids.',
+      table: { type: { summary: '(keys: Set<string>) => void' } },
     },
   },
   decorators: [
     Story => (
-      <div className='w-[min(600px,calc(100vw-32px))]'>
+      <div className='w-[min(600px,calc(100vw-32px))] mx-auto'>
         <Story />
       </div>
     ),
@@ -234,9 +269,10 @@ export const AllVariants: Story = {
       ]}
     />
   ),
+  parameters: { layout: 'padded' },
   decorators: [
     Story => (
-      <div className='w-[min(600px,calc(100vw-32px))]'>
+      <div className='w-full max-w-3xl mx-auto'>
         <Story />
       </div>
     ),
