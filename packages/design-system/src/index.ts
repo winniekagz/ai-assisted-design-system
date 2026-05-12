@@ -85,6 +85,15 @@ export {
   PopoverContent,
   PopoverTrigger,
 } from './components/ui/popover';
+export {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipRoot,
+  TooltipTrigger,
+  type TooltipProps,
+  type TooltipContentProps,
+} from './components/ui/tooltip';
 export { ScrollArea } from './components/ui/scroll-area';
 export { Separator } from './components/ui/separator';
 export {

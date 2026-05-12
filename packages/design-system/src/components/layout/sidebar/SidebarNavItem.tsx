@@ -1,9 +1,11 @@
-import { cn } from '@/lib/utils';
-import * as React from 'react';
-import { ChevronDown } from 'lucide-react';
-import { Typography } from '../../ui/typography';
+'use client';
 
-interface SidebarNavItemProps extends React.HTMLAttributes<HTMLLIElement> {
+import { ChevronDown } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '../../../lib/utils';
+import { Tooltip } from '../../ui/tooltip';
+
+interface SidebarNavItemProps extends React.HTMLAttributes<HTMLButtonElement> {
   icon?: React.ReactNode;
   title: string;
   active?: boolean;
@@ -11,12 +13,11 @@ interface SidebarNavItemProps extends React.HTMLAttributes<HTMLLIElement> {
   level?: number;
   expandable?: boolean;
   expanded?: boolean;
+  badge?: string | number;
+  isCollapsed?: boolean;
 }
 
-export const SidebarNavItem = React.forwardRef<
-  HTMLLIElement,
-  SidebarNavItemProps
->(
+export const SidebarNavItem = React.forwardRef<HTMLButtonElement, SidebarNavItemProps>(
   (
     {
       icon,
@@ -26,45 +27,76 @@ export const SidebarNavItem = React.forwardRef<
       level = 0,
       expandable,
       expanded,
+      badge,
+      isCollapsed,
       className,
-      children,
       ...props
     },
     ref
   ) => {
-    const levelPadding = `pl-${level * 4}`; // Adjust as needed, or use a map
+    const indent = level > 0 ? { paddingLeft: `${(level * 12) + 12}px` } : {};
+
+    if (isCollapsed && level === 0) {
+      return (
+        <Tooltip content={title} side='right' delayDuration={200}>
+          <button
+            ref={ref}
+            disabled={disabled}
+            className={cn(
+              'flex w-full justify-center items-center rounded-[var(--sb-radius,var(--radius-md))] p-2 transition-colors outline-none',
+              'focus-visible:ring-2 focus-visible:ring-[color:var(--border-focus)]',
+              active
+                ? 'bg-[color:var(--sb-active,var(--bg-hover))] text-[color:var(--sb-active-text,var(--text-title))]'
+                : 'text-[color:var(--text-paragraph)] hover:bg-[color:var(--sb-hover,var(--bg-hover))] hover:text-[color:var(--text-title)]',
+              disabled && 'pointer-events-none opacity-40',
+              className
+            )}
+            {...props}
+          >
+            {icon && <span className='size-5 shrink-0 flex items-center justify-center'>{icon}</span>}
+          </button>
+        </Tooltip>
+      );
+    }
+
     return (
-      <li
+      <button
         ref={ref}
+        disabled={disabled}
+        style={indent}
         className={cn(
-          'group flex w-full items-center rounded px-2 py-1 transition-colors',
-          disabled && 'opacity-50 pointer-events-none',
-          active ? 'bg-background-hover' : 'hover:bg-background-hover',
-          className,
-          levelPadding
+          'group flex w-full items-center gap-3 rounded-[var(--sb-radius,var(--radius-md))] px-3 py-2 text-left transition-colors outline-none',
+          'focus-visible:ring-2 focus-visible:ring-[color:var(--border-focus)] focus-visible:ring-inset',
+          active
+            ? 'bg-[color:var(--sb-active,var(--bg-hover))] text-[color:var(--sb-active-text,var(--text-title))] font-semibold'
+            : 'text-[color:var(--text-paragraph)] hover:bg-[color:var(--sb-hover,var(--bg-hover))] hover:text-[color:var(--text-title)]',
+          disabled && 'pointer-events-none opacity-40',
+          className
         )}
         {...props}
       >
-        {/* Icon + title container */}
-        <div className='flex items-center gap-3 flex-grow min-w-0'>
-          {icon && <span className='h-4 w-4 shrink-0'>{icon}</span>}
-          <Typography variant='body1' className='truncate'>
-            {title}
-          </Typography>
-        </div>
-
-        {/* Chevron wrapper always rendered to prevent shift */}
-        <div className='ml-2 h-4 w-4 flex items-center justify-center'>
-          {expandable && (
-            <ChevronDown
-              className={cn('h-4 w-4 ', expanded ? 'rotate-180' : 'rotate-0')}
-            />
-          )}
-        </div>
-
-        {/* Optional expandable children */}
-        {children}
-      </li>
+        {icon && (
+          <span className='size-4 shrink-0 flex items-center justify-center text-[color:var(--text-secondary)] group-hover:text-current'>
+            {icon}
+          </span>
+        )}
+        <span className='min-w-0 flex-1 truncate text-[length:var(--font-size-body-sm)] [font-family:var(--font-rubik)]'>
+          {title}
+        </span>
+        {badge != null && (
+          <span className='flex h-5 min-w-5 items-center justify-center rounded-full bg-[color:var(--sb-badge-bg,var(--bg-secondary))] px-1.5 text-[length:var(--font-size-xs)] font-semibold text-[color:var(--text-secondary)]'>
+            {badge}
+          </span>
+        )}
+        {expandable && (
+          <ChevronDown
+            className={cn(
+              'size-4 shrink-0 text-[color:var(--text-muted)] transition-transform duration-[var(--motion-normal)]',
+              expanded && 'rotate-180'
+            )}
+          />
+        )}
+      </button>
     );
   }
 );
