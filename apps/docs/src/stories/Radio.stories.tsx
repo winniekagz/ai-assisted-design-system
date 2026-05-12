@@ -87,6 +87,11 @@ const meta = {
         component: `
 Token-driven standalone radio button built on Radix UI \`RadioGroup\` primitives. Use **Radio** when you need a single independently-controlled option. For a full mutually-exclusive set use **RadioGroup** instead.
 
+### When to use
+- A single "I agree" acknowledgement checkbox-equivalent where radio semantics are required.
+- Hand-rolling a custom group where you need per-item controlled state.
+- Use **RadioGroup** for standard mutually-exclusive sets — it is less boilerplate and handles ARIA automatically.
+
 ### Radio vs RadioGroup
 | | Radio | RadioGroup |
 |---|---|---|

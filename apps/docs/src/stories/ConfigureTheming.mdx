@@ -1,4 +1,6 @@
 import { Meta } from '@storybook/addon-docs/blocks';
+import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
 
 <Meta title='Configure your project/Theming tokens' />
 
@@ -9,7 +11,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
     <div className='ciq-progress'>
       <span className='ciq-progress-step'>01 Install</span>
       <span className='ciq-progress-sep'>›</span>
-      <span className='ciq-progress-step active'>02 Tokens</span>
+      <span className='ciq-progress-step ciq-active'>02 Tokens</span>
       <span className='ciq-progress-sep'>›</span>
       <span className='ciq-progress-step'>03 Components</span>
     </div>
@@ -21,14 +23,13 @@ import { Meta } from '@storybook/addon-docs/blocks';
     </p>
   </section>
 
-  {/* ── Token roles — stacked: explanation then code ──────────────────── */}
+  {/* ── Token roles — grouped, scannable ──────────────────────────────── */}
   <section className='ciq-token-section'>
-
     <div className='ciq-token-intro'>
       <h2>Token roles to customize</h2>
       <p>
-        Keep colors semantic — text should use neutral grays, brand colors
-        should be reserved for action, selection, and emphasis.
+        Keep colors semantic — text uses neutral grays, brand colors are
+        reserved for action, selection, and emphasis.
       </p>
     </div>
 
@@ -36,70 +37,52 @@ import { Meta } from '@storybook/addon-docs/blocks';
       <div className='ciq-token-group'>
         <span className='ciq-token-group-label'>Actions</span>
         <div className='ciq-token-pills'>
-          <code>primary</code>
-          <code>primaryForeground</code>
-          <code>secondary</code>
-          <code>secondaryForeground</code>
+          <code>primary</code><code>primaryForeground</code>
+          <code>secondary</code><code>secondaryForeground</code>
         </div>
       </div>
       <div className='ciq-token-group'>
         <span className='ciq-token-group-label'>Text</span>
         <div className='ciq-token-pills'>
-          <code>textPrimary</code>
-          <code>foreground</code>
-          <code>textSecondary</code>
-          <code>textMuted</code>
-          <code>textDisabled</code>
+          <code>textPrimary</code><code>foreground</code>
+          <code>textSecondary</code><code>textMuted</code><code>textDisabled</code>
         </div>
       </div>
       <div className='ciq-token-group'>
         <span className='ciq-token-group-label'>Surfaces</span>
         <div className='ciq-token-pills'>
-          <code>background</code>
-          <code>surface</code>
-          <code>secondaryBackground</code>
-          <code>hover</code>
+          <code>background</code><code>surface</code>
+          <code>secondaryBackground</code><code>hover</code>
         </div>
       </div>
       <div className='ciq-token-group'>
         <span className='ciq-token-group-label'>Feedback</span>
         <div className='ciq-token-pills'>
-          <code>error</code>
-          <code>errorPastel</code>
-          <code>warning</code>
-          <code>warningPastel</code>
-          <code>success</code>
-          <code>successPastel</code>
+          <code>error</code><code>errorPastel</code>
+          <code>warning</code><code>warningPastel</code>
+          <code>success</code><code>successPastel</code>
         </div>
       </div>
       <div className='ciq-token-group'>
         <span className='ciq-token-group-label'>Structure</span>
         <div className='ciq-token-pills'>
-          <code>spacing</code>
-          <code>radius</code>
-          <code>shadows</code>
-          <code>typography</code>
-          <code>strokeWidth</code>
+          <code>spacing</code><code>radius</code>
+          <code>shadows</code><code>typography</code><code>strokeWidth</code>
         </div>
       </div>
     </div>
 
-    {/* WCAG note — pulled out of prose into a focused callout */}
-    <div className='ciq-callout'>
-      <span className='ciq-callout-icon'>◎</span>
-      <div>
-        <h3>WCAG contrast habit</h3>
-        <p>
-          Check every foreground color against the surface it sits on. Normal
-          text needs at least <strong>4.5:1</strong>. Large text and icons need
-          at least <strong>3:1</strong>.
-        </p>
-      </div>
+    <div className='ciq-wcag-wrap'>
+      <Alert variant='info' title='WCAG contrast habit'>
+        Check every foreground color against the surface it sits on. Normal text
+        needs at least <strong>4.5:1</strong>. Large text and icons need at
+        least <strong>3:1</strong>.
+      </Alert>
     </div>
 
   </section>
 
-  {/* ── Full theme example ────────────────────────────────────────────── */}
+  {/* ── Full theme object ─────────────────────────────────────────────── */}
   <section className='ciq-code-section'>
     <p className='ciq-kicker'>Full example</p>
     <h2>Brand theme object</h2>
@@ -140,7 +123,9 @@ const brandTheme: ComponentIqTokens = {
   typography: {
     fontFamily: "'Rubik', ui-sans-serif, system-ui, sans-serif",
     headingFontFamily: "'Rubik', ui-sans-serif, system-ui, sans-serif",
-    baseSize: '1rem', headingWeight: 700, bodyWeight: 400,
+    baseSize: '1rem',
+    headingWeight: 700,
+    bodyWeight: 400,
   },
 };
 
@@ -158,12 +143,12 @@ export function AppTheme({ children }: { children: React.ReactNode }) {
       <h2>Minimal use of primary</h2>
       <p>
         DatePicker uses neutral text tokens for all calendar states and
-        reserves primary only for the selected date. This keeps every user
-        theme readable — your brand accent never competes with navigation.
+        reserves primary only for the selected date — your brand accent never
+        competes with navigation.
       </p>
     </div>
     <div className='ciq-swatches'>
-      <div><span style={{ background: 'var(--text-primary)' }} />Current month dates</div>
+      <div><span style={{ background: 'var(--text-title)' }} />Current month dates</div>
       <div><span style={{ background: 'var(--text-secondary)' }} />Weekdays and outside month</div>
       <div><span style={{ background: 'var(--text-disabled)' }} />Disabled dates</div>
       <div><span style={{ background: 'var(--color-primary)' }} />Selected date (primary only)</div>
@@ -171,122 +156,123 @@ export function AppTheme({ children }: { children: React.ReactNode }) {
   </section>
 
   {/* ── CTA ───────────────────────────────────────────────────────────── */}
-  <section className='ciq-next'>
-    <a href='?path=/docs/configure-your-project-using-components--docs' className='ciq-next-link'>
-      Step 03 — Use components →
-    </a>
-    <a href='?path=/docs/configure-your-project-installation--docs' className='ciq-back-link'>
-      ← Back to installation
-    </a>
-  </section>
+  <div className='ciq-next'>
+    <Button asChild>
+      <a target='_parent' href='?path=/docs/configure-your-project-using-components--docs'>
+        Step 03 — Use components →
+      </a>
+    </Button>
+    <Button asChild variant='text'>
+      <a target='_parent' href='?path=/docs/configure-your-project-installation--docs'>← Back to installation</a>
+    </Button>
+  </div>
 
 </div>
 
 <style>
   {`
 .ciq-doc {
-  color: #111827; max-width: 900px; padding: 0 8px;
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  max-width: 900px; padding: 0 8px;
+  font-family: var(--font-rubik, ui-sans-serif, system-ui, sans-serif);
 }
-.ciq-doc h1, .ciq-doc h2, .ciq-doc h3 { color: #111827; letter-spacing: 0; margin-top: 0; }
-.ciq-doc p, .ciq-doc li { color: #374151; line-height: 1.7; font-size: 15px; }
+.ciq-doc h1, .ciq-doc h2, .ciq-doc h3 {
+  color: var(--text-title); letter-spacing: 0; margin-top: 0;
+  font-family: var(--font-heading, var(--font-rubik, ui-sans-serif));
+}
+.ciq-doc p { color: var(--text-paragraph); line-height: 1.7; font-size: 15px; }
 .ciq-doc code {
-  background: #F3F4F6; color: #111827;
-  padding: 2px 6px; border-radius: 4px; font-size: 13px;
+  background: var(--bg-secondary); color: var(--text-title);
+  padding: 2px 6px; border-radius: var(--radius-lg); font-size: 13px;
+  border: 1px solid var(--border-subtle);
 }
+
 .ciq-kicker {
   margin: 0 0 8px; text-transform: uppercase;
-  letter-spacing: 0.16em; font-size: 11px; font-weight: 700; color: #6B7280;
+  letter-spacing: var(--letter-spacing-widest); font-size: 11px;
+  font-weight: 700; color: var(--text-muted);
 }
-.ciq-progress {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
-}
-.ciq-progress-step { font-size: 12px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.04em; }
-.ciq-progress-step.active { color: #111827; }
-.ciq-progress-sep { color: #D1D5DB; font-size: 12px; }
-.ciq-page-head { padding: 32px 0 24px; border-bottom: 1px solid #F3F4F6; margin-bottom: 0; }
+
+/* Progress */
+.ciq-progress { display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
+.ciq-progress-step { font-size: 12px; font-weight: 600; color: var(--text-disabled); letter-spacing: 0.04em; }
+.ciq-active { color: var(--text-title); }
+.ciq-progress-sep { color: var(--border-subtle); font-size: 14px; }
+
+.ciq-page-head { padding: var(--spacing-xl) 0 var(--spacing-lg); border-bottom: 1px solid var(--border-subtle); }
 .ciq-page-head h1 { font-size: 34px; margin: 8px 0 12px; }
-.ciq-page-head > p { max-width: 640px; margin: 0; }
+.ciq-page-head > p { max-width: 640px; margin: 0; color: var(--text-secondary); }
 
 /* Token groups */
 .ciq-token-section {
-  border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden;
-  margin: 24px 0;
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-2xl);
+  overflow: hidden; margin: var(--spacing-lg) 0; background: var(--bg-surface);
 }
 .ciq-token-intro {
-  padding: 24px; border-bottom: 1px solid #F3F4F6;
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+  border-bottom: 1px solid var(--border-subtle);
 }
 .ciq-token-intro h2 { font-size: 20px; margin: 0 0 8px; }
+.ciq-token-intro p { color: var(--text-secondary); margin: 0; }
 .ciq-token-groups {
-  padding: 20px 24px;
-  display: grid; gap: 14px;
-  border-bottom: 1px solid #F3F4F6;
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: grid; gap: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-subtle);
 }
-.ciq-token-group { display: flex; align-items: flex-start; gap: 16px; }
+.ciq-token-group { display: flex; align-items: flex-start; gap: var(--spacing-md); }
 .ciq-token-group-label {
   font-size: 11px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.1em; color: #9CA3AF; min-width: 80px; padding-top: 4px;
+  letter-spacing: 0.1em; color: var(--text-muted);
+  min-width: 72px; padding-top: 5px;
 }
 .ciq-token-pills { display: flex; flex-wrap: wrap; gap: 6px; }
 .ciq-token-pills code {
-  background: #F3F4F6; color: #374151; font-size: 12px;
-  padding: 3px 8px; border-radius: 5px; border: 1px solid #E5E7EB;
+  font-size: 12px; padding: 3px 8px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
 }
-
-/* Callout */
-.ciq-callout {
-  display: flex; gap: 16px;
-  padding: 20px 24px; background: #F9FAFB;
-}
-.ciq-callout-icon { font-size: 16px; color: #6B7280; flex-shrink: 0; margin-top: 2px; }
-.ciq-callout h3 { font-size: 14px; font-weight: 700; margin: 0 0 6px; }
-.ciq-callout p { font-size: 14px; margin: 0; }
+.ciq-wcag-wrap { padding: var(--spacing-md) var(--spacing-lg); }
 
 /* Code section */
 .ciq-code-section {
-  border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden; margin-bottom: 24px;
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-2xl);
+  overflow: hidden; margin-bottom: var(--spacing-lg); background: var(--bg-surface);
 }
-.ciq-code-section > .ciq-kicker,
-.ciq-code-section > h2,
-.ciq-code-section > p { padding: 0 24px; }
-.ciq-code-section > .ciq-kicker { padding-top: 24px; }
-.ciq-code-section h2 { font-size: 20px; margin: 6px 0 8px; }
-.ciq-code-section > p { padding-bottom: 4px; color: #6B7280; }
+.ciq-code-section > .ciq-kicker { padding: var(--spacing-lg) var(--spacing-lg) 0; }
+.ciq-code-section > h2 { padding: 6px var(--spacing-lg) 0; font-size: 20px; }
+.ciq-code-section > p {
+  padding: 0 var(--spacing-lg) var(--spacing-sm);
+  color: var(--text-muted); font-size: 14px; margin: 0;
+}
 .ciq-code-section pre { margin: 0 !important; border-radius: 0 !important; }
 
 /* Token board */
 .ciq-token-board {
-  border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden; margin-bottom: 24px;
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-2xl);
+  overflow: hidden; margin-bottom: var(--spacing-lg); background: var(--bg-surface);
 }
-.ciq-token-board-head { padding: 24px; border-bottom: 1px solid #F3F4F6; }
+.ciq-token-board-head { padding: var(--spacing-lg); border-bottom: 1px solid var(--border-subtle); }
 .ciq-token-board-head h2 { font-size: 20px; margin: 6px 0 8px; }
-.ciq-swatches { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.ciq-token-board-head p { color: var(--text-secondary); margin: 0; }
+.ciq-swatches { display: grid; grid-template-columns: 1fr 1fr; }
 .ciq-swatches div {
   display: flex; align-items: center; gap: 10px;
-  font-size: 14px; color: #374151; padding: 14px 24px;
-  border-bottom: 1px solid #F9FAFB;
+  font-size: 14px; color: var(--text-secondary); padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--bg-secondary);
 }
-.ciq-swatches div:nth-child(odd) { border-right: 1px solid #F3F4F6; }
+.ciq-swatches div:nth-child(odd) { border-right: 1px solid var(--border-subtle); }
 .ciq-swatches span {
-  width: 16px; height: 16px; border-radius: 4px;
-  border: 1px solid rgba(0,0,0,0.08); flex-shrink: 0;
+  width: 16px; height: 16px; border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle); flex-shrink: 0;
 }
 
 /* CTA */
-.ciq-next { display: flex; align-items: center; gap: 16px; margin: 8px 0 32px; }
-.ciq-next-link {
-  display: inline-flex; align-items: center; height: 44px;
-  padding: 0 20px; background: #111827; color: #fff;
-  text-decoration: none; font-weight: 600; font-size: 14px;
-  border-radius: 8px; transition: opacity 0.15s;
-}
-.ciq-next-link:hover { opacity: 0.85; }
-.ciq-back-link { font-size: 14px; color: #6B7280; text-decoration: none; font-weight: 500; }
-.ciq-back-link:hover { color: #111827; }
+.ciq-next { display: flex; align-items: center; gap: var(--spacing-sm); margin: 8px 0 var(--spacing-xl); }
+.ciq-next a { text-decoration: none; color: inherit; }
 
 @media (max-width: 640px) {
   .ciq-token-group { flex-direction: column; gap: 8px; }
-  .ciq-token-group-label { min-width: unset; }
   .ciq-swatches { grid-template-columns: 1fr; }
   .ciq-page-head h1 { font-size: 26px; }
 }

@@ -1,4 +1,5 @@
 import { Meta } from '@storybook/addon-docs/blocks';
+import { Button } from '@/components/ui/button';
 
 <Meta title='Configure your project/Using components' />
 
@@ -11,21 +12,20 @@ import { Meta } from '@storybook/addon-docs/blocks';
       <span className='ciq-progress-sep'>›</span>
       <span className='ciq-progress-step'>02 Tokens</span>
       <span className='ciq-progress-sep'>›</span>
-      <span className='ciq-progress-step active'>03 Components</span>
+      <span className='ciq-progress-step ciq-active'>03 Components</span>
     </div>
     <h1>Use components in product screens</h1>
     <p>
       Import components from the package and compose them inside your app.
-      Every component inherits the design-token values from{' '}
-      <code>ComponentIqProvider</code> — no extra setup needed.
+      Every component inherits token values from <code>ComponentIqProvider</code> — no extra setup needed.
     </p>
   </section>
 
   {/* ── Common imports — first, before patterns ───────────────────────── */}
   <section className='ciq-code-section'>
-    <p className='ciq-kicker'>Common imports</p>
-    <h2>Start here</h2>
-    <p>Everything you need for most product screens in a single import.</p>
+    <p className='ciq-kicker'>Start here</p>
+    <h2>Common imports</h2>
+    <p>Everything you need for most product screens in one import.</p>
 
 ```tsx
 import {
@@ -41,15 +41,15 @@ import {
 
   </section>
 
-  {/* ── Pattern — stacked so prose leads, then code ───────────────────── */}
+  {/* ── Pattern — prose then code ─────────────────────────────────────── */}
   <section className='ciq-pattern-section'>
     <div className='ciq-pattern-head'>
       <p className='ciq-kicker'>Recommended pattern</p>
       <h2>Controlled fields</h2>
       <p>
         Form components like <code>DatePicker</code>, <code>Input</code>, and{' '}
-        <code>Select</code> are controlled. Store the value in component state,
-        pass it as a prop, and update through the callback.
+        <code>Select</code> are controlled. Store the value in state, pass it
+        as a prop, and update it through the callback.
       </p>
     </div>
 
@@ -75,7 +75,7 @@ function ReportFilter() {
 
   </section>
 
-  {/* ── Do / Don't — color-coded left border ──────────────────────────── */}
+  {/* ── Do / Don't — token colors, clear visual coding ────────────────── */}
   <section className='ciq-rules'>
     <div className='ciq-rules-do'>
       <div className='ciq-rules-head'>
@@ -106,108 +106,115 @@ function ReportFilter() {
   </section>
 
   {/* ── CTA ───────────────────────────────────────────────────────────── */}
-  <section className='ciq-next'>
-    <a href='?path=/docs/configure-your-project--docs' className='ciq-next-link'>
-      ✓ Setup complete — browse components →
-    </a>
-    <a href='?path=/docs/configure-your-project-theming-tokens--docs' className='ciq-back-link'>
-      ← Back to tokens
-    </a>
-  </section>
+  <div className='ciq-next'>
+    <Button asChild>
+      <a target='_parent' href='?path=/docs/components-button--docs'>
+        Browse components →
+      </a>
+    </Button>
+    <Button asChild variant='outlined'>
+      <a target='_parent' href='?path=/docs/configure-your-project--docs'>
+        Back to setup overview
+      </a>
+    </Button>
+  </div>
 
 </div>
 
 <style>
   {`
 .ciq-doc {
-  color: #111827; max-width: 900px; padding: 0 8px;
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  max-width: 900px; padding: 0 8px;
+  font-family: var(--font-rubik, ui-sans-serif, system-ui, sans-serif);
 }
-.ciq-doc h1, .ciq-doc h2, .ciq-doc h3 { color: #111827; letter-spacing: 0; margin-top: 0; }
-.ciq-doc p, .ciq-doc li { color: #374151; line-height: 1.7; font-size: 15px; }
+.ciq-doc h1, .ciq-doc h2, .ciq-doc h3 {
+  color: var(--text-title); letter-spacing: 0; margin-top: 0;
+  font-family: var(--font-heading, var(--font-rubik, ui-sans-serif));
+}
+.ciq-doc p, .ciq-doc li { color: var(--text-paragraph); line-height: 1.7; font-size: 15px; }
 .ciq-doc code {
-  background: #F3F4F6; color: #111827;
-  padding: 2px 6px; border-radius: 4px; font-size: 13px;
+  background: var(--bg-secondary); color: var(--text-title);
+  padding: 2px 6px; border-radius: var(--radius-lg); font-size: 13px;
+  border: 1px solid var(--border-subtle);
 }
 .ciq-kicker {
   margin: 0 0 8px; text-transform: uppercase;
-  letter-spacing: 0.16em; font-size: 11px; font-weight: 700; color: #6B7280;
+  letter-spacing: var(--letter-spacing-widest); font-size: 11px;
+  font-weight: 700; color: var(--text-muted);
 }
 
 /* Progress */
-.ciq-progress { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
-.ciq-progress-step { font-size: 12px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.04em; }
-.ciq-progress-step.active { color: #111827; }
-.ciq-progress-sep { color: #D1D5DB; font-size: 12px; }
+.ciq-progress { display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
+.ciq-progress-step { font-size: 12px; font-weight: 600; color: var(--text-disabled); letter-spacing: 0.04em; }
+.ciq-active { color: var(--text-title); }
+.ciq-progress-sep { color: var(--border-subtle); font-size: 14px; }
 
-.ciq-page-head { padding: 32px 0 24px; border-bottom: 1px solid #F3F4F6; margin-bottom: 0; }
+.ciq-page-head { padding: var(--spacing-xl) 0 var(--spacing-lg); border-bottom: 1px solid var(--border-subtle); }
 .ciq-page-head h1 { font-size: 34px; margin: 8px 0 12px; }
-.ciq-page-head > p { max-width: 640px; margin: 0; }
+.ciq-page-head > p { max-width: 640px; margin: 0; color: var(--text-secondary); }
 
 /* Code section */
 .ciq-code-section {
-  border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden; margin: 24px 0;
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-2xl);
+  overflow: hidden; margin: var(--spacing-lg) 0; background: var(--bg-surface);
 }
-.ciq-code-section > .ciq-kicker,
-.ciq-code-section > h2,
-.ciq-code-section > p { padding: 0 24px; }
-.ciq-code-section > .ciq-kicker { padding-top: 24px; }
-.ciq-code-section h2 { font-size: 20px; margin: 6px 0 8px; }
-.ciq-code-section > p { padding-bottom: 4px; color: #6B7280; font-size: 14px; }
+.ciq-code-section > .ciq-kicker { padding: var(--spacing-lg) var(--spacing-lg) 0; }
+.ciq-code-section > h2 { padding: 6px var(--spacing-lg) 0; font-size: 20px; }
+.ciq-code-section > p {
+  padding: 0 var(--spacing-lg) var(--spacing-sm);
+  color: var(--text-muted); font-size: 14px; margin: 0;
+}
 .ciq-code-section pre { margin: 0 !important; border-radius: 0 !important; }
 
 /* Pattern section */
 .ciq-pattern-section {
-  border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden; margin-bottom: 24px;
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-2xl);
+  overflow: hidden; margin-bottom: var(--spacing-lg); background: var(--bg-surface);
 }
-.ciq-pattern-head { padding: 24px; border-bottom: 1px solid #F3F4F6; }
+.ciq-pattern-head { padding: var(--spacing-lg); border-bottom: 1px solid var(--border-subtle); }
 .ciq-pattern-head h2 { font-size: 20px; margin: 6px 0 8px; }
-.ciq-pattern-head p { margin: 0; }
+.ciq-pattern-head p { margin: 0; color: var(--text-secondary); }
 .ciq-pattern-section pre { margin: 0 !important; border-radius: 0 !important; }
 
-/* Do / Don't — distinct left-border colour coding */
+/* Do / Don't — token-colored left border, preattentive visual coding */
 .ciq-rules {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
 }
 .ciq-rules-do, .ciq-rules-dont {
-  border-radius: 10px;
+  border-radius: var(--radius-2xl);
   overflow: hidden;
-  border: 1px solid #E5E7EB;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
 }
-.ciq-rules-do { border-left: 4px solid #067647; }
-.ciq-rules-dont { border-left: 4px solid #B42318; }
+.ciq-rules-do   { border-left: 4px solid var(--helper-success); }
+.ciq-rules-dont { border-left: 4px solid var(--helper-error); }
 .ciq-rules-head {
   display: flex; align-items: center; gap: 10px;
-  padding: 14px 18px 10px;
-  border-bottom: 1px solid #F3F4F6;
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm);
+  border-bottom: 1px solid var(--border-subtle);
 }
-.ciq-rules-head h3 { font-size: 14px; font-weight: 700; margin: 0; }
+.ciq-rules-head h3 { font-size: 14px; font-weight: 700; margin: 0; color: var(--text-title); }
 .ciq-rules-icon {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 20px; height: 20px; border-radius: 50%;
+  width: 20px; height: 20px; border-radius: var(--radius-full);
   font-size: 11px; font-weight: 800; flex-shrink: 0;
 }
-.ciq-do-icon { background: #ECFDF3; color: #067647; }
-.ciq-dont-icon { background: #FEF3F2; color: #B42318; }
+.ciq-do-icon   { background: var(--helper-success-pastel); color: var(--helper-success); }
+.ciq-dont-icon { background: var(--helper-error-pastel);   color: var(--helper-error); }
 .ciq-rules-do ul, .ciq-rules-dont ul {
-  margin: 0; padding: 14px 18px 18px 36px; list-style: disc;
+  margin: 0; padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md) 36px;
+  list-style: disc;
 }
-.ciq-rules-do li, .ciq-rules-dont li { font-size: 14px; margin: 8px 0; color: #374151; }
+.ciq-rules-do li, .ciq-rules-dont li {
+  font-size: 14px; margin: 8px 0; color: var(--text-paragraph);
+}
 
 /* CTA */
-.ciq-next { display: flex; align-items: center; gap: 16px; margin: 8px 0 32px; }
-.ciq-next-link {
-  display: inline-flex; align-items: center; height: 44px;
-  padding: 0 20px; background: #111827; color: #fff;
-  text-decoration: none; font-weight: 600; font-size: 14px;
-  border-radius: 8px; transition: opacity 0.15s;
-}
-.ciq-next-link:hover { opacity: 0.85; }
-.ciq-back-link { font-size: 14px; color: #6B7280; text-decoration: none; font-weight: 500; }
-.ciq-back-link:hover { color: #111827; }
+.ciq-next { display: flex; align-items: center; gap: var(--spacing-sm); margin: 8px 0 var(--spacing-xl); }
+.ciq-next a { text-decoration: none; color: inherit; }
 
 @media (max-width: 640px) {
   .ciq-rules { grid-template-columns: 1fr; }

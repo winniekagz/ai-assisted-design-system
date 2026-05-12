@@ -91,7 +91,23 @@ Filterable combobox that supports both single selection and multi-select (chips)
 - **Multi-select** when multiple simultaneous values are valid (e.g. skills, tags, team members).
 - For short, static lists use **Select** — it is simpler and has native browser behaviour.
 
-### Single selection
+### Usage
+\`\`\`tsx
+import { Autocomplete } from '@winniekagendo/componentiq';
+
+// Uncontrolled single
+<Autocomplete label="Framework" options={options} defaultValue="react" />
+
+// Controlled single
+const [val, setVal] = useState('');
+<Autocomplete label="Framework" value={val} onChange={setVal} options={options} />
+
+// Multi-select
+const [values, setValues] = useState<string[]>([]);
+<Autocomplete label="Skills" multiple selectedValues={values} onSelectedValuesChange={setValues} options={options} />
+\`\`\`
+
+### Single selection detail
 \`\`\`tsx
 import { Autocomplete } from '@winniekagendo/componentiq';
 
