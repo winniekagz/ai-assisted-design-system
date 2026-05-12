@@ -3,23 +3,55 @@ import { Meta } from '@storybook/addon-docs/blocks';
 <Meta title='Configure your project/Using components' />
 
 <div className='ciq-doc'>
+
+  {/* ── Page head ─────────────────────────────────────────────────────── */}
   <section className='ciq-page-head'>
-    <p className='ciq-kicker'>Step 03</p>
+    <div className='ciq-progress'>
+      <span className='ciq-progress-step'>01 Install</span>
+      <span className='ciq-progress-sep'>›</span>
+      <span className='ciq-progress-step'>02 Tokens</span>
+      <span className='ciq-progress-sep'>›</span>
+      <span className='ciq-progress-step active'>03 Components</span>
+    </div>
     <h1>Use components in product screens</h1>
     <p>
-      Import components from the package and compose them inside your app. The
-      components inherit theme values from <code>ComponentIqProvider</code>.
+      Import components from the package and compose them inside your app.
+      Every component inherits the design-token values from{' '}
+      <code>ComponentIqProvider</code> — no extra setup needed.
     </p>
   </section>
 
-  <section className='ciq-layout'>
-    <div className='ciq-panel'>
+  {/* ── Common imports — first, before patterns ───────────────────────── */}
+  <section className='ciq-code-section'>
+    <p className='ciq-kicker'>Common imports</p>
+    <h2>Start here</h2>
+    <p>Everything you need for most product screens in a single import.</p>
+
+```tsx
+import {
+  Button,
+  Badge,
+  Input,
+  Select,
+  Textarea,
+  DatePicker,
+  EnhancedDataTable,
+} from '@winniekagendo/componentiq';
+```
+
+  </section>
+
+  {/* ── Pattern — stacked so prose leads, then code ───────────────────── */}
+  <section className='ciq-pattern-section'>
+    <div className='ciq-pattern-head'>
       <p className='ciq-kicker'>Recommended pattern</p>
       <h2>Controlled fields</h2>
       <p>
-        Inputs like DatePicker are controlled. Store the value in state, pass it
-        to the component, and update it through the callback.
+        Form components like <code>DatePicker</code>, <code>Input</code>, and{' '}
+        <code>Select</code> are controlled. Store the value in component state,
+        pass it as a prop, and update through the callback.
       </p>
+    </div>
 
 ```tsx
 import { DatePicker, type DatePickerValue } from '@winniekagendo/componentiq';
@@ -41,132 +73,145 @@ function ReportFilter() {
 }
 ```
 
-    </div>
-
-    <div className='ciq-panel'>
-      <p className='ciq-kicker'>Common imports</p>
-      <h2>Start small</h2>
-
-```tsx
-import {
-  Button,
-  Badge,
-  Input,
-  Select,
-  Textarea,
-  DatePicker,
-  EnhancedDataTable,
-} from '@winniekagendo/componentiq';
-```
-
-    </div>
-
   </section>
 
-<section className='ciq-rules'>
-  <div>
-    <h3>Do</h3>
-    <ul>
-      <li>Use component props before writing custom CSS.</li>
-      <li>Use semantic tokens for layout-specific styling.</li>
-      <li>Keep form fields compact and aligned in predictable grids.</li>
-      <li>Use helper tokens for validation and feedback states.</li>
-    </ul>
-  </div>
-  <div>
-    <h3>Do not</h3>
-    <ul>
-      <li>Use raw hex colors inside product components.</li>
-      <li>Use primary color for normal body text.</li>
-      <li>Expose internal scale tokens as the main design API.</li>
-      <li>Duplicate field wrappers unless a form library really needs it.</li>
-    </ul>
-  </div>
-</section>
+  {/* ── Do / Don't — color-coded left border ──────────────────────────── */}
+  <section className='ciq-rules'>
+    <div className='ciq-rules-do'>
+      <div className='ciq-rules-head'>
+        <span className='ciq-rules-icon ciq-do-icon'>✓</span>
+        <h3>Do</h3>
+      </div>
+      <ul>
+        <li>Use component props before writing custom CSS.</li>
+        <li>Use semantic tokens for layout-specific styling.</li>
+        <li>Keep form fields compact and aligned in predictable grids.</li>
+        <li>Use helper tokens for validation and feedback states.</li>
+        <li>Prefer <code>Badge</code> and <code>Alert</code> for status communication.</li>
+      </ul>
+    </div>
+    <div className='ciq-rules-dont'>
+      <div className='ciq-rules-head'>
+        <span className='ciq-rules-icon ciq-dont-icon'>✗</span>
+        <h3>Do not</h3>
+      </div>
+      <ul>
+        <li>Use raw hex colors inside product components.</li>
+        <li>Use primary color for normal body text.</li>
+        <li>Expose internal scale tokens as the main design API.</li>
+        <li>Duplicate field wrappers unless a form library requires it.</li>
+        <li>Hard-code spacing values — use spacing tokens instead.</li>
+      </ul>
+    </div>
+  </section>
 
+  {/* ── CTA ───────────────────────────────────────────────────────────── */}
   <section className='ciq-next'>
-    <a href='?path=/docs/configure-your-project--docs'>Back to setup overview</a>
+    <a href='?path=/docs/configure-your-project--docs' className='ciq-next-link'>
+      ✓ Setup complete — browse components →
+    </a>
+    <a href='?path=/docs/configure-your-project-theming-tokens--docs' className='ciq-back-link'>
+      ← Back to tokens
+    </a>
   </section>
+
 </div>
 
 <style>
   {`
 .ciq-doc {
-  color: #111827;
-  max-width: 980px;
+  color: #111827; max-width: 900px; padding: 0 8px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
 }
-.ciq-doc h1,
-.ciq-doc h2,
-.ciq-doc h3 {
-  color: #111827;
-  letter-spacing: 0;
-}
-.ciq-doc p,
-.ciq-doc li {
-  color: #111827;
-  line-height: 1.65;
-}
+.ciq-doc h1, .ciq-doc h2, .ciq-doc h3 { color: #111827; letter-spacing: 0; margin-top: 0; }
+.ciq-doc p, .ciq-doc li { color: #374151; line-height: 1.7; font-size: 15px; }
 .ciq-doc code {
-  color: #111827;
-  padding: 1px 5px;
+  background: #F3F4F6; color: #111827;
+  padding: 2px 6px; border-radius: 4px; font-size: 13px;
 }
 .ciq-kicker {
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: 11px;
-  font-weight: 700;
-  color: #111827;
+  margin: 0 0 8px; text-transform: uppercase;
+  letter-spacing: 0.16em; font-size: 11px; font-weight: 700; color: #6B7280;
 }
-.ciq-page-head {
-  padding-bottom: 20px;
-  margin-bottom: 22px;
+
+/* Progress */
+.ciq-progress { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.ciq-progress-step { font-size: 12px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.04em; }
+.ciq-progress-step.active { color: #111827; }
+.ciq-progress-sep { color: #D1D5DB; font-size: 12px; }
+
+.ciq-page-head { padding: 32px 0 24px; border-bottom: 1px solid #F3F4F6; margin-bottom: 0; }
+.ciq-page-head h1 { font-size: 34px; margin: 8px 0 12px; }
+.ciq-page-head > p { max-width: 640px; margin: 0; }
+
+/* Code section */
+.ciq-code-section {
+  border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden; margin: 24px 0;
 }
-.ciq-page-head h1 {
-  margin: 8px 0;
-  font-size: 32px;
+.ciq-code-section > .ciq-kicker,
+.ciq-code-section > h2,
+.ciq-code-section > p { padding: 0 24px; }
+.ciq-code-section > .ciq-kicker { padding-top: 24px; }
+.ciq-code-section h2 { font-size: 20px; margin: 6px 0 8px; }
+.ciq-code-section > p { padding-bottom: 4px; color: #6B7280; font-size: 14px; }
+.ciq-code-section pre { margin: 0 !important; border-radius: 0 !important; }
+
+/* Pattern section */
+.ciq-pattern-section {
+  border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden; margin-bottom: 24px;
 }
-.ciq-layout {
-  display: grid;
-  grid-template-columns: 1fr 0.85fr;
-  gap: 18px;
-}
-.ciq-panel,
-.ciq-rules > div {
-  padding: 20px;
-}
-.ciq-panel pre {
-  margin-top: 16px !important;
-}
+.ciq-pattern-head { padding: 24px; border-bottom: 1px solid #F3F4F6; }
+.ciq-pattern-head h2 { font-size: 20px; margin: 6px 0 8px; }
+.ciq-pattern-head p { margin: 0; }
+.ciq-pattern-section pre { margin: 0 !important; border-radius: 0 !important; }
+
+/* Do / Don't — distinct left-border colour coding */
 .ciq-rules {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  margin-top: 18px;
+  gap: 12px;
+  margin-bottom: 24px;
 }
-.ciq-rules ul {
-  padding-left: 20px;
+.ciq-rules-do, .ciq-rules-dont {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #E5E7EB;
 }
-.ciq-rules li {
-  margin: 8px 0;
+.ciq-rules-do { border-left: 4px solid #067647; }
+.ciq-rules-dont { border-left: 4px solid #B42318; }
+.ciq-rules-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid #F3F4F6;
 }
-.ciq-next {
-  margin-top: 28px;
+.ciq-rules-head h3 { font-size: 14px; font-weight: 700; margin: 0; }
+.ciq-rules-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%;
+  font-size: 11px; font-weight: 800; flex-shrink: 0;
 }
-.ciq-next a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 40px;
-  padding: 0 14px;
-  color: #111827;
-  text-decoration: none;
-  font-weight: 600;
+.ciq-do-icon { background: #ECFDF3; color: #067647; }
+.ciq-dont-icon { background: #FEF3F2; color: #B42318; }
+.ciq-rules-do ul, .ciq-rules-dont ul {
+  margin: 0; padding: 14px 18px 18px 36px; list-style: disc;
 }
-@media (max-width: 760px) {
-  .ciq-layout,
-  .ciq-rules {
-    grid-template-columns: 1fr;
-  }
+.ciq-rules-do li, .ciq-rules-dont li { font-size: 14px; margin: 8px 0; color: #374151; }
+
+/* CTA */
+.ciq-next { display: flex; align-items: center; gap: 16px; margin: 8px 0 32px; }
+.ciq-next-link {
+  display: inline-flex; align-items: center; height: 44px;
+  padding: 0 20px; background: #111827; color: #fff;
+  text-decoration: none; font-weight: 600; font-size: 14px;
+  border-radius: 8px; transition: opacity 0.15s;
+}
+.ciq-next-link:hover { opacity: 0.85; }
+.ciq-back-link { font-size: 14px; color: #6B7280; text-decoration: none; font-weight: 500; }
+.ciq-back-link:hover { color: #111827; }
+
+@media (max-width: 640px) {
+  .ciq-rules { grid-template-columns: 1fr; }
+  .ciq-page-head h1 { font-size: 26px; }
 }
 `}
 </style>
