@@ -1,6 +1,6 @@
 # Documentation
 
-Welcome to the componentIq Component Library documentation. This directory contains comprehensive guides
+Welcome to the ComponentIQ Component Library documentation. This directory contains comprehensive guides
 and information for developers working with the library.
 
 ## 📚 Available Documentation
@@ -43,4 +43,4 @@ to get started.
 
 ---
 
-_This documentation is maintained by the componentIq Component Library team._
+_This documentation is maintained by the ComponentIQ Component Library team._

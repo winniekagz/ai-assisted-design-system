@@ -1,150 +1,250 @@
 import { Meta } from '@storybook/addon-docs/blocks';
+import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
 
 <Meta title='Configure your project/Installation' />
 
-<div className='ciq-doc ciq-narrow'>
+<div className='ciq-doc'>
+
+  {/* ── Page head ─────────────────────────────────────────────────────── */}
   <section className='ciq-page-head'>
-    <p className='ciq-kicker'>Step 01</p>
+    <div className='ciq-progress'>
+      <span className='ciq-progress-step ciq-active'>01 Install</span>
+      <span className='ciq-progress-sep'>›</span>
+      <span className='ciq-progress-step'>02 Tokens</span>
+      <span className='ciq-progress-sep'>›</span>
+      <span className='ciq-progress-step'>03 Components</span>
+    </div>
     <h1>Install ComponentIQ</h1>
     <p>
-      Add the package to your app, import the global styles once, and wrap your
-      app with the provider so every component can read the design tokens.
+      Add the package, import the global styles once, and wrap your app with
+      the provider so every component can read the design tokens.
     </p>
+    <div className='ciq-install-bar'>
+      <span className='ciq-install-label'>npm</span>
+      <code>npm install componentiq</code>
+    </div>
   </section>
 
+  {/* ── Checklist ─────────────────────────────────────────────────────── */}
   <section className='ciq-checklist'>
-    <div>
-      <span>1</span>
-      <h2>Install the package</h2>
-      <p>Install ComponentIQ and make sure your app has React available.</p>
+
+    <div className='ciq-check-item'>
+      <div className='ciq-check-num'>1</div>
+      <div className='ciq-check-body'>
+        <h2>Install the package</h2>
+        <p>Install ComponentIQ and make sure your app has React available.</p>
 
 ```bash
-npm install @winniekagendo/componentiq
+npm install componentiq
 ```
 
+      </div>
     </div>
-    <div>
-      <span>2</span>
-      <h2>Import CSS once</h2>
-      <p>Put your global stylesheet in your app root, layout, or main entry file.</p>
 
-```tsx
-import './globals.css';
-```
+    <div className='ciq-check-item'>
+      <div className='ciq-check-num'>2</div>
+      <div className='ciq-check-body'>
+        <h2>Import global CSS once</h2>
+        <p>
+          Place this in your app root, layout file, or main entry. Import order
+          matters — put it before any component-specific overrides.
+        </p>
 
 ```css
+/* globals.css */
 @import 'tailwindcss';
 @import '@heroui/styles/css';
 ```
 
+```tsx
+// app/layout.tsx or src/index.tsx
+import './globals.css';
+```
+
+      </div>
     </div>
-    <div>
-      <span>3</span>
-      <h2>Add the provider</h2>
-      <p>The provider writes CSS variables into its subtree.</p>
+
+    <div className='ciq-check-item'>
+      <div className='ciq-check-num'>3</div>
+      <div className='ciq-check-body'>
+        <h2>Add the provider</h2>
+        <p>
+          The provider writes design-token CSS variables into its subtree.
+          Wrap as high as possible — ideally at the app root.
+        </p>
 
 ```tsx
-import { ComponentIqProvider } from '@winniekagendo/componentiq';
+import { ComponentIqProvider } from 'componentiq';
 
 export function RootLayout({ children }: { children: React.ReactNode }) {
   return <ComponentIqProvider>{children}</ComponentIqProvider>;
 }
 ```
 
+      </div>
     </div>
 
   </section>
 
-<section className='ciq-callout'>
-  <h2>For Next.js</h2>
-  <p>
-    Import the CSS in <code>app/layout.tsx</code> or your global stylesheet. If
-    a component uses browser interaction, keep it inside a client component
-    boundary.
-  </p>
-</section>
+  {/* ── Next.js callout using the Alert component ─────────────────────── */}
+  <div className='ciq-callout-wrap'>
+    <Alert variant='info' title='Next.js'>
+      Import the CSS in <code>app/layout.tsx</code> or your global stylesheet.
+      Components that use browser APIs must live inside a client component
+      boundary — add <code>'use client'</code> to those files.
+    </Alert>
+  </div>
 
-  <section className='ciq-next'>
-    <a href='?path=/docs/configure-your-project-theming-tokens--docs'>Next: connect tokens</a>
-  </section>
+  {/* ── CTA ───────────────────────────────────────────────────────────── */}
+  <div className='ciq-next'>
+    <Button asChild>
+      <a target='_parent' href='?path=/docs/configure-your-project-theming-tokens--docs'>
+        Step 02 — Connect tokens →
+      </a>
+    </Button>
+    <Button asChild variant='text'>
+      <a target='_parent' href='?path=/docs/configure-your-project--docs'>← Back to overview</a>
+    </Button>
+  </div>
+
 </div>
 
 <style>
   {`
 .ciq-doc {
-  color: #111827;
-  max-width: 980px;
-}
-.ciq-narrow {
   max-width: 860px;
+  padding: 0 8px;
+  font-family: var(--font-rubik, ui-sans-serif, system-ui, sans-serif);
 }
-.ciq-doc h1,
-.ciq-doc h2 {
-  color: #111827;
+.ciq-doc h1, .ciq-doc h2, .ciq-doc h3 {
+  color: var(--text-title);
   letter-spacing: 0;
+  margin-top: 0;
+  font-family: var(--font-heading, var(--font-rubik, ui-sans-serif));
 }
-.ciq-doc p {
-  color: #111827;
-  line-height: 1.65;
-}
+.ciq-doc p { color: var(--text-paragraph); line-height: 1.7; font-size: 15px; }
 .ciq-doc code {
-  color: #111827;
-  padding: 1px 5px;
+  background: var(--bg-secondary);
+  color: var(--text-title);
+  padding: 2px 6px;
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  border: 1px solid var(--border-subtle);
 }
 .ciq-kicker {
-  margin: 0;
+  margin: 0 0 8px;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
+  letter-spacing: var(--letter-spacing-widest);
   font-size: 11px;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-muted);
 }
-.ciq-page-head {
-  padding-bottom: 20px;
-  margin-bottom: 22px;
+
+/* Progress breadcrumb */
+.ciq-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 }
-.ciq-page-head h1 {
-  margin: 8px 0 8px;
-  font-size: 32px;
-}
-.ciq-page-head p {
-  max-width: 700px;
-}
-.ciq-checklist {
-  display: grid;
-  gap: 18px;
-}
-.ciq-checklist > div,
-.ciq-callout {
-  padding: 20px;
-}
-.ciq-checklist span {
-  display: inline-block;
-  color: #111827;
-  font-weight: 700;
+.ciq-progress-step {
   font-size: 12px;
+  font-weight: 600;
+  color: var(--text-disabled);
+  letter-spacing: 0.04em;
 }
-.ciq-checklist h2,
-.ciq-callout h2 {
-  margin-top: 12px;
+.ciq-active { color: var(--text-title); }
+.ciq-progress-sep { color: var(--border-subtle); font-size: 14px; }
+
+/* Page head */
+.ciq-page-head {
+  padding: var(--spacing-xl) 0 var(--spacing-lg);
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 0;
 }
-.ciq-checklist pre {
-  margin-top: 14px !important;
-}
-.ciq-callout {
-  margin-top: 22px;
-}
-.ciq-next {
-  margin-top: 28px;
-}
-.ciq-next a {
+.ciq-page-head h1 { font-size: 34px; margin: 8px 0 12px; }
+.ciq-page-head > p { max-width: 640px; margin: 0 0 var(--spacing-md); color: var(--text-secondary); }
+
+/* Install bar */
+.ciq-install-bar {
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
-  padding: 0 14px;
-  color: #111827;
-  text-decoration: none;
-  font-weight: 600;
+  gap: var(--spacing-sm);
+  background: var(--text-title);
+  border-radius: var(--radius-xl);
+  padding: 10px var(--spacing-md);
+}
+.ciq-install-bar code {
+  background: transparent;
+  color: var(--helper-success-pastel);
+  font-size: 14px;
+  padding: 0;
+  border: none;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+}
+.ciq-install-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-disabled);
+  font-family: ui-monospace, monospace;
+}
+
+/* Checklist */
+.ciq-checklist {
+  display: grid;
+  gap: 0;
+  margin: var(--spacing-lg) 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+.ciq-check-item {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.ciq-check-item:last-child { border-bottom: none; }
+.ciq-check-num {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  min-width: 60px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-inverse);
+  background: var(--color-primary);
+  line-height: 1.6;
+}
+.ciq-check-body {
+  padding: var(--spacing-lg);
+  flex: 1;
+  min-width: 0;
+}
+.ciq-check-body h2 { font-size: 18px; margin: 0 0 8px; }
+.ciq-check-body p { margin: 0; color: var(--text-secondary); }
+.ciq-check-body pre { margin-top: var(--spacing-md) !important; }
+
+/* Callout */
+.ciq-callout-wrap { margin-bottom: var(--spacing-lg); }
+
+/* CTA */
+.ciq-next {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: 8px 0 var(--spacing-xl);
+}
+.ciq-next a { text-decoration: none; color: inherit; }
+
+@media (max-width: 640px) {
+  .ciq-check-item { flex-direction: column; }
+  .ciq-check-num { min-width: unset; padding: var(--spacing-sm) var(--spacing-md); }
+  .ciq-page-head h1 { font-size: 26px; }
 }
 `}
 </style>

@@ -1,6 +1,6 @@
 # Conventional Commits Setup Summary
 
-This document summarizes the conventional commits setup implemented in the componentIq Component Library.
+This document summarizes the conventional commits setup implemented in the ComponentIQ Component Library.
 
 ## What Was Implemented
 

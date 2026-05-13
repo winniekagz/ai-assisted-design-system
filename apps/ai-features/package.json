@@ -10,7 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@winniekagendo/componentiq": "*",
+    "componentiq": "*",
     "@winniekagendo/componentiq-ai": "*",
     "next": "15.4.2",
     "react": "19.1.0",

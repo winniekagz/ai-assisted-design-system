@@ -1,17 +1,55 @@
+import * as React from 'react';
 import { Textarea } from '@/components/ui/form-fields/textarea';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { MessageSquare, Send } from 'lucide-react';
-import { fn } from 'storybook/test';
 
 const meta = {
   title: 'Components/FormFields/Textarea',
   component: Textarea,
   parameters: {
-    layout: 'centered',
+    layout: 'padded',
     docs: {
       description: {
-        component:
-          'A customizable textarea component with Material-UI styling patterns, supporting auto-grow functionality and icon variants.',
+        component: `
+Token-driven multi-line text input. Supports validation states, size variants, optional icons, and an auto-grow mode that expands as the user types.
+
+### When to use
+- Collecting descriptions, notes, comments, or any input expected to exceed one line.
+- Use **Input** for single-line values (email, search, name).
+- Pair with a visible \`<label>\` — placeholder text alone is not sufficient.
+
+### Usage
+\`\`\`tsx
+import { Textarea } from 'componentiq';
+
+// Basic
+<label>Notes<Textarea placeholder="Add notes…" rows={4} /></label>
+
+// Validation states
+<Textarea error placeholder="This field has an error" />
+<Textarea success placeholder="Looks good" />
+
+// Auto-grow
+<Textarea autoGrow placeholder="Expands as you type…" />
+
+// With icon
+<Textarea startIcon={<MessageSquare className="size-4" />} placeholder="Message" />
+\`\`\`
+
+### Props cheat sheet
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| \`variant\` | \`"default" \\| "error" \\| "success"\` | "default" | Border colour |
+| \`size\` | \`"sm" \\| "default" \\| "lg"\` | "default" | Height and font size |
+| \`error\` | boolean | false | Shorthand for \`variant="error"\` |
+| \`success\` | boolean | false | Shorthand for \`variant="success"\` |
+| \`autoGrow\` | boolean | false | Height expands with content |
+| \`rows\` | number | — | Initial visible row count |
+| \`startIcon\` | ReactNode | — | Left adornment icon |
+| \`endIcon\` | ReactNode | — | Right adornment icon |
+| \`disabled\` | boolean | false | Prevents interaction |
+| \`readOnly\` | boolean | false | Shows value, prevents editing |
+      `,
       },
     },
   },
@@ -20,321 +58,112 @@ const meta = {
     variant: {
       control: { type: 'select' },
       options: ['default', 'error', 'success'],
-      description: 'The visual style variant of the textarea',
+      description: 'Border colour variant.',
+      table: { type: { summary: "'default' | 'error' | 'success'" }, defaultValue: { summary: "'default'" } },
     },
     size: {
       control: { type: 'select' },
       options: ['sm', 'default', 'lg'],
-      description: 'The size of the textarea',
+      description: 'Height and font size.',
+      table: { type: { summary: "'sm' | 'default' | 'lg'" }, defaultValue: { summary: "'default'" } },
     },
     error: {
-      control: { type: 'boolean' },
-      description: 'Whether the textarea has an error state',
+      control: 'boolean',
+      description: 'Shorthand for `variant="error"` — red border.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
     },
     success: {
-      control: { type: 'boolean' },
-      description: 'Whether the textarea has a success state',
+      control: 'boolean',
+      description: 'Shorthand for `variant="success"` — green border.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
+    },
+    autoGrow: {
+      control: 'boolean',
+      description: 'Textarea height expands as content grows.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
+    },
+    rows: {
+      control: { type: 'number', min: 1 },
+      description: 'Initial visible row count.',
+      table: { type: { summary: 'number' } },
     },
     disabled: {
-      control: { type: 'boolean' },
-      description: 'Whether the textarea is disabled',
+      control: 'boolean',
+      description: 'Prevents interaction.',
+      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
     },
     placeholder: {
       control: 'text',
-      description: 'Placeholder text for the textarea',
+      description: 'Hint text shown when empty.',
+      table: { type: { summary: 'string' } },
     },
-    rows: {
-      control: { type: 'number' },
-      description: 'Number of visible rows',
-    },
-    autoGrow: {
-      control: { type: 'boolean' },
-      description: 'Whether the textarea should auto-grow with content',
-    },
+    startIcon: { control: false, table: { type: { summary: 'ReactNode' } } },
+    endIcon:   { control: false, table: { type: { summary: 'ReactNode' } } },
   },
-  args: {
-    placeholder: 'Enter your text here...',
-    onChange: fn(),
-  },
+  args: { placeholder: 'Enter your text here…' },
 } satisfies Meta<typeof Textarea>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Basic Variants
-export const Default: Story = {
-  args: {
-    placeholder: 'Enter your message here...',
-  },
-};
+function VariantShowcase({ title, variants }: {
+  title: string;
+  variants: Array<{ label: string; code: string; node: React.ReactNode }>;
+}) {
+  const [sel, setSel] = React.useState(0);
+  return (
+    <div className='w-full space-y-[var(--spacing-md)]'>
+      <h2 className='font-[family-name:var(--font-heading)] font-[var(--font-weight-bold)] text-[color:var(--text-title)] text-[length:var(--font-size-heading-6)]'>{title}</h2>
+      <div className='grid grid-cols-1 gap-[var(--spacing-sm)] sm:grid-cols-2'>
+        {variants.map((v, i) => (
+          <div key={v.label} onClick={() => setSel(i)}
+            className={`flex flex-col gap-[var(--spacing-sm)] rounded-[var(--radius-md)] border p-[var(--spacing-md)] transition-colors cursor-pointer ${sel === i ? 'bg-[color:var(--bg-hover)] border-[color:var(--color-primary)]' : 'bg-[color:var(--bg-surface)] border-[color:var(--border-subtle)] hover:bg-[color:var(--bg-hover)]'}`}
+          >
+            <span className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] font-[family-name:var(--font-rubik)]'>{v.label}</span>
+            <div className='w-full' onClick={e => e.stopPropagation()}>{v.node}</div>
+          </div>
+        ))}
+      </div>
+      <div className='rounded-[var(--radius-md)] bg-[color:var(--bg-secondary)] border border-[color:var(--border-subtle)] p-[var(--spacing-md)]'>
+        <p className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] font-[family-name:var(--font-rubik)] mb-[var(--spacing-sm)]'>{variants[sel].label}</p>
+        <pre className='text-[length:var(--font-size-xs)] text-[color:var(--text-paragraph)] font-mono overflow-x-auto whitespace-pre-wrap'><code>{variants[sel].code}</code></pre>
+      </div>
+    </div>
+  );
+}
 
-export const WithValue: Story = {
-  args: {
-    value:
-      'This is a sample text that demonstrates how the textarea looks with content.',
-    placeholder: 'Enter your message here...',
-  },
-};
-
-// Variants
-export const Error: Story = {
-  args: {
-    error: true,
-    placeholder: 'This textarea has an error',
-  },
-};
-
-export const Success: Story = {
-  args: {
-    success: true,
-    placeholder: 'This textarea is successful',
-  },
-};
-
-// Sizes
-export const Small: Story = {
-  args: {
-    size: 'sm',
-    placeholder: 'Small textarea',
-  },
-};
-
-export const Large: Story = {
-  args: {
-    size: 'lg',
-    placeholder: 'Large textarea',
-  },
-};
-
-// States
-export const Disabled: Story = {
-  args: {
-    disabled: true,
-    placeholder: 'Disabled textarea',
-  },
-};
-
-export const ReadOnly: Story = {
-  args: {
-    readOnly: true,
-    value: 'This is read-only content that cannot be edited.',
-  },
-};
-
-// Auto-grow functionality
-export const AutoGrow: Story = {
-  args: {
-    autoGrow: true,
-    placeholder: 'Type to see the textarea grow...',
-  },
-};
-
-export const AutoGrowWithContent: Story = {
-  args: {
-    autoGrow: true,
-    value:
-      'This textarea will automatically grow as you type more content. The height will adjust based on the content length.',
-    placeholder: 'Type to see the textarea grow...',
-  },
-};
-
-// Rows
-export const ThreeRows: Story = {
-  args: {
-    rows: 3,
-    placeholder: 'Three rows textarea',
-  },
-};
-
-export const FiveRows: Story = {
-  args: {
-    rows: 5,
-    placeholder: 'Five rows textarea',
-  },
-};
-
-// Icon Examples
-export const WithStartIcon: Story = {
-  args: {
-    startIcon: <MessageSquare className='h-4 w-4' />,
-    placeholder: 'Start typing your message...',
-  },
-};
-
-export const WithEndIcon: Story = {
-  args: {
-    endIcon: <Send className='h-4 w-4' />,
-    placeholder: 'Type your message and click send',
-  },
-};
-
-export const WithBothIcons: Story = {
-  args: {
-    startIcon: <MessageSquare className='h-4 w-4' />,
-    endIcon: <Send className='h-4 w-4' />,
-    placeholder: 'Message with both icons',
-  },
-};
-
-// Interactive Examples
-export const Interactive: Story = {
-  args: {
-    placeholder: 'Type to see changes...',
-    onChange: fn(),
-  },
-};
-
-// All Variants Grid
 export const AllVariants: Story = {
   render: () => (
-    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 p-4 w-full max-w-4xl'>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>Default</label>
-        <Textarea placeholder='Default textarea' />
-      </div>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>Error</label>
-        <Textarea error placeholder='Error textarea' />
-      </div>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>Success</label>
-        <Textarea success placeholder='Success textarea' />
-      </div>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>Disabled</label>
-        <Textarea disabled placeholder='Disabled textarea' />
-      </div>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>Small</label>
-        <Textarea size='sm' placeholder='Small textarea' />
-      </div>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>Large</label>
-        <Textarea size='lg' placeholder='Large textarea' />
-      </div>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>Auto-grow</label>
-        <Textarea autoGrow placeholder='Auto-grow textarea' />
-      </div>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>With Icon</label>
-        <Textarea
-          startIcon={<MessageSquare className='h-4 w-4' />}
-          placeholder='Textarea with icon'
-        />
-      </div>
-    </div>
+    <VariantShowcase title='Textarea' variants={[
+      { label: 'Default', code: `<Textarea placeholder="Enter your message…" />`, node: <Textarea placeholder='Enter your message…' /> },
+      { label: 'Error', code: `<Textarea error placeholder="This field has an error" />`, node: <Textarea error placeholder='This field has an error' /> },
+      { label: 'Success', code: `<Textarea success placeholder="Looks good" />`, node: <Textarea success placeholder='Looks good' /> },
+      { label: 'Disabled', code: `<Textarea disabled placeholder="Disabled" />`, node: <Textarea disabled placeholder='Disabled' /> },
+      { label: 'Small', code: `<Textarea size="sm" placeholder="Small textarea" />`, node: <Textarea size='sm' placeholder='Small textarea' /> },
+      { label: 'Large', code: `<Textarea size="lg" placeholder="Large textarea" />`, node: <Textarea size='lg' placeholder='Large textarea' /> },
+      { label: 'Auto-grow', code: `<Textarea autoGrow placeholder="Grows as you type…" />`, node: <Textarea autoGrow placeholder='Grows as you type…' /> },
+      { label: 'With start icon', code: `<Textarea startIcon={<MessageSquare />} placeholder="Message…" />`, node: <Textarea startIcon={<MessageSquare className='size-4' />} placeholder='Message…' /> },
+      { label: 'With end icon', code: `<Textarea endIcon={<Send />} placeholder="Type and send…" />`, node: <Textarea endIcon={<Send className='size-4' />} placeholder='Type and send…' /> },
+    ]} />
   ),
-  parameters: {
-    layout: 'padded',
-  },
+  parameters: { layout: 'padded' },
+  decorators: [Story => <div className='w-full max-w-3xl'><Story /></div>],
 };
 
-// Form Example
-export const ContactForm: Story = {
-  render: () => (
-    <div className='space-y-4 p-4 w-full max-w-2xl'>
-      <h3 className='text-lg font-semibold'>Contact Form</h3>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>Name</label>
-        <input
-          className='w-full px-3 py-2 border border-[rgba(0,0,0,0.23)] rounded'
-          placeholder='Enter your name'
-        />
-      </div>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>Email</label>
-        <input
-          className='w-full px-3 py-2 border border-[rgba(0,0,0,0.23)] rounded'
-          type='email'
-          placeholder='Enter your email'
-        />
-      </div>
-      <div className='space-y-2'>
-        <label className='text-sm font-medium'>Message</label>
-        <Textarea
-          autoGrow
-          startIcon={<MessageSquare className='h-4 w-4' />}
-          endIcon={<Send className='h-4 w-4' />}
-          placeholder='Enter your message here...'
-          rows={4}
-        />
-      </div>
-    </div>
-  ),
-  parameters: {
-    layout: 'padded',
-  },
+const fieldDecorator = [(Story: React.ComponentType) => <div className='w-[min(480px,calc(100vw-32px))]'><Story /></div>];
+
+export const Default: Story = { decorators: fieldDecorator, args: { placeholder: 'Enter your message…' } };
+export const ErrorState: Story = { decorators: fieldDecorator, args: { error: true, placeholder: 'This field has an error' } };
+export const SuccessState: Story = { decorators: fieldDecorator, args: { success: true, defaultValue: 'Looks good.' } };
+export const Disabled: Story = { decorators: fieldDecorator, args: { disabled: true, placeholder: 'Disabled textarea' } };
+export const Small: Story = { decorators: fieldDecorator, args: { size: 'sm', placeholder: 'Small textarea' } };
+export const Large: Story = { decorators: fieldDecorator, args: { size: 'lg', placeholder: 'Large textarea' } };
+export const AutoGrow: Story = {
+  decorators: fieldDecorator,
+  args: { autoGrow: true, placeholder: 'Grows as you type…' },
+  parameters: { docs: { description: { story: 'Height expands automatically as content exceeds the initial row count.' } } },
 };
-
-// Code Examples
-export const CodeExample: Story = {
-  render: () => (
-    <div className='space-y-4 p-4 w-full max-w-2xl'>
-      <h3 className='text-lg font-semibold'>Code Examples</h3>
-
-      <div className='space-y-4'>
-        <div>
-          <h4 className='text-sm font-medium mb-2'>Basic Textarea</h4>
-          <pre className='bg-gray-100 p-3 rounded text-sm overflow-x-auto'>
-            {`import { Textarea } from '@/components/ui/form-fields/textarea';
-
-<Textarea placeholder="Enter your message" />`}
-          </pre>
-        </div>
-
-        <div>
-          <h4 className='text-sm font-medium mb-2'>Auto-grow Textarea</h4>
-          <pre className='bg-gray-100 p-3 rounded text-sm overflow-x-auto'>
-            {`import { Textarea } from '@/components/ui/form-fields/textarea';
-
-<Textarea 
-  autoGrow 
-  placeholder="This textarea will grow as you type"
-/>`}
-          </pre>
-        </div>
-
-        <div>
-          <h4 className='text-sm font-medium mb-2'>Textarea with Icons</h4>
-          <pre className='bg-gray-100 p-3 rounded text-sm overflow-x-auto'>
-            {`import { Textarea } from '@/components/ui/form-fields/textarea';
-import { MessageSquare, Send } from 'lucide-react';
-
-<Textarea 
-  startIcon={<MessageSquare className="h-4 w-4" />}
-  endIcon={<Send className="h-4 w-4" />}
-  placeholder="Message with icons"
-  onEndIconClick={() => console.log('Send clicked')}
-/>`}
-          </pre>
-        </div>
-
-        <div>
-          <h4 className='text-sm font-medium mb-2'>Textarea Variants</h4>
-          <pre className='bg-gray-100 p-3 rounded text-sm overflow-x-auto'>
-            {`import { Textarea } from '@/components/ui/form-fields/textarea';
-
-<Textarea variant="default" placeholder="Default" />
-<Textarea error placeholder="Error state" />
-<Textarea success placeholder="Success state" />`}
-          </pre>
-        </div>
-
-        <div>
-          <h4 className='text-sm font-medium mb-2'>Textarea Sizes</h4>
-          <pre className='bg-gray-100 p-3 rounded text-sm overflow-x-auto'>
-            {`import { Textarea } from '@/components/ui/form-fields/textarea';
-
-<Textarea size="sm" placeholder="Small" />
-<Textarea size="default" placeholder="Default" />
-<Textarea size="lg" placeholder="Large" />`}
-          </pre>
-        </div>
-      </div>
-    </div>
-  ),
-  parameters: {
-    layout: 'padded',
-  },
+export const WithIcons: Story = {
+  decorators: fieldDecorator,
+  args: { startIcon: <MessageSquare className='size-4' />, endIcon: <Send className='size-4' />, placeholder: 'Message…' },
 };

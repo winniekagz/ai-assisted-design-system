@@ -24,8 +24,8 @@ const setupSteps = [
   {
     title: 'Install the package',
     description:
-      'Add componentIq to a React app, then import the components you need from the package entry.',
-    command: 'npm i @winniekagendo/componentiq',
+      'Add ComponentIQ to a React app, then import the components you need from the package entry.',
+    command: 'npm i componentiq',
     icon: PackageCheck,
   },
   {
@@ -83,7 +83,7 @@ export function CustomComponentsGuideScreen() {
     <AppShell>
       <PageHeader
         eyebrow='Customization Guide'
-        title='Set up, theme, and share custom componentIq components.'
+        title='Set up, theme, and share custom ComponentIQ components.'
         description='A practical workflow for designers and engineers to customize tokens, compose reusable components, document them in Storybook, and share them through the package.'
         actions={
           <div className='flex flex-wrap gap-2'>

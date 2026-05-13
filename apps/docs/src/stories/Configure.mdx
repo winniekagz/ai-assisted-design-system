@@ -1,129 +1,116 @@
 import { Meta } from '@storybook/addon-docs/blocks';
+import { Button } from '@/components/ui/button';
 
 <Meta title='Configure your project' />
 
 <div className='ciq-doc'>
+
+  {/* ── Hero ──────────────────────────────────────────────────────────── */}
   <section className='ciq-hero'>
     <p className='ciq-kicker'>ComponentIQ setup guide</p>
     <h1>Configure your project</h1>
-    <p>
-      This guide helps you install ComponentIQ, wrap your app with the token
-      provider, and start building screens with components that follow your
-      design system.
+    <p className='ciq-hero-desc'>
+      Install ComponentIQ, connect your brand tokens, and start composing
+      product screens with components that follow your design system.
     </p>
+
+    {/* Install command — first action in viewport, no scrolling required */}
+    <div className='ciq-install-bar'>
+      <span className='ciq-install-label'>npm</span>
+      <code>npm install componentiq</code>
+    </div>
   </section>
 
-<section className='ciq-path'>
-  <a
-    className='ciq-step'
-    href='?path=/docs/configure-your-project-installation--docs'
-  >
-    <span>01</span>
-    <strong>Install the package</strong>
-    <p>
-      Add the library, peer dependencies, and global CSS in the right place.
-    </p>
-  </a>
-  <a
-    className='ciq-step'
-    href='?path=/docs/configure-your-project-theming-tokens--docs'
-  >
-    <span>02</span>
-    <strong>Connect tokens</strong>
-    <p>Use semantic colors, typography, radius, spacing, and dynamic themes.</p>
-  </a>
-  <a
-    className='ciq-step'
-    href='?path=/docs/configure-your-project-using-components--docs'
-  >
-    <span>03</span>
-    <strong>Build with components</strong>
-    <p>
-      Compose fields, buttons, badges, tables, and date pickers in product UI.
-    </p>
-  </a>
-</section>
+  {/* ── Three-step path ───────────────────────────────────────────────── */}
+  <section className='ciq-path'>
+    <a className='ciq-step' target='_parent' href='?path=/docs/configure-your-project-installation--docs'>
+      <span className='ciq-step-num'>01</span>
+      <strong>Install the package</strong>
+      <p>Add the library, peer dependencies, and global CSS in the right place.</p>
+      <span className='ciq-step-arrow'>Get started →</span>
+    </a>
+    <a className='ciq-step' target='_parent' href='?path=/docs/configure-your-project-theming-tokens--docs'>
+      <span className='ciq-step-num'>02</span>
+      <strong>Connect tokens</strong>
+      <p>Apply semantic colors, typography, radius, spacing, and dynamic themes.</p>
+      <span className='ciq-step-arrow'>Configure tokens →</span>
+    </a>
+    <a className='ciq-step' target='_parent' href='?path=/docs/configure-your-project-using-components--docs'>
+      <span className='ciq-step-num'>03</span>
+      <strong>Build with components</strong>
+      <p>Compose fields, buttons, badges, tables, and date pickers in product UI.</p>
+      <span className='ciq-step-arrow'>Start building →</span>
+    </a>
+  </section>
 
-<section className='ciq-grid'>
-  <div>
-    <p className='ciq-kicker'>What ComponentIQ gives you</p>
-    <h2>A token-first component system</h2>
-    <p>
-      ComponentIQ is built around semantic tokens instead of one-off colors.
-      Components read from tokens like <code>--text-primary</code>,
-      <code>--bg-surface</code>, <code>--border-default</code>, and
-      <code>--helper-error</code>, so user themes can change the visual system
-      without rewriting component code.
-    </p>
-  </div>
-  <div className='ciq-card'>
-    <h3>Recommended setup order</h3>
-    <ol>
-      <li>Install the package and required peer dependencies.</li>
-      <li>Import the global CSS once in your app shell.</li>
-      <li>
-        Wrap your app with <code>ComponentIqProvider</code>.
-      </li>
-      <li>Pass custom tokens only through the provider.</li>
-      <li>Use semantic utilities and component props in product code.</li>
-    </ol>
-  </div>
-</section>
+  {/* ── What you get — context first, then action list ────────────────── */}
+  <section className='ciq-explainer'>
+    <div className='ciq-explainer-prose'>
+      <p className='ciq-kicker'>What ComponentIQ gives you</p>
+      <h2>A token-first component system</h2>
+      <p>
+        ComponentIQ is built around semantic tokens instead of one-off colors.
+        Every component reads from the token contract — change them once through{' '}
+        <code>ComponentIqProvider</code> and every component updates automatically.
+      </p>
+    </div>
 
-<section className='ciq-token-board'>
-  <div>
-    <p className='ciq-kicker'>Public color contract</p>
-    <h2>Use the semantic tokens</h2>
-    <p>
-      These are the color roles users should learn first. Shade scales still
-      exist internally for compatibility, but product code should prefer the
-      semantic contract below.
-    </p>
-  </div>
-  <div className='ciq-swatches'>
-    <div>
-      <span style={{ background: 'var(--text-primary)' }} />
-      Text primary
-    </div>
-    <div>
-      <span style={{ background: 'var(--text-secondary)' }} />
-      Text secondary
-    </div>
-    <div>
-      <span style={{ background: 'var(--bg-surface)' }} />
-      Surface
-    </div>
-    <div>
-      <span style={{ background: 'var(--color-primary)' }} />
-      Primary
-    </div>
-    <div>
-      <span style={{ background: 'var(--color-secondary)' }} />
-      Secondary
-    </div>
-    <div>
-      <span style={{ background: 'var(--helper-success)' }} />
-      Success
-    </div>
-    <div>
-      <span style={{ background: 'var(--helper-warning)' }} />
-      Warning
-    </div>
-    <div>
-      <span style={{ background: 'var(--helper-error)' }} />
-      Error
-    </div>
-  </div>
-</section>
-
-  <section className='ciq-code-section'>
-    <div>
-      <p className='ciq-kicker'>Quick start</p>
-      <h2>Minimal app shell</h2>
-    </div>
+    <div className='ciq-explainer-code'>
 
 ```tsx
-import { ComponentIqProvider } from '@winniekagendo/componentiq';
+// Tokens every component reads — override once, updates everywhere
+--text-title         // headings and labels
+--text-paragraph     // body copy
+--bg-surface         // cards and panel backgrounds
+--color-primary      // brand actions and selection
+--border-subtle      // dividers and section separators
+--helper-error       // validation and error feedback
+```
+
+    </div>
+
+    <div className='ciq-order'>
+      <h3>Recommended setup order</h3>
+      <ol className='ciq-order-list'>
+        <li><span>1</span>Install the package and required peer dependencies.</li>
+        <li><span>2</span>Import the global CSS once in your app shell.</li>
+        <li><span>3</span>Wrap your app with <code>ComponentIqProvider</code>.</li>
+        <li><span>4</span>Pass custom tokens only through the provider.</li>
+        <li><span>5</span>Use semantic utilities and component props in product code.</li>
+      </ol>
+    </div>
+  </section>
+
+  {/* ── Color contract ────────────────────────────────────────────────── */}
+  <section className='ciq-token-board'>
+    <div className='ciq-token-board-head'>
+      <p className='ciq-kicker'>Public color contract</p>
+      <h2>Use the semantic tokens</h2>
+      <p>
+        These are the roles product code should reference. Shade scales exist
+        internally for compatibility but the semantic contract is the stable public surface.
+      </p>
+    </div>
+    <div className='ciq-swatches'>
+      <div><span style={{ background: 'var(--text-title)' }} />Text title</div>
+      <div><span style={{ background: 'var(--text-paragraph)' }} />Text paragraph</div>
+      <div><span style={{ background: 'var(--bg-surface)' }} />Surface</div>
+      <div><span style={{ background: 'var(--color-primary)' }} />Primary</div>
+      <div><span style={{ background: 'var(--color-secondary)' }} />Secondary</div>
+      <div><span style={{ background: 'var(--helper-success)' }} />Success</div>
+      <div><span style={{ background: 'var(--helper-warning)' }} />Warning</div>
+      <div><span style={{ background: 'var(--helper-error)' }} />Error</div>
+    </div>
+  </section>
+
+  {/* ── Minimal shell ─────────────────────────────────────────────────── */}
+  <section className='ciq-code-section'>
+    <p className='ciq-kicker'>Quick start</p>
+    <h2>Minimal app shell</h2>
+    <p>Add the provider once at your app root. All components inside inherit the token system.</p>
+
+```tsx
+import { ComponentIqProvider } from 'componentiq';
 import './globals.css';
 
 export function App({ children }: { children: React.ReactNode }) {
@@ -133,176 +120,260 @@ export function App({ children }: { children: React.ReactNode }) {
 
   </section>
 
-  <section className='ciq-next'>
-    <a href='?path=/docs/configure-your-project-installation--docs'>Start with installation</a>
-  </section>
+  {/* ── CTA ───────────────────────────────────────────────────────────── */}
+  <div className='ciq-next'>
+    <Button asChild>
+      <a target='_parent' href='?path=/docs/configure-your-project-installation--docs'>
+        Start with Step 01 — Installation →
+      </a>
+    </Button>
+  </div>
+
 </div>
 
 <style>
   {`
+/* ── Base ─────────────────────────────────────────────────────────────────── */
 .ciq-doc {
-  color: #111827;
-  max-width: 980px;
+  max-width: 900px;
+  padding: 0 8px;
+  font-family: var(--font-rubik, ui-sans-serif, system-ui, sans-serif);
 }
-
-.ciq-doc h1,
-.ciq-doc h2,
-.ciq-doc h3 {
-  color: #111827;
+.ciq-doc h1, .ciq-doc h2, .ciq-doc h3 {
+  color: var(--text-title);
   letter-spacing: 0;
+  margin-top: 0;
+  font-family: var(--font-heading, var(--font-rubik, ui-sans-serif));
 }
-
-.ciq-doc p {
-  color: #111827;
-  line-height: 1.65;
+.ciq-doc p, .ciq-doc li {
+  color: var(--text-paragraph);
+  line-height: 1.7;
+  font-size: 15px;
 }
-
 .ciq-doc code {
-  color: #111827;
-  padding: 1px 5px;
+  background: var(--bg-secondary);
+  color: var(--text-title);
+  padding: 2px 6px;
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  border: 1px solid var(--border-subtle);
 }
-
-.ciq-hero {
-  padding: 32px;
-  margin-bottom: 20px;
-}
-
-.ciq-hero h1 {
-  color: #111827;
-  margin: 8px 0 10px;
-  font-size: 34px;
-}
-
-.ciq-hero p,
-.ciq-hero .ciq-kicker {
-  color: #111827;
-  max-width: 680px;
-}
-
 .ciq-kicker {
-  margin: 0;
+  margin: 0 0 8px;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
+  letter-spacing: var(--letter-spacing-widest);
   font-size: 11px;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-muted);
 }
 
+/* ── Hero ─────────────────────────────────────────────────────────────────── */
+.ciq-hero {
+  padding: var(--spacing-xl) 0 var(--spacing-lg);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.ciq-hero h1 {
+  font-size: 36px;
+  margin: 6px 0 12px;
+  color: var(--text-title);
+}
+.ciq-hero-desc {
+  max-width: 640px;
+  margin: 0 0 var(--spacing-md);
+  color: var(--text-secondary);
+}
+
+/* Install bar — dark terminal aesthetic, immediate affordance */
+.ciq-install-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--text-title);
+  border-radius: var(--radius-xl);
+  padding: 10px var(--spacing-md);
+  margin-top: 4px;
+}
+.ciq-install-bar code {
+  background: transparent;
+  color: var(--helper-success-pastel);
+  font-size: 14px;
+  padding: 0;
+  border: none;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+}
+.ciq-install-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-disabled);
+  font-family: ui-monospace, monospace;
+}
+
+/* ── Three-step cards ─────────────────────────────────────────────────────── */
 .ciq-path {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin: 20px 0;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-lg) 0;
 }
-
 .ciq-step {
-  display: block;
-  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--spacing-md);
   color: inherit;
   text-decoration: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  background: var(--bg-surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-
-.ciq-step span {
-  display: inline-block;
-  color: #111827;
-  font-size: 12px;
-  font-weight: 700;
+.ciq-step:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
 }
-
+.ciq-step-num {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: 0.12em;
+  font-family: ui-monospace, monospace;
+}
 .ciq-step strong {
   display: block;
-  margin-top: 14px;
-  color: #111827;
+  font-size: 15px;
+  color: var(--text-title);
+  margin-top: 4px;
 }
-
 .ciq-step p {
-  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  flex: 1;
+}
+.ciq-step-arrow {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-top: var(--spacing-sm);
+}
+
+/* ── Explainer — stacked: prose → code → list ────────────────────────────── */
+.ciq-explainer {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  margin: 8px 0 var(--spacing-lg);
+  background: var(--bg-surface);
+}
+.ciq-explainer-prose {
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.ciq-explainer-prose h2 { font-size: 22px; margin: 6px 0 10px; }
+.ciq-explainer-code { border-bottom: 1px solid var(--border-subtle); }
+.ciq-explainer-code pre { margin: 0 !important; border-radius: 0 !important; }
+.ciq-order {
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+.ciq-order h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--spacing-sm);
+}
+.ciq-order-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--spacing-sm);
+}
+.ciq-order-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
   font-size: 14px;
+  color: var(--text-paragraph);
+}
+.ciq-order-list li span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--text-inverse);
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
-.ciq-grid {
-  display: grid;
-  grid-template-columns: 1fr 0.9fr;
-  gap: 20px;
-  align-items: start;
-  margin: 28px 0;
-}
-
-.ciq-card {
-  padding: 20px;
-}
-
-.ciq-card ol {
-  margin: 12px 0 0;
-  padding-left: 22px;
-  color: #111827;
-}
-
-.ciq-card li {
-  margin: 8px 0;
-}
-
+/* ── Token board ──────────────────────────────────────────────────────────── */
 .ciq-token-board {
-  display: grid;
-  grid-template-columns: 0.85fr 1.15fr;
-  gap: 20px;
-  padding: 22px;
-  margin: 24px 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  margin-bottom: var(--spacing-lg);
+  background: var(--bg-surface);
 }
-
+.ciq-token-board-head {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.ciq-token-board-head h2 { font-size: 22px; margin: 6px 0 10px; }
+.ciq-token-board-head p { color: var(--text-secondary); margin: 0; }
 .ciq-swatches {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: var(--spacing-md) var(--spacing-lg);
+  gap: 4px;
 }
-
 .ciq-swatches div {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #111827;
-  font-size: 14px;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 8px 0;
 }
-
 .ciq-swatches span {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
 }
 
+/* ── Code section ─────────────────────────────────────────────────────────── */
 .ciq-code-section {
-  padding: 22px;
-  margin: 24px 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  margin-bottom: var(--spacing-lg);
+  background: var(--bg-surface);
 }
+.ciq-code-section > .ciq-kicker { padding: var(--spacing-lg) var(--spacing-lg) 0; }
+.ciq-code-section > h2 { padding: 6px var(--spacing-lg) 0; font-size: 22px; }
+.ciq-code-section > p {
+  padding: 0 var(--spacing-lg) var(--spacing-sm);
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0;
+}
+.ciq-code-section pre { margin: 0 !important; border-radius: 0 !important; }
 
-.ciq-code-section pre {
-  margin-top: 16px !important;
-}
-
-.ciq-next {
-  margin-top: 28px;
-}
-
-.ciq-next a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 40px;
-  padding: 0 14px;
-  color: #111827;
-  text-decoration: none;
-  font-weight: 600;
-}
+/* ── CTA ──────────────────────────────────────────────────────────────────── */
+.ciq-next { margin: 8px 0 var(--spacing-xl); }
+.ciq-next a { text-decoration: none; color: inherit; }
 
 @media (max-width: 760px) {
-  .ciq-path,
-  .ciq-grid,
-  .ciq-token-board {
-    grid-template-columns: 1fr;
-  }
-
-  .ciq-hero {
-    padding: 24px;
-  }
+  .ciq-path, .ciq-swatches { grid-template-columns: 1fr; }
+  .ciq-hero h1 { font-size: 28px; }
 }
 `}
 </style>

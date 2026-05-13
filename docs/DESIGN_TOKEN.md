@@ -1,6 +1,6 @@
 # Design Tokens System
 
-A comprehensive, modularized design tokens system for the componentIq Component Library, built to work seamlessly with shadcn/ui and Tailwind CSS v4.
+A comprehensive, modularized design tokens system for the ComponentIQ Component Library, built to work seamlessly with shadcn/ui and Tailwind CSS v4.
 
 ## Overview
 

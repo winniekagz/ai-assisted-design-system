@@ -1,5 +1,5 @@
 {
-  "name": "@winniekagendo/componentiq",
+  "name": "componentiq",
   "version": "1.0.4",
   "description": "A reusable React UI component library built with TypeScript and Tailwind CSS.",
   "private": false,

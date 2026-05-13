@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@winniekagendo/componentiq', '@winniekagendo/componentiq-ai'],
+  transpilePackages: ['componentiq', '@winniekagendo/componentiq-ai'],
   turbopack: {
     rules: {
       '*.svg': {

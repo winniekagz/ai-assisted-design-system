@@ -29,7 +29,7 @@ const docGroups = [
       { href: '/custom-components', label: 'Setup guide' },
       { href: '/components', label: 'Component catalog' },
     ],
-    command: 'npm i @winniekagendo/componentiq',
+    command: 'npm i componentiq',
   },
   {
     title: 'Customize tokens',
@@ -75,8 +75,8 @@ const quickLinks = [
   },
   {
     title: 'npm package',
-    description: 'Public install page for @winniekagendo/componentiq.',
-    href: 'https://www.npmjs.com/package/@winniekagendo/componentiq',
+    description: 'Public install page for componentiq.',
+    href: 'https://github.com/winniekagz/ai-assisted-design-system/packages',
     icon: PackageCheck,
     external: true,
   },
@@ -95,7 +95,7 @@ export function DocumentationScreen() {
       <PageHeader
         eyebrow='Documentation'
         title='Everything users need after clicking Read docs.'
-        description='Use this guide to install componentIq, customize the design system, document components in Storybook, and share changes through npm or GitHub.'
+        description='Use this guide to install ComponentIQ, customize the design system, document components in Storybook, and share changes through npm or GitHub.'
         actions={
           <Button asChild endIcon={<ArrowRight />}>
             <Link href='/custom-components'>Start setup guide</Link>
@@ -186,7 +186,7 @@ export function DocumentationScreen() {
               <code>{`import {
   Button,
   ComponentIqProvider,
-} from '@winniekagendo/componentiq';
+} from 'componentiq';
 
 export function App() {
   return (

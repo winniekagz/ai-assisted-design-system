@@ -34,6 +34,15 @@ import { useState } from 'react';
 import DashPageHeader from '@/components/ui/layouts/DashPageHeader';
 import { Logo } from '@/lib/icon-registry';
 
+const LogoMark = () => (
+  <img
+    src={Logo}
+    alt=''
+    aria-hidden='true'
+    className='h-[56px] w-[56px] object-contain'
+  />
+);
+
 export default function DashLayoutDemo() {
   const [activeItem, setActiveItem] = useState('dashboard');
 
@@ -106,8 +115,8 @@ export default function DashLayoutDemo() {
 
   // Branding data
   const brandingData = {
-    logo: Logo,
-    title: 'componentIq Dashboard',
+    logo: LogoMark,
+    title: 'ComponentIQ Dashboard',
     subtitle: 'Admin Panel',
     user: {
       name: 'John Doe',

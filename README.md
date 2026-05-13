@@ -58,13 +58,13 @@ Storybook includes a theme toolbar powered by `ComponentIqProvider`, so designer
 The installable component library is published as:
 
 ```bash
-npm i @winniekagendo/componentiq
+npm i componentiq
 ```
 
 ## Package Link
 
 ```text
-https://www.npmjs.com/package/@winniekagendo/componentiq
+https://www.npmjs.com/package/componentiq
 ```
 
 The npm package uses `README.npm.md` as its Storybook-focused documentation during CI publishing. The root `README.md` stays focused on the GitHub product docs.

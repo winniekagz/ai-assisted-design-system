@@ -86,6 +86,30 @@ Token-driven text input built on a native \`<input>\` element.
 - Collecting short free-form text: names, emails, search queries, URLs.
 - When a single-line response is expected. For multi-line content use **Textarea**.
 
+### Usage
+\`\`\`tsx
+import { Input } from 'componentiq';
+import { Search, Eye, EyeOff } from 'lucide-react';
+
+// With label
+<label>Email<Input type="email" placeholder="you@company.com" /></label>
+
+// Validation states
+<Input label="Username" error helperText="Username is taken." />
+<Input label="Username" success helperText="Username is available." />
+
+// Start icon
+<Input startIcon={<Search className="size-4" />} placeholder="Search…" />
+
+// Password toggle
+<Input
+  label="Password"
+  type={visible ? 'text' : 'password'}
+  endIcon={visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+  onEndIconClick={() => setVisible(v => !v)}
+/>
+\`\`\`
+
 ### Props cheat sheet
 | Prop | Type | Default | Notes |
 |------|------|---------|-------|

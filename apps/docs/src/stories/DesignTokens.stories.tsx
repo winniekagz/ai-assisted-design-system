@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import { ComponentIqProvider, componentIqThemes } from '@winniekagendo/componentiq';
+import { ComponentIqProvider, componentIqThemes } from 'componentiq';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -77,7 +77,7 @@ ComponentIqProvider (tokens prop → inline CSS vars)
 ## Using the provider
 
 \`\`\`tsx
-import { ComponentIqProvider, componentIqThemes } from '@winniekagendo/componentiq';
+import { ComponentIqProvider, componentIqThemes } from 'componentiq';
 
 // 1. Use a preset theme
 <ComponentIqProvider tokens={componentIqThemes.default}>
