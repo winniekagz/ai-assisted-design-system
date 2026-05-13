@@ -18,7 +18,7 @@ Token-driven breadcrumb trail. The last segment renders as the current page (no 
 
 ### Usage
 \`\`\`tsx
-import { Breadcrumbs } from '@winniekagendo/componentiq';
+import { Breadcrumbs } from 'componentiq';
 
 <Breadcrumbs
   items={[

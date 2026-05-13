@@ -25,7 +25,7 @@ const setupSteps = [
     title: 'Install the package',
     description:
       'Add componentIq to a React app, then import the components you need from the package entry.',
-    command: 'npm i @winniekagendo/componentiq',
+    command: 'npm i componentiq',
     icon: PackageCheck,
   },
   {

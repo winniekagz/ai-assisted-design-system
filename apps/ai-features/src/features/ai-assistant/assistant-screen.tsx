@@ -6,10 +6,10 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { recommendationRequestSchema, recommendationResponseSchema, type RecommendationRequest, type RecommendationResponse, createMockRecommendation } from '@winniekagendo/componentiq-ai';
-import { Badge } from '@winniekagendo/componentiq';
-import { Button } from '@winniekagendo/componentiq';
-import { Card, CardContent, CardHeader, CardTitle } from '@winniekagendo/componentiq';
-import { Select } from '@winniekagendo/componentiq';
+import { Badge } from 'componentiq';
+import { Button } from 'componentiq';
+import { Card, CardContent, CardHeader, CardTitle } from 'componentiq';
+import { Select } from 'componentiq';
 import { AppShell, PageHeader } from '@/features/dashboard/app-shell';
 
 const contexts = ['Feature UI', 'Form', 'Dashboard', 'Marketing', 'Data Display', 'Navigation', 'Feedback', 'Settings', 'Checkout'];

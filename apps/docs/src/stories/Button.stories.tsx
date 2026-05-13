@@ -36,7 +36,7 @@ Token-driven button with seven variants, five sizes, icon slots, loading state, 
 
 ### Usage
 \`\`\`tsx
-import { Button } from '@winniekagendo/componentiq';
+import { Button } from 'componentiq';
 import { Save, Trash2 } from 'lucide-react';
 
 <Button startIcon={<Save />}>Save changes</Button>

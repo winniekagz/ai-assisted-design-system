@@ -19,7 +19,7 @@ Token-driven checkbox built on Radix UI \`Checkbox\` primitive. Supports three s
 
 ### Usage
 \`\`\`tsx
-import { Checkbox } from '@winniekagendo/componentiq';
+import { Checkbox } from 'componentiq';
 
 // Uncontrolled
 <Checkbox label="Accept terms" defaultChecked />

@@ -21,7 +21,7 @@ Token-driven badge for compact status, category, and metadata indicators. Colour
 
 ### Usage
 \`\`\`tsx
-import { Badge } from '@winniekagendo/componentiq';
+import { Badge } from 'componentiq';
 
 // Status-driven (label auto-derived from status)
 <Badge variant="pastel" status="active" />

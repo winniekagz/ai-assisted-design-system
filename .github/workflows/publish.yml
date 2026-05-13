@@ -1,6 +1,12 @@
-name: Publish Package
+name: Publish Component IQ
 
 on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Run npm publish without publishing
+        type: boolean
+        default: false
   release:
     types:
       - published
@@ -15,6 +21,7 @@ jobs:
 
     permissions:
       contents: read
+      id-token: write
 
     steps:
       - name: Checkout
@@ -30,13 +37,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Type check library
+        run: npm run type-check --workspace=packages/design-system
+
       - name: Build library
-        run: npm run build:lib
+        run: npm run build:lib --workspace=packages/design-system
 
       - name: Use npm package README
-        run: cp README.npm.md README.md
+        run: cp ../../README.npm.md README.md
+        working-directory: packages/design-system
 
-      - name: Publish
-        run: npm publish --access public
+      - name: Publish dry run
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: npm publish --dry-run --access public
+        working-directory: packages/design-system
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.dry_run }}
+        run: npm publish --access public --provenance
+        working-directory: packages/design-system
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

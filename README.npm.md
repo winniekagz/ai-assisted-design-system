@@ -5,13 +5,13 @@ componentIq is a React component library documented with Storybook. The npm pack
 ## Install
 
 ```bash
-npm i @winniekagendo/componentiq
+npm i componentiq
 ```
 
 ## Usage
 
 ```tsx
-import { Button, Card, Input, Typography } from '@winniekagendo/componentiq';
+import { Button, Card, Input, Typography } from 'componentiq';
 
 export function Example() {
   return (
@@ -35,7 +35,7 @@ import {
   Button,
   ComponentIqProvider,
   type ComponentIqTokens,
-} from '@winniekagendo/componentiq';
+} from 'componentiq';
 
 const tokens: ComponentIqTokens = {
   colors: {
@@ -72,7 +72,7 @@ You can also start from a preset:
 import {
   ComponentIqProvider,
   componentIqThemes,
-} from '@winniekagendo/componentiq';
+} from 'componentiq';
 
 export function App({ children }: { children: React.ReactNode }) {
   return (
@@ -134,7 +134,7 @@ The package exports common UI primitives and patterns, including:
 ## Package Link
 
 ```text
-https://www.npmjs.com/package/@winniekagendo/componentiq
+https://www.npmjs.com/package/componentiq
 ```
 
 ## Repository

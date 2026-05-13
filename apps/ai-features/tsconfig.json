@@ -23,7 +23,7 @@
       "@/ai/*": ["../../packages/ai/src/ai/*"],
       "@/design-system/data/*": ["../../packages/ai/src/design-system/data/*"],
       "@/*": ["./src/*"],
-      "@winniekagendo/componentiq": ["../../packages/design-system/src/index.ts"],
+      "componentiq": ["../../packages/design-system/src/index.ts"],
       "@winniekagendo/componentiq-ai": ["../../packages/ai/src/index.ts"]
     },
     "plugins": [{ "name": "next" }]

@@ -29,7 +29,7 @@ const docGroups = [
       { href: '/custom-components', label: 'Setup guide' },
       { href: '/components', label: 'Component catalog' },
     ],
-    command: 'npm i @winniekagendo/componentiq',
+    command: 'npm i componentiq',
   },
   {
     title: 'Customize tokens',
@@ -75,8 +75,8 @@ const quickLinks = [
   },
   {
     title: 'npm package',
-    description: 'Public install page for @winniekagendo/componentiq.',
-    href: 'https://www.npmjs.com/package/@winniekagendo/componentiq',
+    description: 'Public install page for componentiq.',
+    href: 'https://www.npmjs.com/package/componentiq',
     icon: PackageCheck,
     external: true,
   },
@@ -186,7 +186,7 @@ export function DocumentationScreen() {
               <code>{`import {
   Button,
   ComponentIqProvider,
-} from '@winniekagendo/componentiq';
+} from 'componentiq';
 
 export function App() {
   return (
