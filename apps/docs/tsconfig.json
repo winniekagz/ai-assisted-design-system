@@ -23,7 +23,7 @@
       "@/ai/*": ["../../packages/ai/src/ai/*"],
       "@/design-system/data/*": ["../../packages/ai/src/design-system/data/*"],
       "@/*": ["./src/*"],
-      "componentiq": ["../../packages/design-system/src/index.ts"],
+      "@winniekagz/componentiq": ["../../packages/design-system/src/index.ts"],
       "@winniekagendo/componentiq-ai": ["../../packages/ai/src/index.ts"]
     },
     "plugins": [
@@ -36,7 +36,8 @@
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "../../packages/design-system/src/types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",

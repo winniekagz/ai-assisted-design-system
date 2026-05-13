@@ -18,7 +18,7 @@
     "chromatic": "npx chromatic --project-token=chpt_ed90d514739b3ee"
   },
   "dependencies": {
-    "componentiq": "*",
+    "@winniekagz/componentiq": "*",
     "@winniekagendo/componentiq-ai": "*",
     "@svgr/webpack": "^8.1.0",
     "next": "15.4.2",

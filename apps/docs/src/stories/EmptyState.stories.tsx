@@ -21,7 +21,7 @@ Placeholder shown when a list, table, or data view has no content. Centers an ic
 
 ### Usage
 \`\`\`tsx
-import { EmptyState } from 'componentiq';
+import { EmptyState } from '@winniekagz/componentiq';
 import { Inbox } from 'lucide-react';
 
 <EmptyState

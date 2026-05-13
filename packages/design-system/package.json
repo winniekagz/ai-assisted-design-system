@@ -1,5 +1,5 @@
 {
-  "name": "componentiq",
+  "name": "@winniekagz/componentiq",
   "version": "1.0.4",
   "description": "A reusable React UI component library built with TypeScript and Tailwind CSS.",
   "private": false,
@@ -25,6 +25,9 @@
       "require": "./dist/index.js",
       "import": "./dist/index.mjs"
     }
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "build:lib": "tsup",

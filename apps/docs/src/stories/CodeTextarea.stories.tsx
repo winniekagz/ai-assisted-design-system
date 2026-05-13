@@ -19,7 +19,7 @@ Monospace textarea designed for code input. Uses \`--font-mono\`, \`--bg-seconda
 
 ### Usage
 \`\`\`tsx
-import { CodeTextarea } from 'componentiq';
+import { CodeTextarea } from '@winniekagz/componentiq';
 
 <CodeTextarea label="Component source" placeholder="// paste your code here" />
 

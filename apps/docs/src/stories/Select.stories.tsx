@@ -92,7 +92,7 @@ Token-driven select built on the native \`<select>\` element — reliable cross-
 Pass \`<option>\` elements as \`children\`. Provide a \`placeholder\` prop to render a disabled first option that prompts the user.
 
 \`\`\`tsx
-import { Select } from 'componentiq';
+import { Select } from '@winniekagz/componentiq';
 
 <Select label="Role" placeholder="Select a role…">
   <option value="designer">Designer</option>

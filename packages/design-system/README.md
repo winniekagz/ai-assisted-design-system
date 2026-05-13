@@ -5,13 +5,13 @@ componentIq is a reusable React UI component library built with TypeScript and T
 ## Install
 
 ```bash
-npm i componentiq
+npm i @winniekagz/componentiq
 ```
 
 ## Usage
 
 ```tsx
-import { Button, Card, Input, Typography } from 'componentiq';
+import { Button, Card, Input, Typography } from '@winniekagz/componentiq';
 
 export function Example() {
   return (
@@ -29,7 +29,7 @@ export function Example() {
 Use `ComponentIqProvider` and `componentIqThemes` to apply design tokens across the component library.
 
 ```tsx
-import { ComponentIqProvider, componentIqThemes } from 'componentiq';
+import { ComponentIqProvider, componentIqThemes } from '@winniekagz/componentiq';
 
 export function App({ children }: { children: React.ReactNode }) {
   return (

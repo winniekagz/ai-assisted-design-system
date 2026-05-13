@@ -20,7 +20,7 @@ Token-driven multi-line text input. Supports validation states, size variants, o
 
 ### Usage
 \`\`\`tsx
-import { Textarea } from 'componentiq';
+import { Textarea } from '@winniekagz/componentiq';
 
 // Basic
 <label>Notes<Textarea placeholder="Add notes…" rows={4} /></label>

@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['componentiq', '@winniekagendo/componentiq-ai'],
+  transpilePackages: ['@winniekagz/componentiq', '@winniekagendo/componentiq-ai'],
   turbopack: {
     resolveAlias: { underscore: 'lodash' },
     resolveExtensions: ['.mdx', '.tsx', '.ts', '.jsx', '.js', '.json'],

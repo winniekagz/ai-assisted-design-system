@@ -20,7 +20,7 @@ Token-driven linear progress bar. Track uses \`--bg-secondary\`; fill uses \`--c
 
 ### Usage
 \`\`\`tsx
-import { Progress } from 'componentiq';
+import { Progress } from '@winniekagz/componentiq';
 
 <Progress value={65} label="Upload progress" showValue />
 

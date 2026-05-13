@@ -19,7 +19,7 @@ Token-driven text component with semantic heading, body, display, and code varia
 
 ### Usage
 \`\`\`tsx
-import { Typography } from 'componentiq';
+import { Typography } from '@winniekagz/componentiq';
 
 <Typography variant="h1">Page title</Typography>
 <Typography variant="body1">

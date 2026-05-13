@@ -24,7 +24,7 @@ Token-driven radio group built on Radix UI \`RadioGroup\` primitives. Renders a 
 
 ### Usage
 \`\`\`tsx
-import { RadioGroup } from 'componentiq';
+import { RadioGroup } from '@winniekagz/componentiq';
 
 const options = [
   { value: 'starter', label: 'Starter' },

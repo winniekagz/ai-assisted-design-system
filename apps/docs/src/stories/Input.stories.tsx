@@ -88,7 +88,7 @@ Token-driven text input built on a native \`<input>\` element.
 
 ### Usage
 \`\`\`tsx
-import { Input } from 'componentiq';
+import { Input } from '@winniekagz/componentiq';
 import { Search, Eye, EyeOff } from 'lucide-react';
 
 // With label

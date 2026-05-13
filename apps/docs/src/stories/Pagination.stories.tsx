@@ -23,7 +23,7 @@ Token-driven pagination controls with five layout variants. The component is ful
 
 ### Usage
 \`\`\`tsx
-import { PaginationControl } from 'componentiq';
+import { PaginationControl } from '@winniekagz/componentiq';
 
 const [page, setPage] = useState(1);
 

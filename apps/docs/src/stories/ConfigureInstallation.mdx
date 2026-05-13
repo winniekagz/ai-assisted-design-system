@@ -22,7 +22,7 @@ import { Alert } from '@/components/ui/alert';
     </p>
     <div className='ciq-install-bar'>
       <span className='ciq-install-label'>npm</span>
-      <code>npm install componentiq</code>
+      <code>npm install @winniekagz/componentiq</code>
     </div>
   </section>
 
@@ -36,7 +36,7 @@ import { Alert } from '@/components/ui/alert';
         <p>Install ComponentIQ and make sure your app has React available.</p>
 
 ```bash
-npm install componentiq
+npm install @winniekagz/componentiq
 ```
 
       </div>
@@ -75,7 +75,7 @@ import './globals.css';
         </p>
 
 ```tsx
-import { ComponentIqProvider } from 'componentiq';
+import { ComponentIqProvider } from '@winniekagz/componentiq';
 
 export function RootLayout({ children }: { children: React.ReactNode }) {
   return <ComponentIqProvider>{children}</ComponentIqProvider>;

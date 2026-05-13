@@ -29,7 +29,7 @@ const config: StorybookConfig = {
     config.resolve = config.resolve ?? {};
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@winniekagendo/componentiq': path.join(dsRoot, 'index.ts'),
+      '@winniekagz/componentiq': path.join(dsRoot, 'index.ts'),
       '@winniekagendo/componentiq-ai': path.join(aiRoot, 'index.ts'),
       // Cross-package @/ aliases so stories can keep their existing imports
       '@/components': path.join(dsRoot, 'components'),

@@ -20,7 +20,7 @@ Token-driven inline alert for persistent contextual feedback. Uses pastel backgr
 
 ### Usage
 \`\`\`tsx
-import { Alert } from 'componentiq';
+import { Alert } from '@winniekagz/componentiq';
 
 <Alert variant="info" title="Your session expires soon">
   Save your work to avoid losing changes.
