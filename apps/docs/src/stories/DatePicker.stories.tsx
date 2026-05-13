@@ -22,7 +22,7 @@ Token-driven calendar input for selecting a single date or a start/end range. Th
 
 ### Usage
 \`\`\`tsx
-import DatePicker, { DatePickerValue } from '@winniekagz/componentiq';
+import DatePicker, { DatePickerValue } from 'componentiq';
 
 // Single date (controlled)
 const [value, setValue] = useState<DatePickerValue>({ startDate: null, endDate: null });

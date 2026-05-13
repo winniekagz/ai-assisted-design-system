@@ -104,7 +104,7 @@ Token-driven standalone radio button built on Radix UI \`RadioGroup\` primitives
 Each \`Radio\` must share the same \`name\` attribute (native radio behaviour) and be controlled against the same state:
 
 \`\`\`tsx
-import { Radio } from '@winniekagz/componentiq';
+import { Radio } from 'componentiq';
 
 const [value, setValue] = useState('');
 

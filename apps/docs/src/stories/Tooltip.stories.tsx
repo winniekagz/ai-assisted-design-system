@@ -35,7 +35,7 @@ Token-driven tooltip built on Radix UI \`Tooltip\` primitive. Appears on hover o
 
 ### Usage
 \`\`\`tsx
-import { Tooltip, TooltipProvider } from '@winniekagz/componentiq';
+import { Tooltip, TooltipProvider } from 'componentiq';
 
 // Wrap your app (once) with TooltipProvider
 <TooltipProvider>
@@ -50,7 +50,7 @@ import { Tooltip, TooltipProvider } from '@winniekagz/componentiq';
 
 ### Composing with primitives
 \`\`\`tsx
-import { TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider } from '@winniekagz/componentiq';
+import { TooltipRoot, TooltipTrigger, TooltipContent, TooltipProvider } from 'componentiq';
 
 <TooltipProvider>
   <TooltipRoot delayDuration={0}>

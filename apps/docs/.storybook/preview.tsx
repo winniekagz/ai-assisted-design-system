@@ -4,12 +4,12 @@ import '../src/styles/globals.css';
 import {
   ComponentIqProvider,
   componentIqThemes,
-} from '@winniekagendo/componentiq';
+} from 'componentiq';
 
 const preview: Preview = {
   globalTypes: {
     theme: {
-      description: 'componentIq token theme',
+      description: 'ComponentIQ token theme',
       defaultValue: 'default',
       toolbar: {
         title: 'Theme',

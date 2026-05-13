@@ -18,7 +18,7 @@ Token-driven layout wrapper with configurable background, spacing, radius, borde
 
 ### Usage
 \`\`\`tsx
-import { Container } from '@winniekagz/componentiq';
+import { Container } from 'componentiq';
 
 // Surface card
 <Container variant="surface" padding="md" radius="lg" bordered>

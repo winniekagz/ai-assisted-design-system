@@ -1,17 +1,17 @@
-# componentIq
+# ComponentIQ
 
-componentIq is a reusable React UI component library built with TypeScript and Tailwind CSS.
+ComponentIQ is a reusable React UI component library built with TypeScript and Tailwind CSS.
 
 ## Install
 
 ```bash
-npm i @winniekagz/componentiq
+npm i componentiq
 ```
 
 ## Usage
 
 ```tsx
-import { Button, Card, Input, Typography } from '@winniekagz/componentiq';
+import { Button, Card, Input, Typography } from 'componentiq';
 
 export function Example() {
   return (
@@ -29,7 +29,7 @@ export function Example() {
 Use `ComponentIqProvider` and `componentIqThemes` to apply design tokens across the component library.
 
 ```tsx
-import { ComponentIqProvider, componentIqThemes } from '@winniekagz/componentiq';
+import { ComponentIqProvider, componentIqThemes } from 'componentiq';
 
 export function App({ children }: { children: React.ReactNode }) {
   return (

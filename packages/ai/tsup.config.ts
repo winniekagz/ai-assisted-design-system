@@ -7,5 +7,5 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   tsconfig: 'tsconfig.json',
-  external: ['react', 'react-dom', '@winniekagz/componentiq'],
+  external: ['react', 'react-dom', 'componentiq'],
 });

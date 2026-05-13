@@ -21,7 +21,6 @@ jobs:
 
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout
@@ -32,8 +31,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          registry-url: https://npm.pkg.github.com
-          scope: '@winniekagz'
+          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: npm ci
@@ -53,11 +51,11 @@ jobs:
         run: npm publish --dry-run
         working-directory: packages/design-system
         env:
-          NODE_AUTH_TOKEN: ${{ github.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
         if: ${{ github.event_name != 'workflow_dispatch' || !inputs.dry_run }}
-        run: npm publish
+        run: npm publish --access public
         working-directory: packages/design-system
         env:
-          NODE_AUTH_TOKEN: ${{ github.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

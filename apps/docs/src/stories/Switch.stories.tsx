@@ -19,7 +19,7 @@ Token-driven toggle switch built on Radix UI \`Switch\` primitive. Represents a 
 
 ### Usage
 \`\`\`tsx
-import { Switch } from '@winniekagz/componentiq';
+import { Switch } from 'componentiq';
 
 // Uncontrolled
 <Switch label="Dark mode" defaultChecked />

@@ -116,7 +116,7 @@ export default function DashLayoutDemo() {
   // Branding data
   const brandingData = {
     logo: LogoMark,
-    title: 'componentIq Dashboard',
+    title: 'ComponentIQ Dashboard',
     subtitle: 'Admin Panel',
     user: {
       name: 'John Doe',

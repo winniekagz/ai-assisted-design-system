@@ -1,6 +1,6 @@
-# componentIq
+# ComponentIQ
 
-componentIq is a React component library documented with Storybook. The npm package ships the compiled component library from `dist` so consumers can install and import components directly.
+ComponentIQ is a React component library documented with Storybook. The npm package ships the compiled component library from `dist` so consumers can install and import components directly.
 
 ## Install
 

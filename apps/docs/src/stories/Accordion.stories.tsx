@@ -107,7 +107,7 @@ Token-driven accordion built on Radix UI. Items render as surface cards; the exp
 
 ### Usage
 \`\`\`tsx
-import { Accordion } from '@winniekagz/componentiq';
+import { Accordion } from 'componentiq';
 
 const items = [
   { id: 'billing', title: 'How does billing work?', content: 'Plans are billed monthly or annually.' },

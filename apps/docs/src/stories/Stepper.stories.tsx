@@ -32,7 +32,7 @@ Token-driven step indicator for multi-step workflows. Completed steps and the ac
 
 ### Usage
 \`\`\`tsx
-import { Stepper } from '@winniekagz/componentiq';
+import { Stepper } from 'componentiq';
 
 const steps = [
   { id: 'account', label: 'Create account', description: 'Set up email and password.' },

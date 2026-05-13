@@ -14,7 +14,7 @@ import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
-import { cn } from '@winniekagz/componentiq';
+import { cn } from 'componentiq';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: Gauge },

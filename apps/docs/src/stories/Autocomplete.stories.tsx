@@ -93,7 +93,7 @@ Filterable combobox that supports both single selection and multi-select (chips)
 
 ### Usage
 \`\`\`tsx
-import { Autocomplete } from '@winniekagz/componentiq';
+import { Autocomplete } from 'componentiq';
 
 // Uncontrolled single
 <Autocomplete label="Framework" options={options} defaultValue="react" />
@@ -109,7 +109,7 @@ const [values, setValues] = useState<string[]>([]);
 
 ### Single selection detail
 \`\`\`tsx
-import { Autocomplete } from '@winniekagz/componentiq';
+import { Autocomplete } from 'componentiq';
 
 // Uncontrolled (use defaultValue)
 <Autocomplete

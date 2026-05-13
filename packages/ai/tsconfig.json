@@ -14,7 +14,7 @@
     "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"],
-      "@winniekagz/componentiq": ["../design-system/src/index.ts"]
+      "componentiq": ["../design-system/src/index.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],

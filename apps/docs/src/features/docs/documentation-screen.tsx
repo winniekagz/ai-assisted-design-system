@@ -29,7 +29,7 @@ const docGroups = [
       { href: '/custom-components', label: 'Setup guide' },
       { href: '/components', label: 'Component catalog' },
     ],
-    command: 'npm i @winniekagz/componentiq',
+    command: 'npm i componentiq',
   },
   {
     title: 'Customize tokens',
@@ -95,7 +95,7 @@ export function DocumentationScreen() {
       <PageHeader
         eyebrow='Documentation'
         title='Everything users need after clicking Read docs.'
-        description='Use this guide to install componentIq, customize the design system, document components in Storybook, and share changes through npm or GitHub.'
+        description='Use this guide to install ComponentIQ, customize the design system, document components in Storybook, and share changes through npm or GitHub.'
         actions={
           <Button asChild endIcon={<ArrowRight />}>
             <Link href='/custom-components'>Start setup guide</Link>
@@ -186,7 +186,7 @@ export function DocumentationScreen() {
               <code>{`import {
   Button,
   ComponentIqProvider,
-} from '@winniekagz/componentiq';
+} from 'componentiq';
 
 export function App() {
   return (

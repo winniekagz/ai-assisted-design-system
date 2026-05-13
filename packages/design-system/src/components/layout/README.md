@@ -134,7 +134,7 @@ import { BrandingComponent } from '@/components/layout';
 
 const brandingData = {
   logo: '/logo.png',
-  title: 'componentIq Dashboard',
+  title: 'ComponentIQ Dashboard',
   subtitle: 'Payment Management System',
   user: {
     name: 'John Doe',
@@ -142,7 +142,7 @@ const brandingData = {
     avatar: '/avatar.jpg',
   },
   company: {
-    name: 'componentIq Inc.',
+    name: 'ComponentIQ Inc.',
     logo: '/company-logo.png',
   },
 };
