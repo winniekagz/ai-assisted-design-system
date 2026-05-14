@@ -41,6 +41,23 @@ export {
   type CodeTextareaProps,
 } from './components/ui/code-textarea';
 export {
+  Dialog,
+  DialogBody,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+  Modal,
+  type DialogContentProps,
+  type DialogSize,
+  type ModalProps,
+} from './components/ui/dialog';
+export {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
