@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component: `
-Token-driven linear progress bar. Track uses \`--bg-secondary\`; fill uses \`--color-primary\`. Fully accessible with \`role="progressbar"\`, \`aria-valuenow\`, \`aria-valuemin\`, and \`aria-valuemax\`.
+Token-driven progress indicator with linear and radial variants. Track uses \`--bg-secondary\`; fill uses \`--color-primary\`. Fully accessible with \`role="progressbar"\`, \`aria-valuenow\`, \`aria-valuemin\`, and \`aria-valuemax\`.
 
 ### When to use
 - Background tasks with a known completion percentage (upload, analysis, build).
@@ -24,6 +24,9 @@ import { Progress } from 'componentiq';
 
 <Progress value={65} label="Upload progress" showValue />
 
+// Radial progress
+<Progress variant="radial" value={64} status="Completed" />
+
 // Custom max — percentage computed automatically
 <Progress value={3} max={5} label="Step 3 of 5" showValue />
 \`\`\`
@@ -35,13 +38,21 @@ import { Progress } from 'componentiq';
 | \`max\` | number | 100 | Maximum value — percentage = value / max × 100 |
 | \`label\` | ReactNode | — | Descriptive text shown above the bar |
 | \`showValue\` | boolean | false | Display computed percentage beside the label |
+| \`variant\` | \`"linear" \\| "radial"\` | "linear" | Progress presentation |
+| \`size\` | number | 96 | Radial diameter in px |
+| \`strokeWidth\` | number | 8 | Radial stroke width in px |
+| \`status\` | ReactNode | — | Center text below radial percentage |
       `,
       },
     },
   },
   tags: ['autodocs'],
   decorators: [
-    Story => <div className='w-[min(420px,calc(100vw-32px))]'><Story /></div>,
+    Story => (
+      <div className='w-[min(420px,calc(100vw-32px))]'>
+        <Story />
+      </div>
+    ),
   ],
   argTypes: {
     value: {
@@ -62,7 +73,34 @@ import { Progress } from 'componentiq';
     showValue: {
       control: 'boolean',
       description: 'Show the computed percentage next to the label.',
-      table: { type: { summary: 'boolean' }, defaultValue: { summary: 'false' } },
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'false' },
+      },
+    },
+    variant: {
+      control: { type: 'select' },
+      options: ['linear', 'radial'],
+      description: 'Progress presentation.',
+      table: {
+        type: { summary: "'linear' | 'radial'" },
+        defaultValue: { summary: "'linear'" },
+      },
+    },
+    size: {
+      control: { type: 'number', min: 48, max: 240, step: 4 },
+      description: 'Radial progress diameter in pixels.',
+      table: { type: { summary: 'number' }, defaultValue: { summary: '96' } },
+    },
+    strokeWidth: {
+      control: { type: 'number', min: 2, max: 24, step: 1 },
+      description: 'Radial progress stroke width.',
+      table: { type: { summary: 'number' }, defaultValue: { summary: '8' } },
+    },
+    status: {
+      control: 'text',
+      description: 'Center text below the radial percentage.',
+      table: { type: { summary: 'ReactNode' } },
     },
   },
   args: { value: 65, label: 'Audit progress', showValue: true },
@@ -71,27 +109,40 @@ import { Progress } from 'componentiq';
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-function VariantShowcase({ title, variants }: {
+function VariantShowcase({
+  title,
+  variants,
+}: {
   title: string;
   variants: Array<{ label: string; code: string; node: React.ReactNode }>;
 }) {
   const [sel, setSel] = React.useState(0);
   return (
     <div className='w-full space-y-[var(--spacing-md)]'>
-      <h2 className='font-[family-name:var(--font-heading)] font-[var(--font-weight-bold)] text-[color:var(--text-title)] text-[length:var(--font-size-heading-6)]'>{title}</h2>
+      <h2 className='font-[family-name:var(--font-heading)] font-[var(--font-weight-bold)] text-[color:var(--text-title)] text-[length:var(--font-size-heading-6)]'>
+        {title}
+      </h2>
       <div className='grid grid-cols-1 gap-[var(--spacing-sm)] sm:grid-cols-2'>
         {variants.map((v, i) => (
-          <div key={v.label} onClick={() => setSel(i)}
+          <div
+            key={v.label}
+            onClick={() => setSel(i)}
             className={`flex flex-col gap-[var(--spacing-sm)] rounded-[var(--radius-md)] border p-[var(--spacing-md)] transition-colors cursor-pointer ${sel === i ? 'bg-[color:var(--bg-hover)] border-[color:var(--color-primary)]' : 'bg-[color:var(--bg-surface)] border-[color:var(--border-subtle)] hover:bg-[color:var(--bg-hover)]'}`}
           >
-            <span className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] font-[family-name:var(--font-rubik)]'>{v.label}</span>
+            <span className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] font-[family-name:var(--font-rubik)]'>
+              {v.label}
+            </span>
             <div onClick={e => e.stopPropagation()}>{v.node}</div>
           </div>
         ))}
       </div>
       <div className='rounded-[var(--radius-md)] bg-[color:var(--bg-secondary)] border border-[color:var(--border-subtle)] p-[var(--spacing-md)]'>
-        <p className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] font-[family-name:var(--font-rubik)] mb-[var(--spacing-sm)]'>{variants[sel].label}</p>
-        <pre className='text-[length:var(--font-size-xs)] text-[color:var(--text-paragraph)] font-mono overflow-x-auto whitespace-pre-wrap'><code>{variants[sel].code}</code></pre>
+        <p className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] font-[family-name:var(--font-rubik)] mb-[var(--spacing-sm)]'>
+          {variants[sel].label}
+        </p>
+        <pre className='text-[length:var(--font-size-xs)] text-[color:var(--text-paragraph)] font-mono overflow-x-auto whitespace-pre-wrap'>
+          <code>{variants[sel].code}</code>
+        </pre>
       </div>
     </div>
   );
@@ -99,23 +150,100 @@ function VariantShowcase({ title, variants }: {
 
 export const AllVariants: Story = {
   render: () => (
-    <VariantShowcase title='Progress' variants={[
-      { label: 'Label + value', code: `<Progress value={65} label="Upload progress" showValue />`, node: <Progress value={65} label='Upload progress' showValue /> },
-      { label: 'Label only', code: `<Progress value={40} label="Processing…" />`, node: <Progress value={40} label='Processing…' /> },
-      { label: 'No label', code: `<Progress value={80} />`, node: <Progress value={80} /> },
-      { label: '0% — start', code: `<Progress value={0} label="Queued" showValue />`, node: <Progress value={0} label='Queued' showValue /> },
-      { label: '100% — complete', code: `<Progress value={100} label="Complete" showValue />`, node: <Progress value={100} label='Complete' showValue /> },
-      { label: 'Custom max (3/5)', code: `<Progress value={3} max={5} label="Step 3 of 5" showValue />`, node: <Progress value={3} max={5} label='Step 3 of 5' showValue /> },
-    ]} />
+    <VariantShowcase
+      title='Progress'
+      variants={[
+        {
+          label: 'Label + value',
+          code: `<Progress value={65} label="Upload progress" showValue />`,
+          node: <Progress value={65} label='Upload progress' showValue />,
+        },
+        {
+          label: 'Label only',
+          code: `<Progress value={40} label="Processing…" />`,
+          node: <Progress value={40} label='Processing…' />,
+        },
+        {
+          label: 'No label',
+          code: `<Progress value={80} />`,
+          node: <Progress value={80} />,
+        },
+        {
+          label: 'Radial',
+          code: `<Progress variant="radial" value={64} status="Completed" />`,
+          node: <Progress variant='radial' value={64} status='Completed' />,
+        },
+        {
+          label: 'Radial large',
+          code: `<Progress variant="radial" value={78} size={128} strokeWidth={10} status="Ready" />`,
+          node: (
+            <Progress
+              variant='radial'
+              value={78}
+              size={128}
+              strokeWidth={10}
+              status='Ready'
+            />
+          ),
+        },
+        {
+          label: '0% — start',
+          code: `<Progress value={0} label="Queued" showValue />`,
+          node: <Progress value={0} label='Queued' showValue />,
+        },
+        {
+          label: '100% — complete',
+          code: `<Progress value={100} label="Complete" showValue />`,
+          node: <Progress value={100} label='Complete' showValue />,
+        },
+        {
+          label: 'Custom max (3/5)',
+          code: `<Progress value={3} max={5} label="Step 3 of 5" showValue />`,
+          node: <Progress value={3} max={5} label='Step 3 of 5' showValue />,
+        },
+      ]}
+    />
   ),
   parameters: { layout: 'padded' },
-  decorators: [Story => <div className='w-full max-w-xl'><Story /></div>],
+  decorators: [
+    Story => (
+      <div className='w-full max-w-xl'>
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export const Default: Story = {};
-export const Complete: Story = { args: { value: 100, label: 'Upload complete', showValue: true } };
-export const NoLabel: Story = { args: { value: 55, label: undefined, showValue: false } };
+export const Radial: Story = {
+  args: {
+    variant: 'radial',
+    value: 64,
+    status: 'Completed',
+    label: 'Task progress',
+  },
+  decorators: [
+    Story => (
+      <div className='grid place-items-center'>
+        <Story />
+      </div>
+    ),
+  ],
+};
+export const Complete: Story = {
+  args: { value: 100, label: 'Upload complete', showValue: true },
+};
+export const NoLabel: Story = {
+  args: { value: 55, label: undefined, showValue: false },
+};
 export const CustomMax: Story = {
   args: { value: 3, max: 5, label: 'Step 3 of 5', showValue: true },
-  parameters: { docs: { description: { story: 'Set `max` to any integer — percentage is computed as `value / max × 100`.' } } },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Set `max` to any integer — percentage is computed as `value / max × 100`.',
+      },
+    },
+  },
 };
