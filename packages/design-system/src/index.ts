@@ -41,6 +41,23 @@ export {
   type CodeTextareaProps,
 } from './components/ui/code-textarea';
 export {
+  Dialog,
+  DialogBody,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+  Modal,
+  type DialogContentProps,
+  type DialogSize,
+  type ModalProps,
+} from './components/ui/dialog';
+export {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
@@ -102,6 +119,24 @@ export {
   SidebarFooter,
   SidebarHeader,
 } from './components/ui/sidebar';
+export {
+  Drawer,
+  Sheet,
+  SheetBody,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetOverlay,
+  SheetPortal,
+  SheetTitle,
+  SheetTrigger,
+  type DrawerProps,
+  type SheetContentProps,
+  type SheetSide,
+  type SheetSize,
+} from './components/ui/sheet';
 export { Skeleton } from './components/ui/skeleton';
 export { EmptyState, type EmptyStateProps } from './components/ui/empty-state';
 export { Progress, type ProgressProps } from './components/ui/progress';
