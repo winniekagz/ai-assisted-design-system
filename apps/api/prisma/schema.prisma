@@ -1,0 +1,258 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MAINTAINER
+  ENGINEER
+  VIEWER
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum GuardrailCategory {
+  ACCESSIBILITY
+  DESIGN_TOKENS
+  COMPONENT_USAGE
+  UI_STATES
+  COPY
+  AI_SAFETY
+}
+
+enum PromptType {
+  COMPONENT_RECOMMENDATION
+  PRE_PR_AUDIT
+  SETUP_GUIDANCE
+  DECISION_SUMMARY
+}
+
+enum AuditStatus {
+  PASSED
+  NEEDS_CHANGES
+  FAILED
+}
+
+model User {
+  id          String               @id @default(uuid())
+  name        String
+  email       String               @unique
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  memberships OrganizationMember[]
+  recommendations RecommendationSession[]
+  audits      AuditSession[]
+  usageLogs   AiUsageLog[]
+}
+
+model Organization {
+  id              String                  @id @default(uuid())
+  name            String
+  slug            String                  @unique
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  members         OrganizationMember[]
+  projects        Project[]
+  components      Component[]
+  guardrails      Guardrail[]
+  promptTemplates PromptTemplate[]
+  recommendations RecommendationSession[]
+  audits          AuditSession[]
+  usageLogs       AiUsageLog[]
+}
+
+model OrganizationMember {
+  id             String       @id @default(uuid())
+  userId         String
+  organizationId String
+  role           Role
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+model Project {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  slug           String
+  framework      String
+  packageManager String
+  stylingSystem  String
+  repositoryUrl  String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  recommendations RecommendationSession[]
+  audits         AuditSession[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+}
+
+model Component {
+  id             String          @id @default(uuid())
+  organizationId String
+  name           String
+  description    String
+  category       String
+  docsUrl        String?
+  storybookUrl   String?
+  status         String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  rules          ComponentRule[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+model ComponentRule {
+  id          String    @id @default(uuid())
+  componentId String
+  ruleType    String
+  ruleText    String
+  severity    Severity
+  exampleGood String?
+  exampleBad  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  component   Component @relation(fields: [componentId], references: [id], onDelete: Cascade)
+
+  @@index([componentId])
+}
+
+model Guardrail {
+  id             String            @id @default(uuid())
+  organizationId String
+  category       GuardrailCategory
+  title          String
+  ruleText       String
+  severity       Severity
+  enabled        Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model PromptTemplate {
+  id                 String        @id @default(uuid())
+  organizationId     String?
+  type               PromptType
+  name               String
+  systemPrompt       String
+  userPromptTemplate String?
+  outputSchema       Json?
+  version            Int           @default(1)
+  active             Boolean       @default(true)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  organization       Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, type, active])
+}
+
+model RecommendationSession {
+  id                   String                      @id @default(uuid())
+  organizationId       String
+  projectId            String?
+  userId               String?
+  userGoal             String
+  recommendedComponent String
+  confidence           String
+  reasoning            String
+  prNote               String?
+  rawResponse          Json?
+  createdAt            DateTime                    @default(now())
+  alternatives         RecommendationAlternative[]
+  organization         Organization                @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project              Project?                    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  user                 User?                       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+}
+
+model RecommendationAlternative {
+  id            String                @id @default(uuid())
+  sessionId     String
+  componentName String
+  reason        String
+  tradeoff      String?
+  session       RecommendationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model AuditSession {
+  id             String         @id @default(uuid())
+  organizationId String
+  projectId      String?
+  userId         String?
+  auditType      String
+  inputType      String
+  inputContent   String
+  status         AuditStatus
+  summary        String
+  rawResponse    Json?
+  createdAt      DateTime       @default(now())
+  findings       AuditFinding[]
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project        Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  user           User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([projectId])
+}
+
+model AuditFinding {
+  id             String       @id @default(uuid())
+  auditSessionId String
+  severity       Severity
+  category       String
+  issue          String
+  suggestion     String
+  ruleUsed       String?
+  filePath       String?
+  lineNumber     Int?
+  docsLink       String?
+  createdAt      DateTime     @default(now())
+  auditSession   AuditSession @relation(fields: [auditSessionId], references: [id], onDelete: Cascade)
+
+  @@index([auditSessionId])
+}
+
+model AiUsageLog {
+  id             String        @id @default(uuid())
+  organizationId String?
+  userId         String?
+  feature        String
+  model          String
+  inputTokens    Int?
+  outputTokens   Int?
+  costEstimate   Decimal?      @db.Decimal(10, 6)
+  latencyMs      Int?
+  createdAt      DateTime      @default(now())
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([userId])
+}
