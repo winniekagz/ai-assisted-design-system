@@ -31,6 +31,73 @@ Open:
 http://localhost:3000
 ```
 
+## Backend API
+
+The NestJS backend lives in `apps/api`. It exposes REST endpoints on port `4000`,
+uses PostgreSQL through Prisma, and treats organization-specific component rules
+and guardrails as the source of truth for AI workflows.
+
+Shared API contracts live in `packages/shared-types`. Share request/response
+types, enum-like constants, and browser-safe domain summaries there so frontend
+apps and the API agree on payload shapes. Keep Nest modules, controllers,
+services, Prisma Client usage, validation decorators, and provider secrets inside
+`apps/api`.
+
+Run the API and PostgreSQL with Docker:
+
+```bash
+cp .env.example .env
+npm run docker:up
+```
+
+Run database migrations and seed the demo organization:
+
+```bash
+npm run db:migrate
+npm run db:seed
+```
+
+For local development without Docker, point `DATABASE_URL` at your PostgreSQL
+instance and run:
+
+```bash
+npm run dev:api
+```
+
+Useful API endpoints:
+
+- `POST /organizations`
+- `GET /organizations`
+- `GET /organizations/:id`
+- `POST /organizations/:orgId/projects`
+- `GET /organizations/:orgId/projects`
+- `POST /organizations/:orgId/components`
+- `GET /organizations/:orgId/components`
+- `GET /components/:id`
+- `POST /components/:componentId/rules`
+- `GET /components/:componentId/rules`
+- `POST /organizations/:orgId/guardrails`
+- `GET /organizations/:orgId/guardrails`
+- `PATCH /guardrails/:id`
+- `POST /ai/recommend-component`
+- `POST /ai/audit`
+- `POST /ai/setup-guidance`
+- `POST /ai/generate-pr-note`
+- `GET /organizations/:orgId/audits`
+- `GET /audits/:id`
+- `GET /organizations/:orgId/recommendations`
+- `GET /recommendations/:id`
+
+`AI_PROVIDER=mock` is the default and requires no API key. It returns structured
+demo responses while still loading each organization's guardrails, component
+catalog, and component rules before producing recommendations or audit findings.
+Set `AI_PROVIDER=openai` and provide `OPENAI_API_KEY` to use the OpenAI provider.
+
+The backend intentionally keeps AI as a decision-support layer. Recommendations
+and audits are generated only from the provided organization rules, component
+catalog, and guardrails; AI output is saved as review evidence, not as final
+approval authority.
+
 ## Storybook
 
 Use Storybook to browse component states, variants, and usage examples:

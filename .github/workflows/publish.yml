@@ -1,18 +1,17 @@
 name: Publish Component IQ
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/design-system/**'
   workflow_dispatch:
     inputs:
       dry_run:
         description: Run npm publish without publishing
         type: boolean
         default: false
-  release:
-    types:
-      - published
-  push:
-    tags:
-      - 'v*.*.*'
 
 jobs:
   publish:
@@ -20,14 +19,16 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
@@ -45,6 +46,19 @@ jobs:
       - name: Use npm package README
         run: cp ../../README.npm.md README.md
         working-directory: packages/design-system
+
+      - name: Bump patch version
+        if: ${{ github.event_name != 'workflow_dispatch' || !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          npm version patch --workspace=packages/design-system --no-git-tag-version
+          VERSION=$(node -p "require('./packages/design-system/package.json').version")
+          git add packages/design-system/package.json
+          git commit -m "chore: bump version to $VERSION [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish dry run
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}

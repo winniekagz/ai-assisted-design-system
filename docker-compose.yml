@@ -1,0 +1,51 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - '4000:4000'
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT:-4000}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://componentiq:componentiq@postgres:5432/componentiq?schema=public}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: rebuild
+          path: apps/api/src
+        - action: rebuild
+          path: apps/api/prisma
+        - action: rebuild
+          path: packages/shared-types
+        - action: rebuild
+          path: apps/api/package.json
+        - action: rebuild
+          path: package-lock.json
+        - action: rebuild
+          path: package.json
+
+  postgres:
+    image: postgres:16
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-componentiq}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-componentiq}
+      POSTGRES_DB: ${POSTGRES_DB:-componentiq}
+    volumes:
+      - componentiq_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  componentiq_postgres_data:

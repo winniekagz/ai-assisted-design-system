@@ -1,0 +1,38 @@
+# dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# next.js build output
+.next/
+out/
+
+# testing and coverage
+/test
+/benchmarks/memory
+/coverage
+/.nyc_output
+/packages/graphql
+build/config.gypi
+
+# debug logs
+lerna-debug.log
+npm-debug.log
+yarn-error.log
+/**/npm-debug.log
+
+# misc
+.DS_Store
+*.tsbuildinfo
+/.nx/workspace-data
+/.history
+.npmrc
+
+# repository specific ignores
+/packages/**/.npmignore
+/packages/**/LICENSE
+
+# example folders
+/quick-start
+/example_dist
+/example
