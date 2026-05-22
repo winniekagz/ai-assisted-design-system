@@ -16,6 +16,20 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    develop:
+      watch:
+        - action: rebuild
+          path: apps/api/src
+        - action: rebuild
+          path: apps/api/prisma
+        - action: rebuild
+          path: packages/shared-types
+        - action: rebuild
+          path: apps/api/package.json
+        - action: rebuild
+          path: package-lock.json
+        - action: rebuild
+          path: package.json
 
   postgres:
     image: postgres:16
