@@ -2,19 +2,23 @@
 
 import {
   Bot,
+  Building2,
   ClipboardCheck,
   Gauge,
-  Moon,
+  Monitor,
+  Settings,
   ShieldCheck,
   Sun,
+  Users,
   Workflow,
 } from 'lucide-react';
+import { UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { useEffect, useState } from 'react';
 
 import { cn } from 'componentiq';
+import { useWorkspaceStore } from '@/stores/workspace-store';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: Gauge },
@@ -24,8 +28,37 @@ const navItems = [
   { href: '/safety', label: 'Guardrails', icon: ShieldCheck },
 ];
 
-export function AppShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
+const orgNavItems = [
+  { path: 'dashboard', label: 'Dashboard', icon: Gauge },
+  { path: 'projects', label: 'Projects', icon: Building2 },
+  { path: 'components', label: 'Components', icon: Bot },
+  { path: 'guardrails', label: 'Guardrails', icon: ShieldCheck },
+  { path: 'ai/recommend', label: 'Recommend', icon: Workflow },
+  { path: 'ai/audit', label: 'Audit', icon: ClipboardCheck },
+  { path: 'settings/members', label: 'Members', icon: Users },
+  { path: 'settings/invites', label: 'Invites', icon: Settings },
+];
+
+export function AppShell({
+  children,
+  orgSlug,
+  orgName,
+  organizations = [],
+}: {
+  children: ReactNode;
+  orgSlug?: string;
+  orgName?: string;
+  organizations?: { slug: string; name: string }[];
+}) {
+  const pathname = usePathname() ?? '';
+  const router = useRouter();
+  const activeNavItems = orgSlug
+    ? orgNavItems.map(item => ({
+        href: `/org/${orgSlug}/${item.path}`,
+        label: item.label,
+        icon: item.icon,
+      }))
+    : navItems;
 
   return (
     <div className='min-h-screen bg-background'>
@@ -41,12 +74,28 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span>
               <span className='block text-base font-semibold'>ComponentIQ AI</span>
               <span className='block text-xs text-muted-foreground'>
-                AI design-system mentor
+                {orgName ?? 'AI design-system mentor'}
               </span>
             </span>
           </Link>
+          {organizations.length > 1 && orgSlug && (
+            <label className='grid gap-2 text-xs font-medium text-muted-foreground'>
+              Organization
+              <select
+                value={orgSlug}
+                onChange={event => router.push(`/org/${event.target.value}/dashboard`)}
+                className='h-10 rounded-md border border-border bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+              >
+                {organizations.map(organization => (
+                  <option key={organization.slug} value={organization.slug}>
+                    {organization.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <nav aria-label='Primary navigation' className='grid gap-1'>
-            {navItems.map(item => {
+            {activeNavItems.map(item => {
               const Icon = item.icon;
               const active =
                 pathname === item.href ||
@@ -67,6 +116,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             })}
           </nav>
           <ThemeToggle />
+          <div className='mt-auto'>
+            <UserButton />
+          </div>
         </div>
       </aside>
       <div className='lg:pl-64'>
@@ -74,7 +126,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className='flex items-center gap-3'>
             <div className='flex min-w-0 flex-1 items-center gap-2 overflow-x-auto'>
               <Bot className='size-5 shrink-0 text-primary' />
-              {navItems.map(item => (
+              {activeNavItems.map(item => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -96,36 +148,26 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function ThemeToggle({ compact = false }: { compact?: boolean }) {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const isDark = theme === 'dark';
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem('componentiq-theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = stored === 'dark' || (!stored && prefersDark) ? 'dark' : 'light';
-    setTheme(initialTheme);
-    document.documentElement.classList.toggle('dark', initialTheme === 'dark');
-  }, []);
+  const themeMode = useWorkspaceStore(state => state.themeMode);
+  const setThemeMode = useWorkspaceStore(state => state.setThemeMode);
+  const isSystem = themeMode === 'system';
 
   function toggleTheme() {
-    const nextTheme = isDark ? 'light' : 'dark';
-    setTheme(nextTheme);
-    window.localStorage.setItem('componentiq-theme', nextTheme);
-    document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+    setThemeMode(isSystem ? 'light' : 'system');
   }
 
   return (
     <button
       type='button'
       onClick={toggleTheme}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label={isSystem ? 'Use light theme' : 'Use system theme'}
       className={cn(
         'inline-flex items-center justify-center rounded-md border border-border bg-background-secondary text-foreground transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         compact ? 'size-10 shrink-0' : 'h-10 gap-2 px-3 text-sm font-medium'
       )}
     >
-      {isDark ? <Sun className='size-4' /> : <Moon className='size-4' />}
-      {!compact && <span>{isDark ? 'Light mode' : 'Dark mode'}</span>}
+      {isSystem ? <Monitor className='size-4' /> : <Sun className='size-4' />}
+      {!compact && <span>{isSystem ? 'System theme' : 'Light theme'}</span>}
     </button>
   );
 }

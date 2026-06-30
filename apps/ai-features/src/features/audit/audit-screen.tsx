@@ -21,7 +21,7 @@ export function AuditScreen() {
   const [result, setResult] = useState<AuditResponse | null>(null);
   const [banner, setBanner] = useState('');
   const form = useForm<AuditRequest>({
-    resolver: zodResolver(auditRequestSchema),
+    resolver: zodResolver(auditRequestSchema as never),
     defaultValues: { description: '', code: '' },
   });
 

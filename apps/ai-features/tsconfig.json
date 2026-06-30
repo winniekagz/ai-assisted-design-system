@@ -14,6 +14,11 @@
     "jsx": "preserve",
     "incremental": true,
     "paths": {
+      "@/lib/api/*": ["./src/lib/api/*"],
+      "@/lib/query/*": ["./src/lib/query/*"],
+      "@/hooks/queries/*": ["./src/hooks/queries/*"],
+      "@/hooks/mutations/*": ["./src/hooks/mutations/*"],
+      "@/stores/*": ["./src/stores/*"],
       "@/components/*": ["../../packages/design-system/src/components/*"],
       "@/lib/*": ["../../packages/design-system/src/lib/*"],
       "@/hooks/*": ["../../packages/design-system/src/hooks/*"],
