@@ -10,11 +10,14 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "componentiq": "*",
+    "@clerk/nextjs": "^7.4.1",
+    "@tanstack/react-query": "^5.100.13",
     "@winniekagendo/componentiq-ai": "*",
+    "componentiq": "*",
     "next": "15.4.2",
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react": "^19.1.4",
+    "react-dom": "^19.1.4",
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
