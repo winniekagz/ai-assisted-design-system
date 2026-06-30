@@ -1,12 +1,19 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { json, urlencoded } from 'express';
 
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
+  const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3001';
+  app.enableCors({
+    origin: [frontendUrl],
+    credentials: true,
+  });
+  app.use(json({ limit: '1mb' }));
+  app.use(urlencoded({ extended: true, limit: '1mb' }));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

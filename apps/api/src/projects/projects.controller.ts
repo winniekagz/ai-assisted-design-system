@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -7,17 +8,24 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
+import { PermissionsGuard } from '../authorization/permissions.guard';
+import { RequirePermission } from '../authorization/require-permission.decorator';
 import { OrgIdParamDto } from '../common/dto/id-param.dto';
 import { ids, projectExample } from '../common/swagger/api-examples';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ProjectsService } from './projects.service';
 
 @ApiTags('Projects')
+@ApiBearerAuth()
+@UseGuards(ClerkAuthGuard)
 @Controller('organizations/:orgId/projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
+  @RequirePermission('projects.manage')
+  @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'Create project',
     description: 'Creates a project inside an organization.',
@@ -64,6 +72,8 @@ export class ProjectsController {
   }
 
   @Get()
+  @RequirePermission('projects.view')
+  @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'List organization projects',
     description: 'Returns projects for an organization ordered by newest first.',

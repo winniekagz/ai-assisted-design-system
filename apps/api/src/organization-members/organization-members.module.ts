@@ -3,12 +3,12 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { AuthorizationModule } from '../authorization/authorization.module';
 import { PrismaModule } from '../prisma/prisma.module';
-import { GuardrailsController } from './guardrails.controller';
-import { GuardrailsService } from './guardrails.service';
+import { OrganizationMembersController } from './organization-members.controller';
+import { OrganizationMembersService } from './organization-members.service';
 
 @Module({
   imports: [AuthModule, AuthorizationModule, PrismaModule],
-  controllers: [GuardrailsController],
-  providers: [GuardrailsService],
+  controllers: [OrganizationMembersController],
+  providers: [OrganizationMembersService],
 })
-export class GuardrailsModule {}
+export class OrganizationMembersModule {}

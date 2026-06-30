@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -7,6 +8,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { AuthorizationService } from '../authorization/authorization.service';
+import { PermissionsGuard } from '../authorization/permissions.guard';
+import { RequirePermission } from '../authorization/require-permission.decorator';
 import {
   ComponentIdParamDto,
   IdParamDto,
@@ -21,13 +27,21 @@ import {
 import { ComponentsService } from './components.service';
 import { CreateComponentDto } from './dto/create-component.dto';
 import { CreateComponentRuleDto } from './dto/create-component-rule.dto';
+import type { User } from '@prisma/client';
 
 @ApiTags('Components')
+@ApiBearerAuth()
+@UseGuards(ClerkAuthGuard)
 @Controller()
 export class ComponentsController {
-  constructor(private readonly componentsService: ComponentsService) {}
+  constructor(
+    private readonly componentsService: ComponentsService,
+    private readonly authorizationService: AuthorizationService
+  ) {}
 
   @Post('organizations/:orgId/components')
+  @RequirePermission('components.manage')
+  @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'Create component',
     description: 'Adds a documented component to an organization catalog.',
@@ -76,6 +90,8 @@ export class ComponentsController {
   }
 
   @Get('organizations/:orgId/components')
+  @RequirePermission('components.view')
+  @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'List organization components',
     description:
@@ -132,8 +148,14 @@ export class ComponentsController {
       },
     },
   })
-  findOne(@Param() params: IdParamDto) {
-    return this.componentsService.findOne(params.id);
+  async findOne(@Param() params: IdParamDto, @CurrentUser() user: User) {
+    const component = await this.componentsService.findOne(params.id);
+    const { membership } = await this.authorizationService.resolveMembership(
+      user,
+      component.organizationId
+    );
+    this.authorizationService.assertPermission(membership, 'components.view');
+    return component;
   }
 
   @Post('components/:componentId/rules')
@@ -177,10 +199,17 @@ export class ComponentsController {
       },
     },
   })
-  createRule(
+  async createRule(
     @Param() params: ComponentIdParamDto,
+    @CurrentUser() user: User,
     @Body() dto: CreateComponentRuleDto
   ) {
+    const component = await this.componentsService.findOne(params.componentId);
+    const { membership } = await this.authorizationService.resolveMembership(
+      user,
+      component.organizationId
+    );
+    this.authorizationService.assertPermission(membership, 'components.manage');
     return this.componentsService.createRule(params.componentId, dto);
   }
 
@@ -210,7 +239,13 @@ export class ComponentsController {
       },
     },
   })
-  findRules(@Param() params: ComponentIdParamDto) {
+  async findRules(@Param() params: ComponentIdParamDto, @CurrentUser() user: User) {
+    const component = await this.componentsService.findOne(params.componentId);
+    const { membership } = await this.authorizationService.resolveMembership(
+      user,
+      component.organizationId
+    );
+    this.authorizationService.assertPermission(membership, 'components.view');
     return this.componentsService.findRules(params.componentId);
   }
 }

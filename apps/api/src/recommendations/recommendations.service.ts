@@ -6,11 +6,11 @@ import { PrismaService } from '../prisma/prisma.service';
 export class RecommendationsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByOrganization(organizationId: string) {
+  async findByOrganization(organizationId: string, userId?: string) {
     await this.ensureOrganization(organizationId);
 
     return this.prisma.recommendationSession.findMany({
-      where: { organizationId },
+      where: { organizationId, ...(userId ? { userId } : {}) },
       include: { alternatives: true },
       orderBy: { createdAt: 'desc' },
     });

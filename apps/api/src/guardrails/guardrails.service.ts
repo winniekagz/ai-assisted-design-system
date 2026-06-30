@@ -41,6 +41,18 @@ export class GuardrailsService {
     });
   }
 
+  async findOne(id: string) {
+    const guardrail = await this.prisma.guardrail.findUnique({
+      where: { id },
+    });
+
+    if (!guardrail) {
+      throw new NotFoundException('Guardrail not found');
+    }
+
+    return guardrail;
+  }
+
   private async ensureOrganization(organizationId: string) {
     const organization = await this.prisma.organization.findUnique({
       where: { id: organizationId },

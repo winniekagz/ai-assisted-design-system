@@ -15,6 +15,13 @@ enum Role {
   VIEWER
 }
 
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
 enum Severity {
   LOW
   MEDIUM
@@ -46,11 +53,14 @@ enum AuditStatus {
 
 model User {
   id          String               @id @default(uuid())
-  name        String
+  clerkUserId String?              @unique
+  name        String?
   email       String               @unique
+  imageUrl    String?
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
   memberships OrganizationMember[]
+  sentInvites OrganizationInvite[]  @relation("InvitedBy")
   recommendations RecommendationSession[]
   audits      AuditSession[]
   usageLogs   AiUsageLog[]
@@ -63,6 +73,7 @@ model Organization {
   createdAt       DateTime                @default(now())
   updatedAt       DateTime                @updatedAt
   members         OrganizationMember[]
+  invites         OrganizationInvite[]
   projects        Project[]
   components      Component[]
   guardrails      Guardrail[]
@@ -78,11 +89,32 @@ model OrganizationMember {
   organizationId String
   role           Role
   createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, organizationId])
   @@index([organizationId])
+}
+
+model OrganizationInvite {
+  id              String       @id @default(uuid())
+  organizationId  String
+  email           String
+  role            Role
+  tokenHash       String       @unique
+  invitedByUserId String
+  status          InviteStatus @default(PENDING)
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy       User         @relation("InvitedBy", fields: [invitedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@index([status])
 }
 
 model Project {

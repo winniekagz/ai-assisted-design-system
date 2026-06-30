@@ -1,21 +1,32 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import type { User } from '@prisma/client';
 
+import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { AuthorizationService } from '../authorization/authorization.service';
+import { OrgMembershipGuard } from '../authorization/org-membership.guard';
 import { ids, organizationExample } from '../common/swagger/api-examples';
 import { IdParamDto } from '../common/dto/id-param.dto';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { OrganizationsService } from './organizations.service';
 
 @ApiTags('Organizations')
+@ApiBearerAuth()
+@UseGuards(ClerkAuthGuard)
 @Controller('organizations')
 export class OrganizationsController {
-  constructor(private readonly organizationsService: OrganizationsService) {}
+  constructor(
+    private readonly organizationsService: OrganizationsService,
+    private readonly authorizationService: AuthorizationService
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -51,8 +62,8 @@ export class OrganizationsController {
       },
     },
   })
-  create(@Body() dto: CreateOrganizationDto) {
-    return this.organizationsService.create(dto);
+  create(@Body() dto: CreateOrganizationDto, @CurrentUser() user: User) {
+    return this.organizationsService.create(dto, user);
   }
 
   @Get()
@@ -65,8 +76,36 @@ export class OrganizationsController {
     description: 'Organizations returned successfully',
     schema: { example: [organizationExample] },
   })
-  findAll() {
-    return this.organizationsService.findAll();
+  findAll(@CurrentUser() user: User) {
+    return this.organizationsService.findAllForUser(user);
+  }
+
+  @Get('slug/:orgSlug')
+  @UseGuards(OrgMembershipGuard)
+  @ApiOperation({
+    summary: 'Get organization by slug',
+    description:
+      'Returns one organization by slug when the authenticated user is a member.',
+  })
+  @ApiParam({
+    name: 'orgSlug',
+    description: 'Organization slug',
+    example: 'acme-design-system',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Organization returned successfully',
+    schema: {
+      example: {
+        ...organizationExample,
+        guardrails: [],
+        components: [],
+        projects: [],
+      },
+    },
+  })
+  findBySlug(@Param('orgSlug') orgSlug: string) {
+    return this.organizationsService.findByIdOrSlug(orgSlug);
   }
 
   @Get(':id')
@@ -103,7 +142,8 @@ export class OrganizationsController {
       },
     },
   })
-  findOne(@Param() params: IdParamDto) {
+  async findOne(@Param() params: IdParamDto, @CurrentUser() user: User) {
+    await this.authorizationService.resolveMembership(user, params.id);
     return this.organizationsService.findOne(params.id);
   }
 }

@@ -1,16 +1,35 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { AuthorizationService } from '../authorization/authorization.service';
+import { CurrentMembership } from '../authorization/current-membership.decorator';
+import { OrgMembershipGuard } from '../authorization/org-membership.guard';
+import { hasPermission } from '../authorization/permissions';
 import { IdParamDto, OrgIdParamDto } from '../common/dto/id-param.dto';
 import { auditSessionExample, ids } from '../common/swagger/api-examples';
 import { AuditsService } from './audits.service';
+import type { OrganizationMember, User } from '@prisma/client';
 
 @ApiTags('Audits')
+@ApiBearerAuth()
+@UseGuards(ClerkAuthGuard)
 @Controller()
 export class AuditsController {
-  constructor(private readonly auditsService: AuditsService) {}
+  constructor(
+    private readonly auditsService: AuditsService,
+    private readonly authorizationService: AuthorizationService
+  ) {}
 
   @Get('organizations/:orgId/audits')
+  @UseGuards(OrgMembershipGuard)
   @ApiOperation({
     summary: 'List organization audits',
     description: 'Returns AI audit sessions for an organization with findings.',
@@ -36,8 +55,16 @@ export class AuditsController {
       },
     },
   })
-  findByOrganization(@Param() params: OrgIdParamDto) {
-    return this.auditsService.findByOrganization(params.orgId);
+  findByOrganization(
+    @Param() params: OrgIdParamDto,
+    @CurrentUser() user: User,
+    @CurrentMembership() membership: OrganizationMember
+  ) {
+    const viewAll = hasPermission(membership.role, 'audits.view');
+    return this.auditsService.findByOrganization(
+      params.orgId,
+      viewAll ? undefined : user.id
+    );
   }
 
   @Get('audits/:id')
@@ -66,7 +93,21 @@ export class AuditsController {
       },
     },
   })
-  findOne(@Param() params: IdParamDto) {
-    return this.auditsService.findOne(params.id);
+  async findOne(@Param() params: IdParamDto, @CurrentUser() user: User) {
+    const audit = await this.auditsService.findOne(params.id);
+    const { membership } = await this.authorizationService.resolveMembership(
+      user,
+      audit.organizationId
+    );
+
+    if (
+      audit.userId === user.id &&
+      hasPermission(membership.role, 'audits.viewOwn')
+    ) {
+      return audit;
+    }
+
+    this.authorizationService.assertPermission(membership, 'audits.view');
+    return audit;
   }
 }

@@ -1,6 +1,16 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { PermissionsGuard } from '../authorization/permissions.guard';
+import { RequirePermission } from '../authorization/require-permission.decorator';
 import {
   auditExample,
   ids,
@@ -13,13 +23,18 @@ import { AuditDto } from './dto/audit.dto';
 import { GeneratePrNoteDto } from './dto/generate-pr-note.dto';
 import { RecommendComponentDto } from './dto/recommend-component.dto';
 import { SetupGuidanceDto } from './dto/setup-guidance.dto';
+import type { User } from '@prisma/client';
 
 @ApiTags('AI')
+@ApiBearerAuth()
+@UseGuards(ClerkAuthGuard)
 @Controller('ai')
 export class AiController {
   constructor(private readonly aiService: AiService) {}
 
   @Post('recommend-component')
+  @RequirePermission('ai.run')
+  @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'Recommend component',
     description:
@@ -72,11 +87,14 @@ export class AiController {
       },
     },
   })
-  recommendComponent(@Body() dto: RecommendComponentDto) {
+  recommendComponent(@Body() dto: RecommendComponentDto, @CurrentUser() user: User) {
+    dto.userId = user.id;
     return this.aiService.recommendComponent(dto);
   }
 
   @Post('audit')
+  @RequirePermission('ai.run')
+  @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'Audit UI submission',
     description:
@@ -126,11 +144,14 @@ export class AiController {
       },
     },
   })
-  audit(@Body() dto: AuditDto) {
+  audit(@Body() dto: AuditDto, @CurrentUser() user: User) {
+    dto.userId = user.id;
     return this.aiService.audit(dto);
   }
 
   @Post('setup-guidance')
+  @RequirePermission('ai.run')
+  @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'Generate setup guidance',
     description:
@@ -172,6 +193,8 @@ export class AiController {
   }
 
   @Post('generate-pr-note')
+  @RequirePermission('ai.run')
+  @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'Generate PR note',
     description:

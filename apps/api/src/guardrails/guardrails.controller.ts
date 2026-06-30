@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -7,18 +8,31 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { AuthorizationService } from '../authorization/authorization.service';
+import { PermissionsGuard } from '../authorization/permissions.guard';
+import { RequirePermission } from '../authorization/require-permission.decorator';
 import { IdParamDto, OrgIdParamDto } from '../common/dto/id-param.dto';
 import { guardrailExample, ids } from '../common/swagger/api-examples';
 import { CreateGuardrailDto } from './dto/create-guardrail.dto';
 import { UpdateGuardrailDto } from './dto/update-guardrail.dto';
 import { GuardrailsService } from './guardrails.service';
+import type { User } from '@prisma/client';
 
 @ApiTags('Guardrails')
+@ApiBearerAuth()
+@UseGuards(ClerkAuthGuard)
 @Controller()
 export class GuardrailsController {
-  constructor(private readonly guardrailsService: GuardrailsService) {}
+  constructor(
+    private readonly guardrailsService: GuardrailsService,
+    private readonly authorizationService: AuthorizationService
+  ) {}
 
   @Post('organizations/:orgId/guardrails')
+  @RequirePermission('guardrails.manage')
+  @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'Create guardrail',
     description: 'Creates an organization-level design-system guardrail.',
@@ -65,6 +79,8 @@ export class GuardrailsController {
   }
 
   @Get('organizations/:orgId/guardrails')
+  @RequirePermission('guardrails.view')
+  @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'List organization guardrails',
     description:
@@ -139,7 +155,17 @@ export class GuardrailsController {
       },
     },
   })
-  update(@Param() params: IdParamDto, @Body() dto: UpdateGuardrailDto) {
+  async update(
+    @Param() params: IdParamDto,
+    @CurrentUser() user: User,
+    @Body() dto: UpdateGuardrailDto
+  ) {
+    const guardrail = await this.guardrailsService.findOne(params.id);
+    const { membership } = await this.authorizationService.resolveMembership(
+      user,
+      guardrail.organizationId
+    );
+    this.authorizationService.assertPermission(membership, 'guardrails.manage');
     return this.guardrailsService.update(params.id, dto);
   }
 }
