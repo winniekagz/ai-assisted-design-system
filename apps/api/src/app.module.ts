@@ -15,10 +15,15 @@ import { ProjectsModule } from './projects/projects.module';
 import { PromptsModule } from './prompts/prompts.module';
 import { RecommendationsModule } from './recommendations/recommendations.module';
 import { UsersModule } from './users/users.module';
+import { apiEnvFilePath, validateEnv } from './config/env';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: apiEnvFilePath,
+      validate: validateEnv,
+    }),
     PrismaModule,
     AuthModule,
     AuthorizationModule,

@@ -14,13 +14,13 @@ export class ClerkAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const token = this.extractBearerToken(request);
+    const clerkSessionToken = this.extractBearerToken(request);
 
-    if (!token) {
+    if (!clerkSessionToken) {
       throw new UnauthorizedException('Authentication required');
     }
 
-    const user = await this.authService.verifyAndSyncUser(token);
+    const user = await this.authService.verifyAndSyncUser(clerkSessionToken);
     request.currentUser = user;
     request.clerkUserId = user.clerkUserId ?? undefined;
 

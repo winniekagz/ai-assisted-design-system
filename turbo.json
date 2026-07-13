@@ -11,7 +11,18 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": [
+        "AI_PROVIDER",
+        "CLERK_SECRET_KEY",
+        "DATABASE_URL",
+        "EMAIL_FROM",
+        "FRONTEND_URL",
+        "OPENAI_API_KEY",
+        "OPENAI_MODEL",
+        "PORT",
+        "RESEND_API_KEY"
+      ]
     },
     "lint": {
       "dependsOn": ["^build:lib"]
@@ -20,7 +31,8 @@
       "dependsOn": ["^build:lib", "prisma:generate"]
     },
     "prisma:generate": {
-      "cache": false
+      "cache": false,
+      "env": ["DATABASE_URL"]
     },
     "test": {
       "dependsOn": ["^build:lib"],
