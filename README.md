@@ -97,25 +97,97 @@ apps and the API agree on payload shapes. Keep Nest modules, controllers,
 services, Prisma Client usage, validation decorators, and provider secrets inside
 `apps/api`.
 
-Run the API and PostgreSQL with Docker:
+### Host API with Docker PostgreSQL
 
-```bash
-cp .env.example .env
-npm run docker:up
+For the most predictable local backend loop, run PostgreSQL in Docker and the
+NestJS API on the host. The host connects to PostgreSQL at:
+
+```text
+localhost:5433
 ```
 
-Run database migrations and seed the demo organization:
+Set up the local API env file:
 
 ```bash
+cp apps/api/.env.example apps/api/.env
+```
+
+`apps/api/.env` is the authoritative env file for host API development. Its
+database URL should use the host-exposed PostgreSQL port:
+
+```env
+DATABASE_URL=postgresql://componentiq:componentiq@localhost:5433/componentiq?schema=public
+```
+
+Start the database, run migrations, then start the API:
+
+```bash
+npm install
+npm run docker:db
 npm run db:migrate
+npm run dev:api
+```
+
+Seed the demo organization when needed:
+
+```bash
 npm run db:seed
 ```
 
-For local development without Docker, point `DATABASE_URL` at your PostgreSQL
-instance and run:
+The API is available at `http://localhost:4000`; Swagger docs are available at
+`http://localhost:4000/api/docs`.
+
+### Fully Dockerized Development
+
+For a fully Dockerized API and PostgreSQL stack, Docker Compose gives the API a
+container-internal database URL:
+
+```text
+postgres:5432
+```
+
+Start the stack:
 
 ```bash
-npm run dev:api
+npm run docker:up
+```
+
+Docker Compose sets the API container's `DATABASE_URL` to:
+
+```env
+DATABASE_URL=postgresql://componentiq:componentiq@postgres:5432/componentiq?schema=public
+```
+
+Do not use the Docker-internal `postgres` hostname in `apps/api/.env`; that file
+is for host-run API processes.
+
+### Database Troubleshooting
+
+Inspect running services and logs:
+
+```bash
+docker compose ps
+docker compose logs postgres
+sudo ss -ltnp | grep -E '5432|5433'
+```
+
+Test local PostgreSQL credentials from the host:
+
+```bash
+PGPASSWORD=componentiq psql \
+  -h localhost \
+  -p 5433 \
+  -U componentiq \
+  -d componentiq
+```
+
+PostgreSQL credentials and database names are written into the named Docker
+volume only when the database is first initialized. Changing `POSTGRES_USER`,
+`POSTGRES_PASSWORD`, or `POSTGRES_DB` later does not update an existing volume.
+Resetting the volume is destructive and should not be the first fix:
+
+```bash
+docker compose down -v
 ```
 
 Useful API endpoints:
