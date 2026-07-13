@@ -2,6 +2,7 @@
 
 import { ClerkProvider } from '@clerk/nextjs';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { ToastProvider, ToastViewport } from 'componentiq';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
@@ -14,7 +15,12 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ClerkProvider>
       <QueryClientProvider client={queryClient}>
-        <AppThemeProvider>{children}</AppThemeProvider>
+        <AppThemeProvider>
+          <ToastProvider>
+            {children}
+            <ToastViewport />
+          </ToastProvider>
+        </AppThemeProvider>
       </QueryClientProvider>
     </ClerkProvider>
   );

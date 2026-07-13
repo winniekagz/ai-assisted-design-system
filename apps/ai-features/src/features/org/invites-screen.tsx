@@ -24,6 +24,7 @@ import {
   EmptyState,
   Input,
   Select,
+  toast,
 } from 'componentiq';
 
 import { PageHeader } from '@/features/dashboard/app-shell';
@@ -48,7 +49,6 @@ const EXPIRING_SOON_DAYS = 3;
 export function InvitesScreen({ orgSlug }: { orgSlug: string }) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<Role>('ENGINEER');
-  const [inviteStatus, setInviteStatus] = useState('');
   const [developmentInviteLink, setDevelopmentInviteLink] = useState('');
   const [error, setError] = useState('');
 
@@ -68,15 +68,17 @@ export function InvitesScreen({ orgSlug }: { orgSlug: string }) {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
-    setInviteStatus('');
     setDevelopmentInviteLink('');
     try {
       const result = await createInvite.mutateAsync({ email, role });
-      setInviteStatus(
+      const inviteStatus =
         result.emailDelivery.status === 'sent'
           ? `Invite email sent to ${result.invite.email}.`
-          : "Invite saved. We'll email it once your sending domain is connected — or copy the link."
-      );
+          : "Invite saved. We'll email it once your sending domain is connected — or copy the link.";
+      toast({
+        variant: result.emailDelivery.status === 'sent' ? 'success' : 'warning',
+        title: inviteStatus,
+      });
       setDevelopmentInviteLink(result.developmentInviteLink ?? '');
       setEmail('');
       setRole('ENGINEER');
@@ -144,19 +146,6 @@ export function InvitesScreen({ orgSlug }: { orgSlug: string }) {
                         Create invite
                       </Button>
                     </form>
-                  )}
-
-                  {inviteStatus && (
-                    <div
-                      role='status'
-                      aria-live='polite'
-                      className='mt-5 rounded-md border border-status-success bg-status-success-bg p-4 text-sm text-status-success'
-                    >
-                      <p className='flex items-center gap-2 font-medium'>
-                        <CheckCircle2 className='size-4' aria-hidden='true' />
-                        {inviteStatus}
-                      </p>
-                    </div>
                   )}
 
                   {developmentInviteLink && <CopyLinkField link={developmentInviteLink} />}

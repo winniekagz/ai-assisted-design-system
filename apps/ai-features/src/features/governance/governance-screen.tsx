@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { AppShell, PageHeader } from '@/features/dashboard/app-shell';
+import { toast } from 'componentiq';
 
 const needOnlySchema = z.object({
   need: z.string().min(6).max(3000),
@@ -167,7 +168,10 @@ export function GovernanceScreen() {
       setAiResult(data);
     } catch {
       setAiResult(createMockGovernance(governanceRequestSchema.parse(body)));
-      setBanner('Using mocked governance memo because the API response was unavailable or failed validation.');
+      toast({
+        variant: 'warning',
+        title: 'Using mocked governance memo because the API response was unavailable or failed validation.',
+      });
     }
   }
 
@@ -304,7 +308,10 @@ export function GovernanceScreen() {
           </CardHeader>
           <CardContent className='grid gap-4'>
             {banner && (
-              <div className='rounded-md border border-warning-500 bg-warning-50 p-3 text-sm text-warning-900' role='status'>
+              <div
+                className='rounded-md border border-status-error bg-status-error-bg p-3 text-sm text-status-error'
+                role='alert'
+              >
                 {banner}
               </div>
             )}

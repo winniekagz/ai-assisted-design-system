@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'componentiq';
 
 import { queryKeys } from '@/lib/query/query-keys';
 
@@ -25,7 +26,16 @@ export function useResendInvite(orgSlug: string) {
     mutationFn: async (_inviteId: string): Promise<void> => {
       throw new Error('Resending invites is not available yet.');
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.invites(orgSlug) }),
+    onSuccess: () => {
+      toast({ variant: 'success', title: 'Invite resent.' });
+      return queryClient.invalidateQueries({ queryKey: queryKeys.invites(orgSlug) });
+    },
+    onError: error => {
+      toast({
+        variant: 'error',
+        title: error instanceof Error ? error.message : 'Invite could not be resent.',
+      });
+    },
   });
 }
 
@@ -35,6 +45,15 @@ export function useRevokeInvite(orgSlug: string) {
     mutationFn: async (_inviteId: string): Promise<void> => {
       throw new Error('Revoking invites is not available yet.');
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.invites(orgSlug) }),
+    onSuccess: () => {
+      toast({ variant: 'success', title: 'Invite revoked.' });
+      return queryClient.invalidateQueries({ queryKey: queryKeys.invites(orgSlug) });
+    },
+    onError: error => {
+      toast({
+        variant: 'error',
+        title: error instanceof Error ? error.message : 'Invite could not be revoked.',
+      });
+    },
   });
 }
