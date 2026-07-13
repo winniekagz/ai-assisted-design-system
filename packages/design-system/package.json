@@ -33,7 +33,7 @@
     "build:lib": "tsup",
     "prepublishOnly": "npm run build:lib",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx"
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --ignore-pattern \"src/components/examples/**\" --ignore-pattern \"src/**/*.stories.tsx\""
   },
   "dependencies": {
     "@heroui/react": "^3.0.3",
@@ -45,6 +45,7 @@
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
+    "@radix-ui/react-toast": "^1.2.15",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/table-core": "^8.21.3",

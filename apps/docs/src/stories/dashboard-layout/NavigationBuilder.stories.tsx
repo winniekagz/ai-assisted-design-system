@@ -1,5 +1,5 @@
 import { NavigationBuilder } from '@/components/layout';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import {
   BarChart3,
   Calendar,

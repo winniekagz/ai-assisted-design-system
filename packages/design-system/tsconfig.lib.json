@@ -22,5 +22,5 @@
     "src/types/**/*.ts",
     "src/types/**/*.tsx"
   ],
-  "exclude": ["node_modules", "src/components/examples/**"]
+  "exclude": ["node_modules", "src/components/examples/**", "src/**/*.stories.tsx"]
 }

@@ -6,11 +6,11 @@ import { PrismaService } from '../prisma/prisma.service';
 export class AuditsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByOrganization(organizationId: string) {
+  async findByOrganization(organizationId: string, userId?: string) {
     await this.ensureOrganization(organizationId);
 
     return this.prisma.auditSession.findMany({
-      where: { organizationId },
+      where: { organizationId, ...(userId ? { userId } : {}) },
       include: { findings: true },
       orderBy: { createdAt: 'desc' },
     });

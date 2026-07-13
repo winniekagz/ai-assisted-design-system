@@ -37,31 +37,157 @@ The NestJS backend lives in `apps/api`. It exposes REST endpoints on port `4000`
 uses PostgreSQL through Prisma, and treats organization-specific component rules
 and guardrails as the source of truth for AI workflows.
 
+### Authentication and Organization Authorization
+
+ComponentIQ uses Clerk for authentication and internal organization membership
+for authorization. This keeps identity separate from product permissions and
+allows each organization to own its own design-system rules, roles, guardrails,
+prompts, review preferences, and AI workflow access.
+
+The backend validates Clerk bearer tokens, syncs the Clerk user to an internal
+`User`, resolves organization access by ID or slug, checks membership, and then
+enforces a simple role-to-permission map. Existing ID-based organization API
+routes remain supported; the Next.js app uses slug-based routes such as
+`/org/[orgSlug]/dashboard` for cleaner workspace URLs.
+
+Invites are V1-only records. The API generates a secure random token, stores
+only its hash, returns a copyable invite link, and does not send email yet.
+
+For local app development, configure each runtime in the directory that loads
+its environment file:
+
+```bash
+cp apps/api/.env.example apps/api/.env
+cp apps/ai-features/.env.example apps/ai-features/.env.local
+```
+
+Set `CLERK_SECRET_KEY` in the API env file and
+`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` in the frontend env file. Do not place the
+Clerk secret key in the frontend app.
+
+### Frontend State Management
+
+The Next.js app uses TanStack Query as the shared server-state layer. Query keys
+live in `apps/ai-features/src/lib/query/query-keys.ts`, API domain functions live
+in `apps/ai-features/src/lib/api`, and reusable query/mutation hooks live in
+`apps/ai-features/src/hooks`. The onboarding V1 routes currently use shared
+queries for `/me`, organizations, organization detail, members, and invites.
+Those domain functions call the NestJS API directly with Clerk bearer tokens;
+the onboarding flow does not maintain parallel Next.js proxy routes.
+As components, guardrails, audits, and recommendations receive organization UI,
+they should be added through the same domain/query pattern so caching, retries,
+loading states, and invalidation stay consistent across pages.
+
+Zustand is used only for the selected-workspace UI fallback. Do not duplicate
+backend records, roles, invites, audit inputs, recommendation history, or invite
+tokens into Zustand or local storage. Keep sensitive form inputs local to the
+component and clear them after successful submission when appropriate.
+
+React Context is used only for stable providers such as Clerk and
+`QueryClientProvider`. Backend authorization remains the source of truth; frontend
+role checks are display hints only.
+
+The Next.js app uses `.next` for development output and `.next-build` for
+production builds, so a verification build cannot invalidate a running dev
+server's generated manifests.
+
 Shared API contracts live in `packages/shared-types`. Share request/response
 types, enum-like constants, and browser-safe domain summaries there so frontend
 apps and the API agree on payload shapes. Keep Nest modules, controllers,
 services, Prisma Client usage, validation decorators, and provider secrets inside
 `apps/api`.
 
-Run the API and PostgreSQL with Docker:
+### Host API with Docker PostgreSQL
 
-```bash
-cp .env.example .env
-npm run docker:up
+For the most predictable local backend loop, run PostgreSQL in Docker and the
+NestJS API on the host. The host connects to PostgreSQL at:
+
+```text
+localhost:5433
 ```
 
-Run database migrations and seed the demo organization:
+Set up the local API env file:
 
 ```bash
+cp apps/api/.env.example apps/api/.env
+```
+
+`apps/api/.env` is the authoritative env file for host API development. Its
+database URL should use the host-exposed PostgreSQL port:
+
+```env
+DATABASE_URL=postgresql://componentiq:componentiq@localhost:5433/componentiq?schema=public
+```
+
+Start the database, run migrations, then start the API:
+
+```bash
+npm install
+npm run docker:db
 npm run db:migrate
+npm run dev:api
+```
+
+Seed the demo organization when needed:
+
+```bash
 npm run db:seed
 ```
 
-For local development without Docker, point `DATABASE_URL` at your PostgreSQL
-instance and run:
+The API is available at `http://localhost:4000`; Swagger docs are available at
+`http://localhost:4000/api/docs`.
+
+### Fully Dockerized Development
+
+For a fully Dockerized API and PostgreSQL stack, Docker Compose gives the API a
+container-internal database URL:
+
+```text
+postgres:5432
+```
+
+Start the stack:
 
 ```bash
-npm run dev:api
+npm run docker:up
+```
+
+Docker Compose sets the API container's `DATABASE_URL` to:
+
+```env
+DATABASE_URL=postgresql://componentiq:componentiq@postgres:5432/componentiq?schema=public
+```
+
+Do not use the Docker-internal `postgres` hostname in `apps/api/.env`; that file
+is for host-run API processes.
+
+### Database Troubleshooting
+
+Inspect running services and logs:
+
+```bash
+docker compose ps
+docker compose logs postgres
+sudo ss -ltnp | grep -E '5432|5433'
+```
+
+Test local PostgreSQL credentials from the host:
+
+```bash
+PGPASSWORD=componentiq psql \
+  -h localhost \
+  -p 5433 \
+  -U componentiq \
+  -d componentiq
+```
+
+PostgreSQL credentials and database names are written into the named Docker
+volume only when the database is first initialized. Changing `POSTGRES_USER`,
+`POSTGRES_PASSWORD`, or `POSTGRES_DB` later does not update an existing volume.
+Resetting the volume is destructive and should not be the first fix:
+
+```bash
+docker compose down -v
 ```
 
 Useful API endpoints:

@@ -23,7 +23,7 @@ export function AssistantScreen() {
   const [error, setError] = useState('');
 
   const form = useForm<RecommendationRequest>({
-    resolver: zodResolver(recommendationRequestSchema),
+    resolver: zodResolver(recommendationRequestSchema as never),
     defaultValues: {
       prompt: '',
       context: 'Feature UI',

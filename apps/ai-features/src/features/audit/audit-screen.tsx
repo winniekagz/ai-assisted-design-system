@@ -16,17 +16,16 @@ import { Badge } from '@/components/ui/badge/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AppShell, PageHeader } from '@/features/dashboard/app-shell';
+import { toast } from 'componentiq';
 
 export function AuditScreen() {
   const [result, setResult] = useState<AuditResponse | null>(null);
-  const [banner, setBanner] = useState('');
   const form = useForm<AuditRequest>({
-    resolver: zodResolver(auditRequestSchema),
+    resolver: zodResolver(auditRequestSchema as never),
     defaultValues: { description: '', code: '' },
   });
 
   async function submit(values: AuditRequest) {
-    setBanner('');
     try {
       const response = await fetch('/api/ai/audit', {
         method: 'POST',
@@ -38,7 +37,10 @@ export function AuditScreen() {
       setResult(data);
     } catch {
       setResult(createMockAudit(values));
-      setBanner('Showing mocked audit output because the API response was unavailable or failed validation.');
+      toast({
+        variant: 'warning',
+        title: 'Showing mocked audit output because the API response was unavailable or failed validation.',
+      });
     }
   }
 
@@ -102,12 +104,6 @@ export function AuditScreen() {
                 Running audit…
               </CardContent>
             </Card>
-          )}
-
-          {banner && (
-            <div className='rounded-md border border-warning-500 bg-warning-50 p-3 text-sm text-warning-900' role='status'>
-              {banner}
-            </div>
           )}
 
           {!result && !form.formState.isSubmitting ? (

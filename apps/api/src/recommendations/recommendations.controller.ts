@@ -1,21 +1,38 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { AuthorizationService } from '../authorization/authorization.service';
+import { CurrentMembership } from '../authorization/current-membership.decorator';
+import { OrgMembershipGuard } from '../authorization/org-membership.guard';
+import { hasPermission } from '../authorization/permissions';
 import { IdParamDto, OrgIdParamDto } from '../common/dto/id-param.dto';
 import {
   ids,
   recommendationSessionExample,
 } from '../common/swagger/api-examples';
 import { RecommendationsService } from './recommendations.service';
+import type { OrganizationMember, User } from '@prisma/client';
 
 @ApiTags('Recommendations')
+@ApiBearerAuth()
+@UseGuards(ClerkAuthGuard)
 @Controller()
 export class RecommendationsController {
   constructor(
-    private readonly recommendationsService: RecommendationsService
+    private readonly recommendationsService: RecommendationsService,
+    private readonly authorizationService: AuthorizationService
   ) {}
 
   @Get('organizations/:orgId/recommendations')
+  @UseGuards(OrgMembershipGuard)
   @ApiOperation({
     summary: 'List organization recommendations',
     description:
@@ -42,8 +59,16 @@ export class RecommendationsController {
       },
     },
   })
-  findByOrganization(@Param() params: OrgIdParamDto) {
-    return this.recommendationsService.findByOrganization(params.orgId);
+  findByOrganization(
+    @Param() params: OrgIdParamDto,
+    @CurrentUser() user: User,
+    @CurrentMembership() membership: OrganizationMember
+  ) {
+    const viewAll = hasPermission(membership.role, 'recommendations.view');
+    return this.recommendationsService.findByOrganization(
+      params.orgId,
+      viewAll ? undefined : user.id
+    );
   }
 
   @Get('recommendations/:id')
@@ -72,7 +97,24 @@ export class RecommendationsController {
       },
     },
   })
-  findOne(@Param() params: IdParamDto) {
-    return this.recommendationsService.findOne(params.id);
+  async findOne(@Param() params: IdParamDto, @CurrentUser() user: User) {
+    const recommendation = await this.recommendationsService.findOne(params.id);
+    const { membership } = await this.authorizationService.resolveMembership(
+      user,
+      recommendation.organizationId
+    );
+
+    if (
+      recommendation.userId === user.id &&
+      hasPermission(membership.role, 'recommendations.viewOwn')
+    ) {
+      return recommendation;
+    }
+
+    this.authorizationService.assertPermission(
+      membership,
+      'recommendations.view'
+    );
+    return recommendation;
   }
 }

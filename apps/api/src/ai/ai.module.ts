@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import { AuthModule } from '../auth/auth.module';
+import { AuthorizationModule } from '../authorization/authorization.module';
 import { AiController } from './ai.controller';
 import { AiService } from './ai.service';
 import { AI_PROVIDER } from './providers/ai-provider.interface';
@@ -8,6 +10,7 @@ import { MockAiProvider } from './providers/mock-ai.provider';
 import { OpenAiProvider } from './providers/openai.provider';
 
 @Module({
+  imports: [AuthModule, AuthorizationModule],
   controllers: [AiController],
   providers: [
     AiService,

@@ -49,7 +49,8 @@ const Radio = React.forwardRef<
   value = '',
   ...props
 }, ref) => {
-  const radioId      = id ?? React.useId();
+  const generatedId = React.useId();
+  const radioId = id ?? generatedId;
   const finalVariant = error ? 'error' : success ? 'success' : variant;
   const { item, dot } = sizeMap[size];
 
@@ -120,4 +121,3 @@ const Radio = React.forwardRef<
 Radio.displayName = 'Radio';
 
 export { Radio };
-

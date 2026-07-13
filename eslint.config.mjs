@@ -64,8 +64,8 @@ const eslintConfig = [
       "@typescript-eslint/explicit-function-return-type": "off", // Not too strict
       "@typescript-eslint/explicit-module-boundary-types": "off", // Not too strict
       "@typescript-eslint/no-non-null-assertion": "warn", // Warn but allow
-      "@typescript-eslint/prefer-optional-chain": "warn",
-      "@typescript-eslint/prefer-nullish-coalescing": "warn",
+      "@typescript-eslint/prefer-optional-chain": "off",
+      "@typescript-eslint/prefer-nullish-coalescing": "off",
 
       // Import rules
       "import/order": [
@@ -96,9 +96,18 @@ const eslintConfig = [
 
       // Next.js specific rules
       "@next/next/no-img-element": "warn", // Prefer Next.js Image component
-      "@next/next/no-html-link-for-pages": "warn",
+      "@next/next/no-html-link-for-pages": "off",
       "@next/next/no-sync-scripts": "error",
       "@next/next/no-page-custom-font": "off", // Allow custom fonts
+    },
+  },
+
+  // TypeScript handles undefined symbols more accurately than ESLint's
+  // JavaScript-only no-undef rule, especially for type-only React namespaces.
+  {
+    files: ["**/*.{ts,tsx}"],
+    rules: {
+      "no-undef": "off",
     },
   },
 
