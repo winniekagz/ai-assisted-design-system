@@ -90,7 +90,8 @@ const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps>(
     },
     ref
   ) => {
-    const inputId = id ?? React.useId();
+    const generatedId = React.useId();
+    const inputId = id ?? generatedId;
     const listboxId = `${inputId}-listbox`;
     const helperId = helperText ? `${inputId}-helper` : undefined;
 

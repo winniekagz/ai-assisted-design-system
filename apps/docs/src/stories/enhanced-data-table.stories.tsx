@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { ColumnDef } from '@tanstack/react-table';
 import { Edit, Eye } from 'lucide-react';
 import { useState } from 'react';

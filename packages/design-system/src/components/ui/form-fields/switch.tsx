@@ -23,7 +23,8 @@ const Switch = React.forwardRef<
   onCheckedChange,
   ...props
 }, ref) => {
-  const switchId = id ?? React.useId();
+  const generatedId = React.useId();
+  const switchId = id ?? generatedId;
 
   const labelEl = label ? (
     <label

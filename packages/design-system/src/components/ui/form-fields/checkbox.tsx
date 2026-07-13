@@ -49,7 +49,8 @@ const Checkbox = React.forwardRef<
   },
   ref,
 ) => {
-  const checkboxId   = id ?? React.useId();
+  const generatedId = React.useId();
+  const checkboxId = id ?? generatedId;
   const finalVariant = error ? 'error' : success ? 'success' : variant;
   const { box, icon } = sizeMap[size];
 

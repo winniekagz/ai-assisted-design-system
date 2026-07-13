@@ -70,7 +70,8 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     },
     ref
   ) => {
-    const selectId = id ?? React.useId();
+    const generatedId = React.useId();
+    const selectId = id ?? generatedId;
     const helperId = helperText ? `${selectId}-helper` : undefined;
 
     let finalVariant = variant;
