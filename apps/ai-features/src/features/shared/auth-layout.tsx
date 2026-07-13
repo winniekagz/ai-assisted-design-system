@@ -8,17 +8,17 @@ import * as React from 'react';
  * Left  = brand / trust rail (marketing context, never asks for anything)
  * Right = the single action for this screen (form, Clerk widget, etc.)
  *
- * The gradient is the one arbitrary-color exception allowed by the design
- * review: it renders identically regardless of theme config, expressed from
- * the literal token values (primaryScale.800 -> primary, secondaryScale.900
- * -> secondary) rather than a made-up color.
+ * The gradient is built from CSS custom property tokens
+ * (--primary-800/--primary-500, --secondary-900/--secondary-500) rather than
+ * a made-up color, so it renders identically regardless of theme config and
+ * updates automatically if the palette changes.
  */
 
 type RailTone = 'primary' | 'secondary';
 
 const RAIL_GRADIENT: Record<RailTone, string> = {
-  primary: 'bg-[linear-gradient(160deg,#4D271F,#8D493A)]',
-  secondary: 'bg-[linear-gradient(160deg,#1C3E45,#347887)]',
+  primary: 'bg-[linear-gradient(160deg,var(--primary-800),var(--primary-500))]',
+  secondary: 'bg-[linear-gradient(160deg,var(--secondary-900),var(--secondary-500))]',
 };
 
 export interface AuthLayoutProps {
@@ -31,7 +31,7 @@ export interface AuthLayoutProps {
 export function AuthLayout({ children, rail, tone = 'primary' }: AuthLayoutProps) {
   return (
     <main className='min-h-screen bg-background'>
-      <div className='mx-auto grid min-h-screen w-full max-w-6xl grid-cols-1 lg:grid-cols-[1.05fr_1fr]'>
+      <div className='grid min-h-screen grid-cols-1 lg:grid-cols-[1.05fr_1fr]'>
         <aside
           className={`hidden flex-col p-9 text-primary-foreground lg:flex ${RAIL_GRADIENT[tone]}`}
         >

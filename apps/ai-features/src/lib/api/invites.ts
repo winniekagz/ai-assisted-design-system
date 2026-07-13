@@ -22,22 +22,26 @@ export type InvitePreview = {
   organization: Organization;
 };
 
-export function getInvites(orgSlug: string, authToken: string | null, signal?: AbortSignal) {
+export function getInvites(
+  orgSlug: string,
+  clerkSessionToken: string | null,
+  signal?: AbortSignal
+) {
   return apiClient.get<OrganizationInvite[]>(
     `/organizations/${encodeURIComponent(orgSlug)}/invites`,
-    { signal, token: authToken }
+    { signal, clerkSessionToken }
   );
 }
 
 export function createInvite(
   orgSlug: string,
   input: CreateInviteInput,
-  authToken: string | null
+  clerkSessionToken: string | null
 ) {
   return apiClient.post<CreateInviteResponse>(
     `/organizations/${encodeURIComponent(orgSlug)}/invites`,
     input,
-    { token: authToken }
+    { clerkSessionToken }
   );
 }
 
@@ -48,10 +52,10 @@ export function validateInvite(token: string, signal?: AbortSignal) {
   );
 }
 
-export function acceptInvite(token: string, authToken: string | null) {
+export function acceptInvite(token: string, clerkSessionToken: string | null) {
   return apiClient.post<{ organization: Organization }>(
     '/invites/accept',
     { token },
-    { token: authToken }
+    { clerkSessionToken }
   );
 }

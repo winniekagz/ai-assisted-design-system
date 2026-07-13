@@ -2,7 +2,6 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo } from 'react';
 
@@ -12,6 +11,7 @@ import { useMe } from '@/hooks/queries/use-me';
 import { useOrganization } from '@/hooks/queries/use-organization';
 import { useOrganizations } from '@/hooks/queries/use-organizations';
 import { useWorkspaceStore } from '@/stores/workspace-store';
+import { redirectToSignIn } from '../../lib/auth/redirects';
 import type { CurrentUserResponse, Membership, Organization } from './types';
 
 export function OrgFrame({
@@ -26,7 +26,6 @@ export function OrgFrame({
   }) => ReactNode;
 }) {
   const { isLoaded, isSignedIn } = useAuth();
-  const router = useRouter();
   const meQuery = useMe();
   const organizationQuery = useOrganization(orgSlug);
   const organizationsQuery = useOrganizations();
@@ -35,15 +34,21 @@ export function OrgFrame({
   useEffect(() => {
     if (!isLoaded) return;
     if (!isSignedIn) {
-      router.replace('/sign-in');
+      redirectToSignIn();
       return;
     }
     setSelectedOrgSlug(orgSlug);
-  }, [isLoaded, isSignedIn, orgSlug, router, setSelectedOrgSlug]);
+  }, [isLoaded, isSignedIn, setSelectedOrgSlug, orgSlug]);
 
   const me = meQuery.data ?? null;
   const organization = organizationQuery.data ?? null;
   const error = meQuery.error ?? organizationQuery.error;
+
+  useEffect(() => {
+    if (error instanceof ApiError && error.status === 401) {
+      redirectToSignIn();
+    }
+  }, [error]);
 
   const membership = useMemo(
     () => me?.memberships.find(item => item.organization.slug === orgSlug) ?? null,

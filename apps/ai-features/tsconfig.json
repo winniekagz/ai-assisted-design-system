@@ -19,6 +19,7 @@
       "@/hooks/queries/*": ["./src/hooks/queries/*"],
       "@/hooks/mutations/*": ["./src/hooks/mutations/*"],
       "@/stores/*": ["./src/stores/*"],
+      "@/lib/auth/*": ["./src/lib/auth/*"],
       "@/components/*": ["../../packages/design-system/src/components/*"],
       "@/lib/*": ["../../packages/design-system/src/lib/*"],
       "@/hooks/*": ["../../packages/design-system/src/hooks/*"],

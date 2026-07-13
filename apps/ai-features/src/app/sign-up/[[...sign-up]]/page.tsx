@@ -1,4 +1,6 @@
 import { SignUp } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 
 import { AuthLayout, AuthRail } from '@/features/shared/auth-layout';
 import { clerkAuthAppearance } from '@/features/shared/clerk-appearance';
@@ -40,7 +42,13 @@ function SignUpSteps() {
   );
 }
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+  const session = await auth();
+
+  if (session.userId) {
+    redirect('/onboarding');
+  }
+
   return (
     <AuthLayout
       rail={
@@ -55,7 +63,14 @@ export default function SignUpPage() {
           You're on step 1 of 3. Takes about two minutes.
         </p>
       </div>
-      <SignUp routing='path' path='/sign-up' signInUrl='/sign-in' appearance={clerkAuthAppearance} />
+      <SignUp
+        routing='path'
+        path='/sign-up'
+        signInUrl='/sign-in'
+        forceRedirectUrl='/onboarding'
+        fallbackRedirectUrl='/onboarding'
+        appearance={clerkAuthAppearance}
+      />
     </AuthLayout>
   );
 }

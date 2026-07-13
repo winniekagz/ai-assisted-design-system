@@ -2,6 +2,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useQuery } from '@tanstack/react-query';
 
 import { getInvites, validateInvite } from '@/lib/api/invites';
+import { requireClerkSessionToken } from '@/lib/auth/clerk-session-token';
 import { queryKeys } from '@/lib/query/query-keys';
 
 export function useInvites(orgSlug: string) {
@@ -9,7 +10,10 @@ export function useInvites(orgSlug: string) {
 
   return useQuery({
     queryKey: queryKeys.invites(orgSlug),
-    queryFn: async ({ signal }) => getInvites(orgSlug, await getToken(), signal),
+    queryFn: async ({ signal }) => {
+      const clerkSessionToken = await requireClerkSessionToken(getToken);
+      return getInvites(orgSlug, clerkSessionToken, signal);
+    },
     enabled: isLoaded && Boolean(isSignedIn) && Boolean(orgSlug),
     staleTime: 1000 * 30,
   });

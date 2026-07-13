@@ -1,9 +1,24 @@
-import { QueryClient } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 
 import { ApiError } from '../api/client';
+import { redirectToSignIn } from '../auth/redirects';
 
 export function createQueryClient() {
   return new QueryClient({
+    queryCache: new QueryCache({
+      onError: error => {
+        if (isUnauthenticated(error)) {
+          redirectToSignIn();
+        }
+      },
+    }),
+    mutationCache: new MutationCache({
+      onError: error => {
+        if (isUnauthenticated(error)) {
+          redirectToSignIn();
+        }
+      },
+    }),
     defaultOptions: {
       queries: {
         staleTime: 1000 * 60 * 2,
@@ -21,4 +36,8 @@ export function createQueryClient() {
       },
     },
   });
+}
+
+function isUnauthenticated(error: unknown) {
+  return error instanceof ApiError && error.status === 401;
 }

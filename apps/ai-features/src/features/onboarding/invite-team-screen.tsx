@@ -2,21 +2,33 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowRight, CheckCircle2, Plus, Trash2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useMemo, useRef, useState } from 'react';
 
 import { Button, Input, Select } from 'componentiq';
 
-import { OnboardingStepper } from '@/features/shared/onboarding-stepper';
+import { OnboardingLayout } from '@/features/shared/onboarding-layout';
 import { createInvite } from '@/lib/api/invites';
+import { requireClerkSessionToken } from '@/lib/auth/clerk-session-token';
 import { queryKeys } from '@/lib/query/query-keys';
 import type { Role } from '@/features/org/types';
 
 type InviteDraft = { id: string; email: string; role: Exclude<Role, 'OWNER'> };
 
-const inviteRoles: InviteDraft['role'][] = ['ADMIN', 'MAINTAINER', 'ENGINEER', 'VIEWER'];
+const inviteRoles: InviteDraft['role'][] = [
+  'ADMIN',
+  'MAINTAINER',
+  'ENGINEER',
+  'VIEWER',
+];
 
 /**
  * Invite teammates — the optional step 3 (split out of create-org).
@@ -53,7 +65,11 @@ export function InviteTeamScreen() {
   }
 
   function addInvite() {
-    const draft: InviteDraft = { id: crypto.randomUUID(), email: '', role: 'ENGINEER' };
+    const draft: InviteDraft = {
+      id: crypto.randomUUID(),
+      email: '',
+      role: 'ENGINEER',
+    };
     setInvites(cur => [...cur, draft]);
     setLiveMessage('Invite row added.');
     requestAnimationFrame(() => emailRefs.current[draft.id]?.focus());
@@ -61,11 +77,13 @@ export function InviteTeamScreen() {
 
   function removeInvite(id: string) {
     setInvites(cur => {
-      if (cur.length === 1) return [{ id: crypto.randomUUID(), email: '', role: 'ENGINEER' }];
+      if (cur.length === 1)
+        return [{ id: crypto.randomUUID(), email: '', role: 'ENGINEER' }];
       const index = cur.findIndex(i => i.id === id);
       const next = cur.filter(i => i.id !== id);
       const focusTarget = next[Math.max(0, index - 1)];
-      if (focusTarget) requestAnimationFrame(() => emailRefs.current[focusTarget.id]?.focus());
+      if (focusTarget)
+        requestAnimationFrame(() => emailRefs.current[focusTarget.id]?.focus());
       return next;
     });
     setLiveMessage('Invite row removed.');
@@ -73,9 +91,11 @@ export function InviteTeamScreen() {
 
   const sendMutation = useMutation({
     mutationFn: async () => {
-      const token = await getToken();
+      const clerkSessionToken = await requireClerkSessionToken(getToken);
       const results = await Promise.allSettled(
-        prepared.map(i => createInvite(orgSlug, { email: i.email, role: i.role }, token))
+        prepared.map(i =>
+          createInvite(orgSlug, { email: i.email, role: i.role }, clerkSessionToken)
+        )
       );
       return {
         sent: results.filter(r => r.status === 'fulfilled').length,
@@ -102,7 +122,9 @@ export function InviteTeamScreen() {
     try {
       await sendMutation.mutateAsync();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invites could not be sent.');
+      setError(
+        err instanceof Error ? err.message : 'Invites could not be sent.'
+      );
     }
   }
 
@@ -110,19 +132,28 @@ export function InviteTeamScreen() {
   const sent = sendMutation.data?.sent ?? 0;
 
   return (
-    <main className='min-h-screen bg-background px-4 py-8 sm:px-6 lg:px-8 lg:py-12'>
-      <div className='mx-auto grid w-full max-w-2xl gap-8'>
-        <OnboardingStepper current='invite' completed={['account', 'choose', 'workspace']} />
-
-        <div>
-          <h1 className='text-2xl font-bold tracking-tight text-foreground md:text-3xl'>
-            Invite your team
-          </h1>
-          <p className='mt-2 text-sm leading-6 text-muted-foreground'>
-            Bring teammates into <span className='font-medium text-foreground'>{orgSlug}</span>.
-            This is optional — you can always do it later from Settings → Invites.
-          </p>
-        </div>
+    <OnboardingLayout
+      current='invite'
+      completed={['account', 'choose', 'workspace']}
+      stepNumber='4 of 4'
+      title='Invite your team'
+      explanation='Add teammates now or continue to the dashboard and invite them later from workspace settings.'
+      happens={[
+        'Enter teammate emails only if you have them ready.',
+        'Choose the right role for each person.',
+        'Skip safely if you want to finish setup first.',
+      ]}
+      benefits={[
+        'Everyone starts from the same approved rules.',
+        'Workspace permissions are ready before AI workflows expand.',
+      ]}
+    >
+      <section className='grid gap-6'>
+        <p className='text-sm leading-6 text-muted-foreground'>
+          Bring teammates into{' '}
+          <span className='font-medium text-foreground'>{orgSlug}</span>. This
+          step is optional.
+        </p>
 
         {/* Polite live region for dynamic row changes */}
         <p className='sr-only' aria-live='polite'>
@@ -134,22 +165,30 @@ export function InviteTeamScreen() {
             {invites.map((invite, index) => (
               <div
                 key={invite.id}
-                className='grid gap-3 rounded-md border border-border bg-background-secondary p-4 sm:grid-cols-[minmax(0,1fr)_160px_44px]'
+                className='grid gap-3 rounded-lg border border-border bg-card p-4 sm:grid-cols-[minmax(0,1fr)_160px_44px]'
               >
                 <Input
                   ref={(el: HTMLInputElement | null) => {
                     emailRefs.current[invite.id] = el;
                   }}
                   type='email'
-                  label={index === 0 ? 'Email address' : `Email address ${index + 1}`}
+                  label={
+                    index === 0 ? 'Email address' : `Email address ${index + 1}`
+                  }
                   value={invite.email}
-                  onChange={e => updateInvite(invite.id, { email: e.target.value })}
+                  onChange={e =>
+                    updateInvite(invite.id, { email: e.target.value })
+                  }
                   placeholder='teammate@example.com'
                 />
                 <Select
                   label='Role'
                   value={invite.role}
-                  onChange={e => updateInvite(invite.id, { role: e.target.value as InviteDraft['role'] })}
+                  onChange={e =>
+                    updateInvite(invite.id, {
+                      role: e.target.value as InviteDraft['role'],
+                    })
+                  }
                 >
                   {inviteRoles.map(role => (
                     <option key={role} value={role}>
@@ -189,14 +228,18 @@ export function InviteTeamScreen() {
               aria-live='assertive'
               className='flex items-start gap-3 rounded-md border border-status-warning bg-status-warning-bg p-4 text-sm text-status-warning'
             >
-              <AlertTriangle className='mt-0.5 size-4 shrink-0' aria-hidden='true' />
+              <AlertTriangle
+                className='mt-0.5 size-4 shrink-0'
+                aria-hidden='true'
+              />
               <div>
                 <p className='font-medium'>
-                  {sent} invite{sent === 1 ? '' : 's'} sent, {failed} couldn't be delivered.
+                  {sent} invite{sent === 1 ? '' : 's'} sent, {failed} couldn't
+                  be delivered.
                 </p>
                 <p className='mt-1 text-status-warning/90'>
-                  Check the addresses and try again, or continue and resend later from Settings →
-                  Invites.
+                  Check the addresses and try again, or continue and resend
+                  later from Settings → Invites.
                 </p>
               </div>
             </div>
@@ -213,7 +256,11 @@ export function InviteTeamScreen() {
           )}
 
           <div className='mt-2 flex flex-col gap-3 sm:flex-row sm:items-center'>
-            <Button type='submit' loading={sendMutation.isPending} endIcon={<ArrowRight className='size-4' />}>
+            <Button
+              type='submit'
+              loading={sendMutation.isPending}
+              endIcon={<ArrowRight className='size-4' />}
+            >
               {prepared.length > 0 ? 'Send invites & continue' : 'Continue'}
             </Button>
             <Button type='button' variant='text' onClick={goToDashboard}>
@@ -227,7 +274,7 @@ export function InviteTeamScreen() {
             )}
           </div>
         </form>
-      </div>
-    </main>
+      </section>
+    </OnboardingLayout>
   );
 }

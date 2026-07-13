@@ -6,8 +6,15 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from 'componentiq';
-import { OnboardingStepper } from '@/features/shared/onboarding-stepper';
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from 'componentiq';
+import { OnboardingLayout } from '@/features/shared/onboarding-layout';
 import { useMe } from '@/hooks/queries/use-me';
 
 export function OnboardingScreen() {
@@ -25,7 +32,9 @@ export function OnboardingScreen() {
     }
 
     if (meQuery.data?.memberships[0]) {
-      router.replace(`/org/${meQuery.data.memberships[0].organization.slug}/dashboard`);
+      router.replace(
+        `/org/${meQuery.data.memberships[0].organization.slug}/dashboard`
+      );
     }
   }, [isLoaded, isSignedIn, meQuery.data, router]);
 
@@ -38,62 +47,92 @@ export function OnboardingScreen() {
   }
 
   return (
-    <main className='mx-auto grid min-h-screen w-full max-w-5xl place-items-center bg-background px-4 py-10'>
-      <section className='grid w-full gap-6'>
-        <OnboardingStepper current='choose' completed={['account']} />
-        <div className='max-w-2xl'>
-          <p className='text-sm font-medium uppercase text-primary'>Onboarding</p>
-          <h1 className='mt-2 text-3xl font-semibold text-foreground'>
-            Set up your ComponentIQ organization
-          </h1>
-          <p className='mt-3 text-sm leading-6 text-muted-foreground'>
-            Create a workspace for your design-system rules, components, guardrails,
-            and AI-assisted workflows.
-          </p>
+    <OnboardingLayout
+      current='choose'
+      completed={['account']}
+      stepNumber='2 of 4'
+      title='Set up your workspace'
+      explanation='Choose whether you are creating a new ComponentIQ organization or joining one your team already owns.'
+      happens={[
+        'Pick the path that matches your team.',
+        'Create a workspace now or accept an invite.',
+        'Keep organization access tied to the right account.',
+      ]}
+      benefits={[
+        'Design-system rules stay scoped to one team.',
+        'Members, guardrails, and AI workflows inherit the same workspace.',
+      ]}
+    >
+      <section className='grid gap-4' aria-labelledby='choose-workspace-title'>
+        <div className='sr-only'>
+          <h3 id='choose-workspace-title'>Choose your workspace path</h3>
         </div>
-        <div className='grid gap-4 md:grid-cols-2'>
-          <Card className='border border-primary/40 bg-card p-0'>
-            <CardHeader className='px-5 pt-5 sm:px-6 sm:pt-6'>
-              <CardTitle className='flex items-center gap-2 text-lg'>
-                <Building2 className='size-5 text-primary' />
-                Create organization
-                <Badge variant='pastel' status='active' size='sm'>
-                  Recommended
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className='grid gap-4 px-5 pb-5 sm:px-6 sm:pb-6'>
-              <p className='text-sm leading-6 text-muted-foreground'>
-                Start a new organization and become the owner for projects,
-                guardrails, invites, and AI workflows. Takes about two minutes.
-              </p>
-              <Button asChild className='min-h-10 px-5 py-2.5' endIcon={<ArrowRight />}>
-                <Link href='/onboarding/create-organization'>Create workspace</Link>
-              </Button>
-            </CardContent>
-          </Card>
-          <Card className='border border-border bg-card p-0'>
-            <CardHeader className='px-5 pt-5 sm:px-6 sm:pt-6'>
-              <CardTitle className='flex items-center gap-2 text-lg'>
-                <Mail className='size-5 text-primary' />
-                Join an existing organization
-              </CardTitle>
-            </CardHeader>
-            <CardContent className='grid gap-4 px-5 pb-5 sm:px-6 sm:pb-6'>
-              <p className='text-sm leading-6 text-muted-foreground'>
-                {token
-                  ? 'You have an invite link open — accept it to join your team’s workspace.'
-                  : 'Already have a teammate using ComponentIQ? Ask them to send you an invite link from Settings → Invites, then open it here.'}
-              </p>
-              <Button asChild variant='outlined' className='min-h-10 px-5 py-2.5' endIcon={<ArrowRight />}>
-                <Link href={token ? `/accept-invite?token=${token}` : '/onboarding/join-organization'}>
-                  Accept invite
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+
+        <Card className='border border-primary bg-card p-0 shadow-sm'>
+          <CardHeader className='px-6 pt-6'>
+            <CardTitle className='flex flex-wrap items-center gap-2 text-xl'>
+              <span className='grid size-9 place-items-center rounded-md bg-primary text-primary-foreground'>
+                <Building2 className='size-4' aria-hidden='true' />
+              </span>
+              Create workspace
+              <Badge variant='pastel' status='active' size='sm'>
+                Recommended
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className='grid gap-5 px-6 pb-6'>
+            <p className='max-w-xl text-sm leading-6 text-muted-foreground'>
+              Start fresh as the owner for projects, guardrails, invites, and AI
+              workflows.
+            </p>
+            <Button
+              asChild
+              className='min-h-11 px-5 py-2.5'
+              endIcon={<ArrowRight />}
+            >
+              <Link href='/onboarding/create-organization'>
+                Create workspace
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <div className='rounded-lg border border-border bg-background-secondary p-5'>
+          <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+            <div className='flex gap-3'>
+              <span className='grid size-9 shrink-0 place-items-center rounded-md border border-border bg-card text-primary'>
+                <Mail className='size-4' aria-hidden='true' />
+              </span>
+              <div>
+                <h3 className='text-base font-semibold text-foreground'>
+                  Join existing workspace
+                </h3>
+                <p className='mt-1 text-sm leading-6 text-muted-foreground'>
+                  {token
+                    ? 'You have an invite link ready to accept.'
+                    : 'Use the invite link sent by an owner or admin.'}
+                </p>
+              </div>
+            </div>
+            <Button
+              asChild
+              variant='text'
+              className='justify-start sm:justify-center'
+              endIcon={<ArrowRight />}
+            >
+              <Link
+                href={
+                  token
+                    ? `/accept-invite?token=${token}`
+                    : '/onboarding/join-organization'
+                }
+              >
+                Accept invite
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
-    </main>
+    </OnboardingLayout>
   );
 }

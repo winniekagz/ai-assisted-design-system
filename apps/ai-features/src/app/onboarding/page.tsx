@@ -16,7 +16,10 @@ export default async function OnboardingPage() {
     try {
       await queryClient.prefetchQuery({
         queryKey: queryKeys.me,
-        queryFn: async () => getMe(await session.getToken()),
+        queryFn: async () => {
+          const clerkSessionToken = await session.getToken();
+          return getMe(clerkSessionToken);
+        },
       });
     } catch {
       queryClient.removeQueries({ queryKey: queryKeys.me });

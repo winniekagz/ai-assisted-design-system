@@ -30,11 +30,14 @@ const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?$/;
  * until that endpoint ships:
  *   GET /organizations/slug-available?slug=... -> { available: boolean }
  */
-async function fetchSlugAvailability(slug: string, token: string | null): Promise<boolean | null> {
+async function fetchSlugAvailability(
+  slug: string,
+  clerkSessionToken: string | null
+): Promise<boolean | null> {
   try {
     const data = await apiClient.get<{ available?: boolean }>(
       `/organizations/slug-available?slug=${encodeURIComponent(slug)}`,
-      { token }
+      { clerkSessionToken, authRedirect: false }
     );
     return typeof data.available === 'boolean' ? data.available : null;
   } catch {
@@ -43,7 +46,7 @@ async function fetchSlugAvailability(slug: string, token: string | null): Promis
 }
 
 export function useSlugAvailability(slug: string): SlugAvailability {
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const [result, setResult] = useState<SlugAvailability>({ status: 'idle', message: '' });
 
   const formatValid = useMemo(
@@ -52,7 +55,7 @@ export function useSlugAvailability(slug: string): SlugAvailability {
   );
 
   useEffect(() => {
-    if (slug.length === 0) {
+    if (!isLoaded || !isSignedIn || slug.length === 0) {
       setResult({ status: 'idle', message: '' });
       return;
     }
@@ -68,8 +71,8 @@ export function useSlugAvailability(slug: string): SlugAvailability {
     setResult({ status: 'checking', message: 'Checking availability…' });
 
     const timer = setTimeout(async () => {
-      const token = await getToken();
-      const available = await fetchSlugAvailability(slug, token);
+      const clerkSessionToken = await getToken();
+      const available = await fetchSlugAvailability(slug, clerkSessionToken);
       if (cancelled) return;
       if (available === null) {
         setResult({ status: 'unknown', message: "We'll confirm this URL when you continue." });
@@ -84,7 +87,7 @@ export function useSlugAvailability(slug: string): SlugAvailability {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [slug, formatValid, getToken]);
+  }, [slug, formatValid, getToken, isLoaded, isSignedIn]);
 
   return result;
 }

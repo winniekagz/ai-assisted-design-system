@@ -1,3 +1,5 @@
+import { redirectToSignIn } from '../auth/redirects';
+
 export type ApiErrorCode =
   | 'validation'
   | 'unauthenticated'
@@ -23,7 +25,8 @@ export class ApiError extends Error {
 
 type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: unknown;
-  token?: string | null;
+  clerkSessionToken?: string | null;
+  authRedirect?: boolean;
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
@@ -40,13 +43,14 @@ export const apiClient = {
 };
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { token, ...requestOptions } = options;
+  const { clerkSessionToken, authRedirect = true, ...requestOptions } = options;
+  const bearerToken = clerkSessionToken?.trim();
   const response = await fetch(`${API_URL}${path}`, {
     ...requestOptions,
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...requestOptions.headers,
+      ...(bearerToken ? { Authorization: `Bearer ${bearerToken}` } : {}),
     },
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
   });
@@ -54,6 +58,10 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   const payload = await parseResponse(response);
 
   if (!response.ok) {
+    if (response.status === 401 && authRedirect) {
+      redirectToSignIn();
+    }
+
     throw new ApiError(getErrorMessage(payload, response.status), response.status, payload);
   }
 

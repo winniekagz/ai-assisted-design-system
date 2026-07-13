@@ -6,17 +6,21 @@ export type CreateOrganizationInput = {
   slug?: string;
 };
 
-export function getOrganizations(token: string | null, signal?: AbortSignal) {
-  return apiClient.get<Organization[]>('/organizations', { signal, token });
+export function getOrganizations(clerkSessionToken: string | null, signal?: AbortSignal) {
+  return apiClient.get<Organization[]>('/organizations', { signal, clerkSessionToken });
 }
 
-export function getOrganization(orgSlug: string, token: string | null, signal?: AbortSignal) {
+export function getOrganization(
+  orgSlug: string,
+  clerkSessionToken: string | null,
+  signal?: AbortSignal
+) {
   return apiClient.get<Organization>(
     `/organizations/slug/${encodeURIComponent(orgSlug)}`,
-    { signal, token }
+    { signal, clerkSessionToken }
   );
 }
 
-export function createOrganization(input: CreateOrganizationInput, token: string | null) {
-  return apiClient.post<Organization>('/organizations', input, { token });
+export function createOrganization(input: CreateOrganizationInput, clerkSessionToken: string | null) {
+  return apiClient.post<Organization>('/organizations', input, { clerkSessionToken });
 }
