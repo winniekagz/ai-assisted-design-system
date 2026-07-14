@@ -1,4 +1,4 @@
-import { OrganizationDashboardScreen } from '@/features/org/dashboard-screen';
+import { OrganizationDashboardScreen } from '../../../../features/org/dashboard-screen';
 
 type PageProps = {
   params: Promise<{ orgSlug: string }>;
