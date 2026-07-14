@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 
 import type { Role } from '@winniekagendo/componentiq-shared-types';
 
+import type { SidebarSection } from '@/features/projects/fixtures/projects';
+
 export const permissions = [
   'org.manage',
   'members.invite',
@@ -83,6 +85,7 @@ type WorkspaceState = {
   activeMembershipId?: string;
   activeRole?: Role;
   activePermissions: Permission[];
+  activeProjectSection: SidebarSection;
   themeMode: 'light' | 'system';
   setSelectedOrgSlug(orgSlug?: string): void;
   setActiveMembership(membership?: {
@@ -91,6 +94,8 @@ type WorkspaceState = {
     role: Role;
   }): void;
   hasPermission(permission: Permission): boolean;
+  // eslint-disable-next-line no-unused-vars
+  setActiveProjectSection(section: SidebarSection): void;
   setThemeMode(themeMode: 'light' | 'system'): void;
 };
 
@@ -102,6 +107,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       activeMembershipId: undefined,
       activeRole: undefined,
       activePermissions: [],
+      activeProjectSection: 'overview',
       themeMode: 'light',
       setSelectedOrgSlug: selectedOrgSlug => set({ selectedOrgSlug }),
       setActiveMembership: membership => {
@@ -124,6 +130,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         });
       },
       hasPermission: permission => get().activePermissions.includes(permission),
+      setActiveProjectSection: activeProjectSection => set({ activeProjectSection }),
       setThemeMode: themeMode => set({ themeMode }),
     }),
     {
