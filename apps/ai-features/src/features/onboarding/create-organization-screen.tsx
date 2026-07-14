@@ -60,14 +60,14 @@ export function CreateOrganizationScreen() {
       const clerkSessionToken = await requireClerkSessionToken(getToken);
       return createOrganization({ name: name.trim(), slug }, clerkSessionToken);
     },
-    onSuccess: organization => {
+    onSuccess: async organization => {
       setSelectedOrgSlug(organization.slug);
-      queryClient.invalidateQueries({ queryKey: queryKeys.me });
-      queryClient.invalidateQueries({ queryKey: queryKeys.organizations });
       queryClient.setQueryData(
         queryKeys.organization(organization.slug),
         organization
       );
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations });
+      await queryClient.refetchQueries({ queryKey: queryKeys.me });
       // Optional invite step — the org already exists, so this is skippable.
       router.push(`/onboarding/invite?org=${organization.slug}`);
     },

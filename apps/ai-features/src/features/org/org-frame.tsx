@@ -14,22 +14,27 @@ import { useWorkspaceStore } from '@/stores/workspace-store';
 import { redirectToSignIn } from '../../lib/auth/redirects';
 import type { CurrentUserResponse, Membership, Organization } from './types';
 
+type OrgFrameContext = {
+  organization: Organization;
+  membership: Membership;
+  me: CurrentUserResponse;
+};
+
+type OrgFrameProps = {
+  orgSlug: string;
+  children(context: OrgFrameContext): ReactNode;
+};
+
 export function OrgFrame({
   orgSlug,
   children,
-}: {
-  orgSlug: string;
-  children: (context: {
-    organization: Organization;
-    membership: Membership;
-    me: CurrentUserResponse;
-  }) => ReactNode;
-}) {
+}: OrgFrameProps) {
   const { isLoaded, isSignedIn } = useAuth();
   const meQuery = useMe();
   const organizationQuery = useOrganization(orgSlug);
   const organizationsQuery = useOrganizations();
   const setSelectedOrgSlug = useWorkspaceStore(state => state.setSelectedOrgSlug);
+  const setActiveMembership = useWorkspaceStore(state => state.setActiveMembership);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -50,10 +55,36 @@ export function OrgFrame({
     }
   }, [error]);
 
-  const membership = useMemo(
-    () => me?.memberships.find(item => item.organization.slug === orgSlug) ?? null,
-    [me, orgSlug]
-  );
+  const membership = useMemo(() => {
+    const membershipFromMe =
+      me?.memberships.find(item => item.organization.slug === orgSlug) ?? null;
+
+    if (membershipFromMe) {
+      return membershipFromMe;
+    }
+
+    if (organization?.currentUserRole) {
+      return {
+        id: organization.membershipId ?? `active-${organization.id}`,
+        role: organization.currentUserRole,
+        createdAt: organization.createdAt,
+        updatedAt: organization.updatedAt,
+        organization,
+      } satisfies Membership;
+    }
+
+    return null;
+  }, [me, organization, orgSlug]);
+
+  useEffect(() => {
+    if (!membership) return;
+
+    setActiveMembership({
+      orgSlug,
+      membershipId: membership.id,
+      role: membership.role,
+    });
+  }, [membership, orgSlug, setActiveMembership]);
 
   if (!me || !organization || !membership) {
     return (

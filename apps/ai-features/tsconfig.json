@@ -30,7 +30,10 @@
       "@/design-system/data/*": ["../../packages/ai/src/design-system/data/*"],
       "@/*": ["./src/*"],
       "componentiq": ["../../packages/design-system/src/index.ts"],
-      "@winniekagendo/componentiq-ai": ["../../packages/ai/src/index.ts"]
+      "@winniekagendo/componentiq-ai": ["../../packages/ai/src/index.ts"],
+      "@winniekagendo/componentiq-shared-types": [
+        "../../packages/shared-types/src"
+      ]
     },
     "plugins": [{ "name": "next" }]
   },

@@ -14,10 +14,10 @@ export function useCreateOrganization() {
       const clerkSessionToken = await requireClerkSessionToken(getToken);
       return createOrganization(input, clerkSessionToken);
     },
-    onSuccess: organization => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.me });
-      queryClient.invalidateQueries({ queryKey: queryKeys.organizations });
+    onSuccess: async organization => {
       queryClient.setQueryData(queryKeys.organization(organization.slug), organization);
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations });
+      await queryClient.refetchQueries({ queryKey: queryKeys.me });
     },
   });
 }

@@ -7,11 +7,12 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import type { User } from '@prisma/client';
+import type { OrganizationMember, User } from '@prisma/client';
 
 import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthorizationService } from '../authorization/authorization.service';
+import { CurrentMembership } from '../authorization/current-membership.decorator';
 import { OrgMembershipGuard } from '../authorization/org-membership.guard';
 import { ids, organizationExample } from '../common/swagger/api-examples';
 import { IdParamDto } from '../common/dto/id-param.dto';
@@ -104,8 +105,17 @@ export class OrganizationsController {
       },
     },
   })
-  findBySlug(@Param('orgSlug') orgSlug: string) {
-    return this.organizationsService.findByIdOrSlug(orgSlug);
+  async findBySlug(
+    @Param('orgSlug') orgSlug: string,
+    @CurrentMembership() membership: OrganizationMember
+  ) {
+    const organization = await this.organizationsService.findByIdOrSlug(orgSlug);
+
+    return {
+      ...organization,
+      currentUserRole: membership.role,
+      membershipId: membership.id,
+    };
   }
 
   @Get(':id')
