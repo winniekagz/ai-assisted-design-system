@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  .prx *, .prx *::before, .prx *::after { box-sizing: border-box; }
+  .prx { font-family: 'Rubik', ui-sans-serif, system-ui, sans-serif; }
+  .prx a { color: #175CD3; text-decoration: none; }
+  .prx a:hover { color: #0E3F91; text-decoration: underline; }
+  .prx-mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace; }
+  .prx-btn { transition: background .12s ease, border-color .12s ease, color .12s ease; cursor: pointer; }
+  .prx-btn:active { transform: translateY(1px); }
+  .prx-row { cursor: pointer; transition: background .1s ease; }
+  .prx-row:hover { background: #F9FAFB; }
+  .prx-row:hover .prx-hover-reveal { opacity: 1; }
+  .prx-hover-reveal { opacity: 0; transition: opacity .1s ease; }
+  .prx-pill { cursor: pointer; transition: background .12s ease, color .12s ease, border-color .12s ease; }
+  .prx-tab { cursor: pointer; transition: color .12s ease, border-color .12s ease; }
+  .prx-input::placeholder { color: #9CA3AF; }
+  .prx-sidebar-item { cursor: pointer; transition: background .1s ease, color .1s ease; }
+  .prx-sidebar-item:hover { background: #F3F4F6; }
+</style>
+</helmet>
+
+<div class="prx" style="width:1280px; max-width:100%; margin:0 auto; background:#FDFAF9; color:#111827;">
+
+  <!-- reviewer controls -->
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:10px 20px; background:#F3F1EE; border-bottom:1px solid #E5E7EB; font-size:12px;">
+    <div style="display:flex; align-items:center; gap:8px; color:#6B7280; flex-wrap:wrap;">
+      <span style="font-weight:600; color:#374151;">Preview:</span>
+      <span class="prx-btn prx-pill" onClick="{{ goList }}" style="padding:4px 10px; border-radius:9999px; border:1px solid {{ listBorder }}; background:{{ listBg }}; color:{{ listColor }}; font-weight:500;">Projects list</span>
+      <span class="prx-btn prx-pill" onClick="{{ goDetail }}" style="padding:4px 10px; border-radius:9999px; border:1px solid {{ detailBorder }}; background:{{ detailBg }}; color:{{ detailColor }}; font-weight:500;">Project details</span>
+      <span style="margin-left:10px;">role:</span>
+      <sc-for list="{{ roleOptions }}" as="r" hint-placeholder-count="3">
+        <span class="prx-btn prx-pill" onClick="{{ r.go }}" style="padding:4px 10px; border-radius:9999px; border:1px solid {{ r.border }}; background:{{ r.bg }}; color:{{ r.color }}; font-weight:500;">{{ r.label }}</span>
+      </sc-for>
+      <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+        <span style="margin-left:10px;">list state:</span>
+        <sc-for list="{{ listStateOptions }}" as="s" hint-placeholder-count="3">
+          <span class="prx-btn prx-pill" onClick="{{ s.go }}" style="padding:4px 10px; border-radius:9999px; border:1px solid {{ s.border }}; background:{{ s.bg }}; color:{{ s.color }}; font-weight:500;">{{ s.label }}</span>
+        </sc-for>
+      </sc-if>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- ======================= PROJECTS LIST ======================= -->
+  <!-- ============================================================ -->
+  <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+  <div style="padding:0 20px 56px;">
+
+    <!-- header -->
+    <div style="padding:24px 0 20px; border-bottom:1px solid #E5E7EB;">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px;">
+        <div>
+          <h1 style="margin:0; font-size:1.75rem; font-weight:700; letter-spacing:-0.01em; color:#111827;">Projects</h1>
+          <p style="margin:6px 0 0; font-size:13.5px; line-height:1.6; color:#6B7280; max-width:560px;">Manage engineering projects connected to ComponentIQ. Connect repositories, monitor design-system adoption, and investigate projects requiring attention.</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+          <span class="prx-btn" style="padding:8px 14px; border-radius:8px; font-size:13.5px; font-weight:500; color:#374151; border:1px solid #D1D5DB; background:#fff;">Import</span>
+          <span class="prx-btn" style="padding:8px 14px; border-radius:8px; font-size:13.5px; font-weight:600; color:#FDFAF9; background:#8D493A;">New project</span>
+        </div>
+      </div>
+    </div>
+
+    <sc-if value="{{ listEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:24px; border:1px solid #EAEAEA; border-radius:8px; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.03); padding:56px 32px; text-align:center;">
+        <p style="margin:0; font-size:16px; font-weight:700; color:#111827;">No projects yet</p>
+        <p style="margin:8px auto 0; max-width:420px; font-size:13.5px; line-height:1.6; color:#6B7280;">Projects connect repositories to ComponentIQ. You'll use projects to audit repositories, track adoption, enforce branding, and monitor compliance.</p>
+        <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:18px;">
+          <span class="prx-btn" style="padding:9px 16px; border-radius:8px; font-size:13.5px; font-weight:600; color:#FDFAF9; background:#8D493A;">Create project</span>
+          <span class="prx-btn" style="padding:9px 16px; border-radius:8px; font-size:13.5px; font-weight:500; color:#374151; border:1px solid #D1D5DB; background:#fff;">Import existing repository</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ listLoading }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+        <div style="height:38px; border-radius:8px; background:#F3F4F6;"></div>
+        <sc-for list="{{ skeletonRows }}" as="sk" hint-placeholder-count="6">
+          <div style="height:56px; border-radius:8px; background:#F3F4F6;"></div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ listReady }}" hint-placeholder-val="{{ true }}">
+    <!-- summary pills -->
+    <div style="display:flex; align-items:center; gap:10px; margin-top:20px; flex-wrap:wrap;">
+      <sc-for list="{{ summaryPills }}" as="p" hint-placeholder-count="4">
+        <span class="prx-pill" onClick="{{ p.go }}" style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:9999px; border:1px solid {{ p.border }}; background:{{ p.bg }}; font-size:12.5px; font-weight:600; color:{{ p.color }};">
+          <span style="width:6px; height:6px; border-radius:9999px; background:{{ p.dot }};"></span>{{ p.label }}
+        </span>
+      </sc-for>
+    </div>
+
+    <!-- search + filters -->
+    <div style="display:flex; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap;">
+      <div style="position:relative; flex:1; min-width:240px;">
+        <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:13px;">&#128269;</span>
+        <input class="prx-input" placeholder="Search by project, repository, team, design system, tag, or framework" style="width:100%; padding:9px 12px 9px 32px; border:1px solid #D1D5DB; border-radius:8px; font-size:13.5px; color:#111827; background:#fff;"></input>
+      </div>
+      <sc-for list="{{ filterChips }}" as="f" hint-placeholder-count="5">
+        <span class="prx-btn" style="display:inline-flex; align-items:center; gap:5px; padding:8px 12px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; font-weight:500; color:#374151; background:#fff;">{{ f }} <span style="color:#9CA3AF; font-size:10px;">&#9662;</span></span>
+      </sc-for>
+    </div>
+
+    <!-- table -->
+    <div style="margin-top:16px; border:1px solid #EAEAEA; border-radius:8px; overflow:hidden; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.03);">
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <thead>
+          <tr style="background:#F9FAFB; text-align:left;">
+            <th style="padding:10px 16px; font-size:11px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:#6B7280;">Project</th>
+            <th style="padding:10px 16px; font-size:11px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:#6B7280;">Status</th>
+            <th style="padding:10px 16px; font-size:11px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:#6B7280;">Blocking</th>
+            <th style="padding:10px 16px; font-size:11px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:#6B7280;">Latest audit</th>
+            <th style="padding:10px 16px; font-size:11px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:#6B7280;">Design system</th>
+            <th style="padding:10px 16px; font-size:11px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:#6B7280;">Activity</th>
+            <th style="padding:10px 16px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ projects }}" as="pr" hint-placeholder-count="6">
+            <tr class="prx-row" onClick="{{ pr.open }}" style="border-top:1px solid #F3F4F6;">
+              <td style="padding:12px 16px;">
+                <p style="margin:0; font-weight:600; color:#111827;">{{ pr.name }}</p>
+                <p class="prx-mono" style="margin:2px 0 0; font-size:12px; color:#9CA3AF;">{{ pr.repo }}</p>
+              </td>
+              <td style="padding:12px 16px;">
+                <span style="display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:9999px; font-size:11.5px; font-weight:600; background:{{ pr.statusBg }}; color:{{ pr.statusColor }};">{{ pr.statusIcon }} {{ pr.statusLabel }}</span>
+              </td>
+              <td style="padding:12px 16px; color:{{ pr.blockingColor }}; font-weight:600;">{{ pr.blockingLabel }}</td>
+              <td style="padding:12px 16px;">
+                <p style="margin:0; color:{{ pr.auditColor }}; font-weight:500;">{{ pr.auditState }}</p>
+                <p style="margin:2px 0 0; font-size:12px; color:#9CA3AF;">{{ pr.auditTime }}</p>
+              </td>
+              <td style="padding:12px 16px;" title="{{ pr.dsVersion }}">
+                <span style="color:{{ pr.dsColor }}; font-weight:500;">{{ pr.dsIcon }} {{ pr.dsLabel }}</span>
+                <span class="prx-hover-reveal prx-mono" style="display:block; font-size:11px; color:#9CA3AF; margin-top:2px;">{{ pr.dsVersion }}</span>
+              </td>
+              <td style="padding:12px 16px; color:#6B7280;">{{ pr.activity }}</td>
+              <td style="padding:12px 16px; text-align:right; white-space:nowrap;">
+                <span class="prx-hover-reveal prx-btn" style="font-size:12px; font-weight:500; color:#374151; border:1px solid #D1D5DB; border-radius:6px; padding:5px 10px; margin-right:4px; background:#fff;">Run audit</span>
+                <span class="prx-btn" style="font-size:12px; font-weight:600; color:#374151;">Open &rsaquo;</span>
+              </td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- pagination -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px; font-size:12.5px; color:#6B7280;">
+      <span>Showing 1&ndash;6 of 128 projects</span>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span class="prx-btn" style="padding:6px 10px; border:1px solid #D1D5DB; border-radius:6px; color:#9CA3AF; background:#fff;">Previous</span>
+        <span class="prx-btn" style="padding:6px 10px; border:1px solid #D1D5DB; border-radius:6px; color:#374151; background:#fff;">Next</span>
+      </div>
+    </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ============================================================ -->
+  <!-- ====================== PROJECT DETAILS ======================= -->
+  <!-- ============================================================ -->
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+  <div style="display:grid; grid-template-columns:220px 1fr;">
+
+    <!-- sidebar -->
+    <aside style="border-right:1px solid #E5E7EB; padding:20px 12px; min-height:720px;">
+      <div style="padding:0 8px 14px;">
+        <span class="prx-btn" onClick="{{ goList }}" style="font-size:12.5px; color:#6B7280;">&larr; All projects</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <sc-for list="{{ sidebarItems }}" as="nav" hint-placeholder-count="7">
+          <span class="prx-sidebar-item" onClick="{{ nav.go }}" style="display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:7px; font-size:13.5px; font-weight:500; color:{{ nav.color }}; background:{{ nav.bg }};">{{ nav.icon }} {{ nav.label }}</span>
+        </sc-for>
+      </div>
+    </aside>
+
+    <!-- main -->
+    <div style="padding:24px 28px 56px;">
+
+      <!-- project header -->
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding-bottom:18px; border-bottom:1px solid #E5E7EB;">
+        <div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <h1 style="margin:0; font-size:1.6rem; font-weight:700; letter-spacing:-0.01em; color:#111827;">Checkout Platform</h1>
+            <span style="display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:9999px; font-size:11.5px; font-weight:600; background:#FEF3F2; color:#B42318;">&#9679; Blocked</span>
+          </div>
+          <p style="margin:6px 0 0; font-size:13px; color:#6B7280; max-width:520px;">Customer-facing checkout flow, payment forms, and order confirmation.</p>
+          <p style="margin:8px 0 0; font-size:13px; color:#6B7280;">Team <span style="color:#374151; font-weight:500;">Checkout</span> &middot; 3 repositories &middot; Design system <span style="color:#374151; font-weight:500;">Acme Design System v3.4</span> &middot; Last audited 12 minutes ago</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+          <span class="prx-btn" style="padding:8px 14px; border-radius:8px; font-size:13.5px; font-weight:500; color:#374151; border:1px solid #D1D5DB; background:#fff;">Project settings</span>
+          <span class="prx-btn" style="padding:8px 14px; border-radius:8px; font-size:13.5px; font-weight:600; color:#FDFAF9; background:#8D493A;">Run audit</span>
+        </div>
+      </div>
+
+      <!-- deployment status -->
+      <div style="margin-top:20px; border:1px solid #FECDCA; border-left:3px solid #B42318; border-radius:8px; background:#FEF3F2; padding:18px 20px;">
+        <p style="margin:0; font-size:15px; font-weight:700; color:#B42318;">Deployment blocked</p>
+        <p style="margin:6px 0 0; font-size:13.5px; color:#374151;">3 blocking findings must be resolved before this project can be deployed.</p>
+        <div style="display:flex; gap:8px; margin-top:12px;">
+          <span class="prx-btn" style="padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; color:#fff; background:#111827;">Review blocking findings</span>
+        </div>
+      </div>
+
+      <!-- latest audit -->
+      <div style="margin-top:16px; border:1px solid #EAEAEA; border-radius:8px; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.03); padding:16px 20px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <h2 style="margin:0; font-size:14px; font-weight:700; color:#111827;">Latest audit</h2>
+            <span style="padding:2px 9px; border-radius:9999px; font-size:11px; font-weight:600; background:#FEF3F2; color:#B42318;">Failed</span>
+            <span style="font-size:12.5px; color:#6B7280;">on <a href="#">PR #128</a></span>
+          </div>
+          <span style="font-size:12px; color:#9CA3AF;">12 minutes ago</span>
+        </div>
+      </div>
+
+      <!-- Action centre (only blocking + overrides, condensed) -->
+      <div style="margin-top:24px;">
+        <div style="display:flex; align-items:center; gap:20px; border-bottom:1px solid #E5E7EB;">
+          <sc-for list="{{ detailTabs }}" as="dt" hint-placeholder-count="3">
+            <span class="prx-tab" onClick="{{ dt.go }}" style="padding:8px 2px; font-size:13.5px; font-weight:600; color:{{ dt.color }}; border-bottom:2px solid {{ dt.border }};">{{ dt.label }}</span>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ detailTabIsFindings }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:14px; border:1px solid #EAEAEA; border-radius:8px; overflow:hidden; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.03);">
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead><tr style="background:#F9FAFB; text-align:left;">
+              <th style="padding:10px 14px; font-size:11px; font-weight:600; text-transform:uppercase; color:#6B7280;">Severity</th>
+              <th style="padding:10px 14px; font-size:11px; font-weight:600; text-transform:uppercase; color:#6B7280;">Finding</th>
+              <th style="padding:10px 14px; font-size:11px; font-weight:600; text-transform:uppercase; color:#6B7280;">Rule</th>
+              <th style="padding:10px 14px; font-size:11px; font-weight:600; text-transform:uppercase; color:#6B7280;">Assignee</th>
+              <th style="padding:10px 14px; font-size:11px; font-weight:600; text-transform:uppercase; color:#6B7280;">Age</th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{ findings }}" as="f" hint-placeholder-count="3">
+                <tr class="prx-row" style="border-top:1px solid #F3F4F6;">
+                  <td style="padding:11px 14px;"><span style="padding:2px 8px; border-radius:9999px; font-size:11px; font-weight:600; background:#FEF3F2; color:#B42318;">Blocking</span></td>
+                  <td style="padding:11px 14px;"><p style="margin:0; font-weight:500;">{{ f.title }}</p><p class="prx-mono" style="margin:2px 0 0; font-size:12px; color:#9CA3AF;">{{ f.location }}</p></td>
+                  <td style="padding:11px 14px; color:#4B5563;">{{ f.rule }}</td>
+                  <td style="padding:11px 14px; color:{{ f.assigneeColor }};">{{ f.assignee }}</td>
+                  <td style="padding:11px 14px; color:#9CA3AF;">{{ f.age }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ detailTabIsRepos }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:14px; display:flex; flex-direction:column; gap:10px;">
+          <sc-for list="{{ repositories }}" as="rp" hint-placeholder-count="3">
+            <div style="border:1px solid #EAEAEA; border-radius:8px; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.03); padding:14px 16px; display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <p class="prx-mono" style="margin:0; font-weight:600; color:#111827;">{{ rp.name }}</p>
+                <p style="margin:3px 0 0; font-size:12.5px; color:#6B7280;">{{ rp.branch }} branch &middot; last commit {{ rp.lastCommit }}</p>
+              </div>
+              <span style="padding:2px 9px; border-radius:9999px; font-size:11.5px; font-weight:600; background:{{ rp.statusBg }}; color:{{ rp.statusColor }};">{{ rp.status }}</span>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ detailTabIsDS }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:14px; border:1px solid #EAEAEA; border-radius:8px; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.03); padding:18px 20px;">
+          <p style="margin:0; font-size:14px; font-weight:600;">Acme Design System v3.4</p>
+          <div style="display:flex; gap:28px; margin-top:14px;">
+            <div><p style="margin:0; font-size:20px; font-weight:700;">78%</p><p style="margin:2px 0 0; font-size:12px; color:#6B7280;">coverage</p></div>
+            <div><p style="margin:0; font-size:20px; font-weight:700; color:#B54708;">6</p><p style="margin:2px 0 0; font-size:12px; color:#6B7280;">deprecated components</p></div>
+            <div><p style="margin:0; font-size:20px; font-weight:700; color:#B42318;">4</p><p style="margin:2px 0 0; font-size:12px; color:#6B7280;">outdated components</p></div>
+          </div>
+        </div>
+        </sc-if>
+      </div>
+
+      <!-- recent activity -->
+      <div style="margin-top:24px; border:1px solid #EAEAEA; border-radius:8px; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.03); padding:16px 20px;">
+        <h2 style="margin:0 0 10px; font-size:13px; font-weight:700; text-transform:uppercase; color:#6B7280;">Recent activity</h2>
+        <sc-for list="{{ activity }}" as="a" hint-placeholder-count="3">
+          <div style="display:flex; gap:10px; padding:9px 0; border-top:1px solid #F3F4F6;">
+            <span style="flex-shrink:0; width:7px; height:7px; margin-top:6px; border-radius:9999px; background:{{ a.dot }};"></span>
+            <div><p style="margin:0; font-size:13px; font-weight:500;">{{ a.title }}</p><p style="margin:2px 0 0; font-size:12px; color:#9CA3AF;">{{ a.time }}</p></div>
+          </div>
+        </sc-for>
+      </div>
+
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+class Component extends DCLogic {
+  state = { view: 'list', role: 'manager', listState: 'ready', detailTab: 'findings' };
+
+  renderVals() {
+    const { view, role, listState, detailTab } = this.state;
+    const goList = () => this.setState({ view: 'list' });
+    const goDetail = () => this.setState({ view: 'detail' });
+    const setRole = (r) => () => this.setState({ role: r });
+    const setListState = (s) => () => this.setState({ listState: s });
+    const setDetailTab = (t) => () => this.setState({ detailTab: t });
+
+    const roleOptions = ['manager', 'maintainer', 'developer'].map(r => ({
+      label: r[0].toUpperCase() + r.slice(1), go: setRole(r),
+      bg: role === r ? '#8D493A' : '#fff', color: role === r ? '#FDFAF9' : '#374151',
+      border: role === r ? '#8D493A' : '#D1D5DB',
+    }));
+
+    const listStates = [{ id: 'ready', label: 'Populated' }, { id: 'empty', label: 'Empty' }, { id: 'loading', label: 'Loading' }];
+    const listStateOptions = listStates.map(s => ({
+      label: s.label, go: setListState(s.id),
+      bg: listState === s.id ? '#347887' : '#fff', color: listState === s.id ? '#FDFAF9' : '#374151',
+      border: listState === s.id ? '#347887' : '#D1D5DB',
+    }));
+
+    const isList = view === 'list';
+    const isDetail = view === 'detail';
+
+    const summaryPills = [
+      { label: '128 Projects', dot: '#6B7280', bg: '#F9FAFB', border: '#E5E7EB', color: '#374151' },
+      { label: '12 Blocked', dot: '#B42318', bg: '#FEF3F2', border: '#FECDCA', color: '#B42318' },
+      { label: '18 Need Attention', dot: '#B54708', bg: '#FFFAEB', border: '#FEDF89', color: '#B54708' },
+      { label: '96 Healthy', dot: '#067647', bg: '#ECFDF3', border: '#ABEFC6', color: '#067647' },
+    ].map(p => ({ ...p, go: () => {} }));
+
+    const filterChips = ['Status', 'Team', 'Design system', 'Audit state', 'Framework'];
+
+    const projects = [
+      { name: 'Checkout Platform', repo: 'acme/checkout-web', statusIcon: '\u25CF', statusLabel: 'Blocked', statusBg: '#FEF3F2', statusColor: '#B42318',
+        blockingLabel: '3', blockingColor: '#B42318', auditState: 'Failed', auditColor: '#B42318', auditTime: '12 minutes ago',
+        dsIcon: '\u2713', dsLabel: 'Current', dsColor: '#067647', dsVersion: 'Acme DS v3.4', activity: 'Audit failed on PR #128', open: goDetail },
+      { name: 'Marketing Site', repo: 'acme/marketing-site', statusIcon: '\u26A0', statusLabel: 'Needs attention', statusBg: '#FFFAEB', statusColor: '#B54708',
+        blockingLabel: '\u2014', blockingColor: '#9CA3AF', auditState: 'Passed', auditColor: '#067647', auditTime: '2 hours ago',
+        dsIcon: '\u26A0', dsLabel: 'Outdated', dsColor: '#B54708', dsVersion: 'Acme DS v3.1', activity: 'Adoption declined 5%', open: goDetail },
+      { name: 'Admin Console', repo: 'acme/admin-console', statusIcon: '\u2713', statusLabel: 'Healthy', statusBg: '#ECFDF3', statusColor: '#067647',
+        blockingLabel: '0', blockingColor: '#374151', auditState: 'Passed', auditColor: '#067647', auditTime: '1 day ago',
+        dsIcon: '\u2713', dsLabel: 'Current', dsColor: '#067647', dsVersion: 'Acme DS v3.4', activity: 'Rule activated', open: goDetail },
+      { name: 'Mobile Companion', repo: 'acme/mobile-companion', statusIcon: '\u25CB', statusLabel: 'Not configured', statusBg: '#F3F4F6', statusColor: '#6B7280',
+        blockingLabel: '\u2014', blockingColor: '#9CA3AF', auditState: 'Not configured', auditColor: '#9CA3AF', auditTime: '\u2014',
+        dsIcon: '\u2014', dsLabel: 'None', dsColor: '#9CA3AF', dsVersion: '\u2014', activity: 'Repository connected', open: goDetail },
+      { name: 'Internal Tools', repo: 'acme/internal-tools', statusIcon: '\u2713', statusLabel: 'Healthy', statusBg: '#ECFDF3', statusColor: '#067647',
+        blockingLabel: '0', blockingColor: '#374151', auditState: 'Passed', auditColor: '#067647', auditTime: '3 days ago',
+        dsIcon: '\u2713', dsLabel: 'Base', dsColor: '#374151', dsVersion: 'Base Design System', activity: 'Migration completed', open: goDetail },
+      { name: 'Legacy Billing', repo: 'acme/legacy-billing', statusIcon: '\u25CF', statusLabel: 'Archived', statusBg: '#F3F4F6', statusColor: '#6B7280',
+        blockingLabel: '\u2014', blockingColor: '#9CA3AF', auditState: 'Not configured', auditColor: '#9CA3AF', auditTime: '30 days ago',
+        dsIcon: '\u2014', dsLabel: 'None', dsColor: '#9CA3AF', dsVersion: '\u2014', activity: 'Archived by Winnie', open: goDetail },
+    ];
+
+    const sidebarBase = [
+      { id: 'findings', label: 'Overview', icon: '\uD83D\uDCC4' },
+      { id: 'findings', label: 'Findings', icon: '\u26A0\uFE0F' },
+      { id: 'repos', label: 'Repositories', icon: '\uD83D\uDCE6' },
+      { id: 'ds', label: 'Design systems', icon: '\uD83C\uDFA8' },
+      { id: 'findings', label: 'Rules', icon: '\uD83D\uDCCB' },
+      { id: 'findings', label: 'Audit history', icon: '\u23F1\uFE0F' },
+      { id: 'findings', label: 'Settings', icon: '\u2699\uFE0F' },
+    ];
+    const sidebarItems = sidebarBase.map((n, i) => ({
+      label: n.label, icon: n.icon, go: setDetailTab(n.id),
+      color: detailTab === n.id && (i === 1 || i === 2 || i === 3) ? '#111827' : '#4B5563',
+      bg: detailTab === n.id && (i === 1 || i === 2 || i === 3) ? '#F3F4F6' : 'transparent',
+    }));
+
+    const detailTabDefs = [
+      { id: 'findings', label: 'Findings' },
+      { id: 'repos', label: 'Repositories' },
+      { id: 'ds', label: 'Design system' },
+    ];
+    const detailTabs = detailTabDefs.map(t => ({
+      label: t.label, go: setDetailTab(t.id),
+      color: detailTab === t.id ? '#111827' : '#6B7280',
+      border: detailTab === t.id ? '#8D493A' : 'transparent',
+    }));
+
+    const findings = [
+      { title: 'Raw hex colour bypasses approved token', location: 'src/components/CheckoutButton.tsx:42', rule: 'Use approved colour tokens', assignee: 'Unassigned', assigneeColor: '#9CA3AF', age: '12 minutes ago' },
+      { title: 'Modal is missing an accessible title', location: 'src/features/projects/DeleteProjectModal.tsx:18', rule: 'Dialogs require an accessible name', assignee: 'Winnie Kagendo', assigneeColor: '#374151', age: '12 minutes ago' },
+      { title: 'Deprecated ButtonPrimary introduced', location: 'src/features/checkout/CheckoutSummary.tsx:64', rule: 'Deprecated component usage', assignee: 'Unassigned', assigneeColor: '#9CA3AF', age: '12 minutes ago' },
+    ];
+
+    const repositories = [
+      { name: 'checkout-web', branch: 'main', lastCommit: '12 minutes ago', status: 'Blocked', statusBg: '#FEF3F2', statusColor: '#B42318' },
+      { name: 'checkout-api', branch: 'main', lastCommit: '1 hour ago', status: 'Healthy', statusBg: '#ECFDF3', statusColor: '#067647' },
+      { name: 'checkout-mobile', branch: 'develop', lastCommit: '3 hours ago', status: 'Needs attention', statusBg: '#FFFAEB', statusColor: '#B54708' },
+    ];
+
+    const activity = [
+      { title: 'Audit failed on PR #128', time: '12 minutes ago', dot: '#B42318' },
+      { title: 'Winnie requested an override for the checkout migration', time: '18 minutes ago', dot: '#B54708' },
+      { title: 'Four deprecated component usages were resolved', time: 'Yesterday', dot: '#067647' },
+    ];
+
+    return {
+      isList, isDetail, goList, goDetail,
+      listBg: isList ? '#8D493A' : '#fff', listColor: isList ? '#FDFAF9' : '#374151', listBorder: isList ? '#8D493A' : '#D1D5DB',
+      detailBg: isDetail ? '#8D493A' : '#fff', detailColor: isDetail ? '#FDFAF9' : '#374151', detailBorder: isDetail ? '#8D493A' : '#D1D5DB',
+      roleOptions, listStateOptions,
+      listEmpty: listState === 'empty', listLoading: listState === 'loading', listReady: listState === 'ready',
+      skeletonRows: [1,2,3,4,5,6],
+      summaryPills, filterChips, projects,
+      sidebarItems, detailTabs,
+      detailTabIsFindings: detailTab === 'findings', detailTabIsRepos: detailTab === 'repos', detailTabIsDS: detailTab === 'ds',
+      findings, repositories, activity,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
