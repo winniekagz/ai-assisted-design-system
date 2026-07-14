@@ -3,6 +3,7 @@
 import { CheckCircle2, Copy, Loader2, MoreHorizontal, Send, UserPlus } from 'lucide-react';
 import { FormEvent, useMemo, useState } from 'react';
 
+import { ASSIGNABLE_ROLES } from '@winniekagendo/componentiq-shared-types';
 import {
   Badge,
   Button,
@@ -35,7 +36,7 @@ import { formatDate } from './utils';
 import { OrgFrame } from './org-frame';
 import type { OrganizationInvite, Role } from './types';
 
-const roles: Role[] = ['ADMIN', 'MAINTAINER', 'ENGINEER', 'VIEWER'];
+const roles = [...ASSIGNABLE_ROLES] satisfies Role[];
 
 const EXPIRING_SOON_DAYS = 3;
 

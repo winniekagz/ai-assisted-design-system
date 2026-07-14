@@ -1,4 +1,6 @@
-export type Role = 'OWNER' | 'ADMIN' | 'MAINTAINER' | 'ENGINEER' | 'VIEWER';
+import type { Role } from '@winniekagendo/componentiq-shared-types';
+
+export type { Role };
 
 export type Organization = {
   id: string;

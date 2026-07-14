@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import type { FormEvent } from 'react';
 import { useMemo, useRef, useState } from 'react';
 
+import { ASSIGNABLE_ROLES } from '@winniekagendo/componentiq-shared-types';
 import { Button, Input, Select } from 'componentiq';
 
 import { OnboardingLayout } from '@/features/shared/onboarding-layout';
@@ -23,12 +24,7 @@ import type { Role } from '@/features/org/types';
 
 type InviteDraft = { id: string; email: string; role: Exclude<Role, 'OWNER'> };
 
-const inviteRoles: InviteDraft['role'][] = [
-  'ADMIN',
-  'MAINTAINER',
-  'ENGINEER',
-  'VIEWER',
-];
+const inviteRoles = [...ASSIGNABLE_ROLES] satisfies InviteDraft['role'][];
 
 /**
  * Invite teammates — the optional step 3 (split out of create-org).

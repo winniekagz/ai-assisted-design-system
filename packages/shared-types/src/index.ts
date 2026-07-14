@@ -7,6 +7,16 @@ export const ROLES = [
   'VIEWER',
 ] as const;
 
+export type Role = (typeof ROLES)[number];
+export type AssignableRole = Exclude<Role, 'OWNER'>;
+
+export const ASSIGNABLE_ROLES = [
+  'ADMIN',
+  'MAINTAINER',
+  'ENGINEER',
+  'VIEWER',
+] as const satisfies readonly AssignableRole[];
+
 export const SEVERITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const;
 
 export const GUARDRAIL_CATEGORIES = [
@@ -27,7 +37,6 @@ export const PROMPT_TYPES = [
 
 export const AUDIT_STATUSES = ['PASSED', 'NEEDS_CHANGES', 'FAILED'] as const;
 
-export type Role = (typeof ROLES)[number];
 export type Severity = (typeof SEVERITIES)[number];
 export type GuardrailCategory = (typeof GUARDRAIL_CATEGORIES)[number];
 export type PromptType = (typeof PROMPT_TYPES)[number];

@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import type { Role } from '@winniekagendo/componentiq-shared-types';
 
 export const permissions = [
   'org.manage',
@@ -20,7 +20,7 @@ export const permissions = [
 export type Permission = (typeof permissions)[number];
 
 export const rolePermissions: Record<Role, Permission[]> = {
-  [Role.OWNER]: [
+  OWNER: [
     'org.manage',
     'members.invite',
     'members.remove',
@@ -34,7 +34,7 @@ export const rolePermissions: Record<Role, Permission[]> = {
     'audits.view',
     'recommendations.view',
   ],
-  [Role.ADMIN]: [
+  ADMIN: [
     'members.invite',
     'members.remove',
     'projects.view',
@@ -47,7 +47,7 @@ export const rolePermissions: Record<Role, Permission[]> = {
     'audits.view',
     'recommendations.view',
   ],
-  [Role.MAINTAINER]: [
+  MAINTAINER: [
     'projects.view',
     'components.view',
     'components.manage',
@@ -57,7 +57,7 @@ export const rolePermissions: Record<Role, Permission[]> = {
     'audits.view',
     'recommendations.view',
   ],
-  [Role.ENGINEER]: [
+  ENGINEER: [
     'projects.view',
     'components.view',
     'guardrails.view',
@@ -65,7 +65,7 @@ export const rolePermissions: Record<Role, Permission[]> = {
     'audits.viewOwn',
     'recommendations.viewOwn',
   ],
-  [Role.VIEWER]: [
+  VIEWER: [
     'projects.view',
     'components.view',
     'guardrails.view',
