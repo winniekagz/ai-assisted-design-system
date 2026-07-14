@@ -89,7 +89,7 @@ export function OrgFrame({
   if (!me || !organization || !membership) {
     return (
       <AppShell orgSlug={orgSlug}>
-        <div className='grid min-h-96 place-items-center rounded-md border border-border bg-card p-8 text-center'>
+        <div className='grid min-h-96 place-items-center rounded-md border border-border bg-card py-8 text-center'>
           {error ? (
             <div>
               <h1 className='text-xl font-semibold'>Unable to open organization</h1>
