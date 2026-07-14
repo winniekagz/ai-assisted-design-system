@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, type User } from '@prisma/client';
+import { Prisma, Role, type User } from '@prisma/client';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { slugify } from '../common/utils/slugify';
@@ -13,14 +13,14 @@ export class OrganizationsService {
     const slug = dto.slug ? slugify(dto.slug) : slugify(dto.name);
 
     try {
-      return await this.prisma.organization.create({
+      const organization = await this.prisma.organization.create({
         data: {
           name: dto.name,
           slug,
           members: {
             create: {
               userId: owner.id,
-              role: 'OWNER',
+              role: Role.OWNER,
             },
           },
         },
@@ -28,6 +28,16 @@ export class OrganizationsService {
           members: true,
         },
       });
+
+      const ownerMembership = organization.members.find(
+        membership => membership.userId === owner.id
+      );
+
+      return {
+        ...organization,
+        currentUserRole: ownerMembership?.role ?? Role.OWNER,
+        membershipId: ownerMembership?.id,
+      };
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
