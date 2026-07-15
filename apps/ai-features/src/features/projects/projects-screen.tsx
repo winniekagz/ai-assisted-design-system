@@ -29,10 +29,14 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 
 import { OrgFrame } from '@/features/org/org-frame';
 
+import {
+  CreateProjectDrawer,
+  type CreatedProjectDraft,
+} from './create-project-drawer';
 import {
   projectRows,
   projectStatuses,
@@ -40,8 +44,7 @@ import {
   type ProjectStatus,
   type ProjectsListState,
 } from './fixtures/projects';
-
-const unsupportedActionMessage = 'This action needs the projects API before it can be enabled.';
+import { ImportProjectFlow } from './import-project-flow';
 
 const statusLabels: Record<ProjectStatus, string> = {
   healthy: 'Healthy',
@@ -51,11 +54,29 @@ const statusLabels: Record<ProjectStatus, string> = {
   archived: 'Archived',
 };
 
+const auditStateLabels: Record<ProjectRow['latestAudit']['state'], string> = {
+  passed: 'Passed',
+  failed: 'Failed',
+  warning: 'Needs review',
+  not_run: 'Not run',
+  running: 'Running',
+};
+
+const designSystemStateLabels: Record<ProjectRow['designSystem']['state'], string> = {
+  current: 'Current',
+  outdated: 'Outdated',
+  base: 'Base Design System',
+  none: 'None',
+};
+
+type ProjectFilterValue = string;
+
 export function ProjectsScreen({ orgSlug }: { orgSlug: string }) {
   return (
     <OrgFrame orgSlug={orgSlug}>
       {({ organization, membership }) => (
         <ProjectsCatalogue
+          organizationId={organization.id}
           orgSlug={organization.slug}
           organizationName={organization.name}
           role={membership.role}
@@ -66,10 +87,12 @@ export function ProjectsScreen({ orgSlug }: { orgSlug: string }) {
 }
 
 function ProjectsCatalogue({
+  organizationId,
   orgSlug,
   organizationName,
   role,
 }: {
+  organizationId: string;
   orgSlug: string;
   organizationName: string;
   role: string;
@@ -79,13 +102,55 @@ function ProjectsCatalogue({
   const listState = isProjectsListState(requestedState) ? requestedState : 'populated';
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
+  const [teamFilter, setTeamFilter] = useState<ProjectFilterValue>('all');
+  const [designSystemFilter, setDesignSystemFilter] = useState<ProjectFilterValue>('all');
+  const [auditStateFilter, setAuditStateFilter] = useState<ProjectFilterValue>('all');
+  const [frameworkFilter, setFrameworkFilter] = useState<ProjectFilterValue>('all');
   const [page, setPage] = useState(1);
+  const [createdProjects, setCreatedProjects] = useState<ProjectRow[]>([]);
+  const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
+  const [importFlowOpen, setImportFlowOpen] = useState(false);
   const pageSize = 6;
+  const projects = useMemo(
+    () => [...createdProjects, ...projectRows],
+    [createdProjects]
+  );
+  const teamOptions = useMemo(
+    () => uniqueProjectOptions(projects.map(project => project.team)),
+    [projects]
+  );
+  const designSystemOptions = useMemo(
+    () =>
+      uniqueProjectOptions(
+        projects.map(project => designSystemStateLabels[project.designSystem.state])
+      ),
+    [projects]
+  );
+  const auditStateOptions = useMemo(
+    () =>
+      uniqueProjectOptions(
+        projects.map(project => auditStateLabels[project.latestAudit.state])
+      ),
+    [projects]
+  );
+  const frameworkOptions = useMemo(
+    () => uniqueProjectOptions(projects.map(project => project.framework)),
+    [projects]
+  );
 
   const filteredProjects = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return projectRows.filter(project => {
+    return projects.filter(project => {
       const statusMatches = statusFilter === 'all' || project.status === statusFilter;
+      const teamMatches = teamFilter === 'all' || project.team === teamFilter;
+      const designSystemMatches =
+        designSystemFilter === 'all' ||
+        designSystemStateLabels[project.designSystem.state] === designSystemFilter;
+      const auditStateMatches =
+        auditStateFilter === 'all' ||
+        auditStateLabels[project.latestAudit.state] === auditStateFilter;
+      const frameworkMatches =
+        frameworkFilter === 'all' || project.framework === frameworkFilter;
       const queryMatches =
         !query ||
         [
@@ -100,9 +165,24 @@ function ProjectsCatalogue({
           .toLowerCase()
           .includes(query);
 
-      return statusMatches && queryMatches;
+      return (
+        statusMatches &&
+        teamMatches &&
+        designSystemMatches &&
+        auditStateMatches &&
+        frameworkMatches &&
+        queryMatches
+      );
     });
-  }, [search, statusFilter]);
+  }, [
+    auditStateFilter,
+    designSystemFilter,
+    frameworkFilter,
+    projects,
+    search,
+    statusFilter,
+    teamFilter,
+  ]);
 
   const pageCount = Math.max(1, Math.ceil(filteredProjects.length / pageSize));
   const currentPage = Math.min(page, pageCount);
@@ -116,6 +196,29 @@ function ProjectsCatalogue({
     setPage(1);
   }
 
+  function applyFilter(
+    setFilter: Dispatch<SetStateAction<ProjectFilterValue>>,
+    value: ProjectFilterValue
+  ) {
+    setFilter(value);
+    setPage(1);
+  }
+
+  function clearFilters() {
+    setSearch('');
+    setStatusFilter('all');
+    setTeamFilter('all');
+    setDesignSystemFilter('all');
+    setAuditStateFilter('all');
+    setFrameworkFilter('all');
+    setPage(1);
+  }
+
+  function addProject(project: ProjectRow) {
+    setCreatedProjects(current => [project, ...current]);
+    clearFilters();
+  }
+
   if (listState === 'loading') {
     return <ProjectsSkeleton />;
   }
@@ -123,16 +226,44 @@ function ProjectsCatalogue({
   if (listState === 'empty') {
     return (
       <div className='grid gap-5'>
-        <ProjectsHeader organizationName={organizationName} role={role} />
-        <EmptyProjectsState />
+        <ProjectsHeader
+          organizationName={organizationName}
+          role={role}
+          onCreateProject={() => setCreateDrawerOpen(true)}
+          onImportProject={() => setImportFlowOpen(true)}
+        />
+        <EmptyProjectsState
+          onCreateProject={() => setCreateDrawerOpen(true)}
+          onImportProject={() => setImportFlowOpen(true)}
+        />
+        <ProjectFlowMounts
+          organizationId={organizationId}
+          createDrawerOpen={createDrawerOpen}
+          importFlowOpen={importFlowOpen}
+          teamOptions={teamOptions}
+          existingProjects={projects}
+          onCreateDrawerOpenChange={setCreateDrawerOpen}
+          onImportFlowOpenChange={setImportFlowOpen}
+          onCreatedDraft={draft => addProject(projectRowFromCreatedDraft(draft))}
+          onImported={addProject}
+        />
       </div>
     );
   }
 
   return (
     <div className='grid gap-5'>
-      <ProjectsHeader organizationName={organizationName} role={role} />
-      <StatusSummaryPills activeStatus={statusFilter} onSelect={applyStatus} />
+      <ProjectsHeader
+        organizationName={organizationName}
+        role={role}
+        onCreateProject={() => setCreateDrawerOpen(true)}
+        onImportProject={() => setImportFlowOpen(true)}
+      />
+      <StatusSummaryPills
+        activeStatus={statusFilter}
+        projects={projects}
+        onSelect={applyStatus}
+      />
       <section className='border-y border-border bg-transparent'>
         <div className='px-0'>
           <div className='flex flex-col gap-3 border-b border-border px-4 py-4 lg:flex-row lg:items-center lg:justify-between'>
@@ -150,10 +281,30 @@ function ProjectsCatalogue({
             </div>
             <div className='flex flex-wrap gap-2' aria-label='Project filters'>
               <StatusFilter status={statusFilter} onSelect={applyStatus} />
-              <DisabledFilter label='Team' />
-              <DisabledFilter label='Design system' />
-              <DisabledFilter label='Audit state' />
-              <DisabledFilter label='Framework' />
+              <ProjectMenuFilter
+                label='Team'
+                value={teamFilter}
+                options={teamOptions}
+                onSelect={value => applyFilter(setTeamFilter, value)}
+              />
+              <ProjectMenuFilter
+                label='Design system'
+                value={designSystemFilter}
+                options={designSystemOptions}
+                onSelect={value => applyFilter(setDesignSystemFilter, value)}
+              />
+              <ProjectMenuFilter
+                label='Audit state'
+                value={auditStateFilter}
+                options={auditStateOptions}
+                onSelect={value => applyFilter(setAuditStateFilter, value)}
+              />
+              <ProjectMenuFilter
+                label='Framework'
+                value={frameworkFilter}
+                options={frameworkOptions}
+                onSelect={value => applyFilter(setFrameworkFilter, value)}
+              />
             </div>
           </div>
 
@@ -175,7 +326,7 @@ function ProjectsCatalogue({
                 title='No matching projects'
                 description='Adjust search or filters to find projects connected to this organization.'
               >
-                <Button type='button' variant='outlined' size='sm' onClick={() => applyStatus('all')}>
+                <Button type='button' variant='outlined' size='sm' onClick={clearFilters}>
                   Clear filters
                 </Button>
               </EmptyState>
@@ -183,16 +334,76 @@ function ProjectsCatalogue({
           )}
         </div>
       </section>
+      <ProjectFlowMounts
+        organizationId={organizationId}
+        createDrawerOpen={createDrawerOpen}
+        importFlowOpen={importFlowOpen}
+        teamOptions={teamOptions}
+        existingProjects={projects}
+        onCreateDrawerOpenChange={setCreateDrawerOpen}
+        onImportFlowOpenChange={setImportFlowOpen}
+        onCreatedDraft={draft => addProject(projectRowFromCreatedDraft(draft))}
+        onImported={addProject}
+      />
     </div>
+  );
+}
+
+function ProjectFlowMounts({
+  organizationId,
+  createDrawerOpen,
+  importFlowOpen,
+  teamOptions,
+  existingProjects,
+  onCreateDrawerOpenChange,
+  onImportFlowOpenChange,
+  onCreatedDraft,
+  onImported,
+}: {
+  organizationId: string;
+  createDrawerOpen: boolean;
+  importFlowOpen: boolean;
+  teamOptions: string[];
+  existingProjects: ProjectRow[];
+  // eslint-disable-next-line no-unused-vars
+  onCreateDrawerOpenChange(open: boolean): void;
+  // eslint-disable-next-line no-unused-vars
+  onImportFlowOpenChange(open: boolean): void;
+  // eslint-disable-next-line no-unused-vars
+  onCreatedDraft(draft: CreatedProjectDraft): void;
+  // eslint-disable-next-line no-unused-vars
+  onImported(project: ProjectRow): void;
+}) {
+  return (
+    <>
+      <CreateProjectDrawer
+        open={createDrawerOpen}
+        organizationId={organizationId}
+        existingProjectNames={existingProjects.map(project => project.name)}
+        teamOptions={teamOptions.length > 0 ? teamOptions : ['Unassigned']}
+        onOpenChange={onCreateDrawerOpenChange}
+        onCreated={onCreatedDraft}
+      />
+      <ImportProjectFlow
+        open={importFlowOpen}
+        organizationId={organizationId}
+        onOpenChange={onImportFlowOpenChange}
+        onImported={onImported}
+      />
+    </>
   );
 }
 
 function ProjectsHeader({
   organizationName,
   role,
+  onCreateProject,
+  onImportProject,
 }: {
   organizationName: string;
   role: string;
+  onCreateProject(): void;
+  onImportProject(): void;
 }) {
   return (
     <header className='flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between'>
@@ -209,10 +420,10 @@ function ProjectsHeader({
         </p>
       </div>
       <div className='flex flex-wrap gap-2'>
-        <Button type='button' disabled title={unsupportedActionMessage} startIcon={<Plus className='size-4' />}>
+        <Button type='button' onClick={onCreateProject} startIcon={<Plus className='size-4' />}>
           New project
         </Button>
-        <Button type='button' variant='outlined' disabled title={unsupportedActionMessage} startIcon={<Import className='size-4' />}>
+        <Button type='button' variant='outlined' onClick={onImportProject} startIcon={<Import className='size-4' />}>
           Import
         </Button>
       </div>
@@ -222,17 +433,19 @@ function ProjectsHeader({
 
 function StatusSummaryPills({
   activeStatus,
+  projects,
   onSelect,
 }: {
   activeStatus: ProjectStatus | 'all';
+  projects: ProjectRow[];
   // eslint-disable-next-line no-unused-vars
   onSelect(status: ProjectStatus | 'all'): void;
 }) {
   const counts = {
-    all: projectRows.length,
-    blocked: projectRows.filter(project => project.status === 'blocked').length,
-    needs_attention: projectRows.filter(project => project.status === 'needs_attention').length,
-    healthy: projectRows.filter(project => project.status === 'healthy').length,
+    all: projects.length,
+    blocked: projects.filter(project => project.status === 'blocked').length,
+    needs_attention: projects.filter(project => project.status === 'needs_attention').length,
+    healthy: projects.filter(project => project.status === 'healthy').length,
   };
 
   const pills = [
@@ -303,20 +516,42 @@ function StatusFilter({
   );
 }
 
-function DisabledFilter({ label }: { label: string }) {
+function ProjectMenuFilter({
+  label,
+  value,
+  options,
+  onSelect,
+}: {
+  label: string;
+  value: ProjectFilterValue;
+  options: ProjectFilterValue[];
+  // eslint-disable-next-line no-unused-vars
+  onSelect(value: ProjectFilterValue): void;
+}) {
+  const displayValue = value === 'all' ? 'All' : value;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button type='button' variant='outlined' size='sm' endIcon={<ChevronDown className='size-4' />}>
-          {label}
+          {label}: {displayValue}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='w-64'>
         <DropdownMenuLabel>{label}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuCheckboxItem disabled checked={false}>
-          Requires project filter API
+        <DropdownMenuCheckboxItem checked={value === 'all'} onCheckedChange={() => onSelect('all')}>
+          All
         </DropdownMenuCheckboxItem>
+        {options.map(option => (
+          <DropdownMenuCheckboxItem
+            key={option}
+            checked={value === option}
+            onCheckedChange={() => onSelect(option)}
+          >
+            {option}
+          </DropdownMenuCheckboxItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -349,6 +584,7 @@ function ProjectsTable({ orgSlug, projects }: { orgSlug: string; projects: Proje
 
 function ProjectRowItem({ orgSlug, project }: { orgSlug: string; project: ProjectRow }) {
   const href = `/org/${orgSlug}/projects/${project.slug}`;
+  const needsConfiguration = project.status === 'not_configured';
 
   return (
     <tr className='group hover:bg-background-secondary/70'>
@@ -389,8 +625,17 @@ function ProjectRowItem({ orgSlug, project }: { orgSlug: string; project: Projec
           >
             Run audit
           </Button>
-          <Button asChild size='sm' endIcon={<ChevronRight className='size-4' />}>
-            <Link href={href}>Open</Link>
+          <Button
+            asChild
+            size='sm'
+            endIcon={<ChevronRight className='size-4' />}
+            className={
+              needsConfiguration
+                ? 'bg-status-success text-white hover:bg-status-success/90 focus-visible:ring-status-success/30'
+                : undefined
+            }
+          >
+            <Link href={href}>{needsConfiguration ? 'Configure' : 'Open'}</Link>
           </Button>
         </div>
       </td>
@@ -400,9 +645,18 @@ function ProjectRowItem({ orgSlug, project }: { orgSlug: string; project: Projec
 
 export function ProjectStatusPill({ status }: { status: ProjectStatus }) {
   const meta = {
-    healthy: { icon: CheckCircle2, className: 'border-status-success bg-status-success-bg text-status-success' },
-    needs_attention: { icon: AlertCircle, className: 'border-status-warning bg-status-warning-bg text-status-warning' },
-    blocked: { icon: ShieldAlert, className: 'border-status-error bg-status-error-bg text-status-error' },
+    healthy: {
+      icon: CheckCircle2,
+      className: 'border-status-success bg-status-success-bg text-status-success',
+    },
+    needs_attention: {
+      icon: AlertCircle,
+      className: 'border-status-warning bg-status-warning-bg text-status-warning',
+    },
+    blocked: {
+      icon: ShieldAlert,
+      className: 'border-status-error bg-status-error-bg text-status-error',
+    },
     not_configured: { icon: CircleDashed, className: 'border-border bg-background-secondary text-muted-foreground' },
     archived: { icon: Archive, className: 'border-border bg-background-secondary text-muted-foreground' },
   } satisfies Record<ProjectStatus, { icon: typeof CheckCircle2; className: string }>;
@@ -475,7 +729,13 @@ function ProjectsPagination({
   );
 }
 
-function EmptyProjectsState() {
+function EmptyProjectsState({
+  onCreateProject,
+  onImportProject,
+}: {
+  onCreateProject(): void;
+  onImportProject(): void;
+}) {
   return (
     <EmptyState
       icon={<FolderKanban className='size-6' />}
@@ -483,10 +743,10 @@ function EmptyProjectsState() {
       description='Create or import a project to connect repositories, design-system rules, and audit workflows.'
     >
       <div className='flex flex-wrap justify-center gap-2'>
-        <Button type='button' disabled title={unsupportedActionMessage} startIcon={<Plus className='size-4' />}>
+        <Button type='button' onClick={onCreateProject} startIcon={<Plus className='size-4' />}>
           Create project
         </Button>
-        <Button type='button' variant='outlined' disabled title={unsupportedActionMessage} startIcon={<Download className='size-4' />}>
+        <Button type='button' variant='outlined' onClick={onImportProject} startIcon={<Download className='size-4' />}>
           Import existing repository
         </Button>
       </div>
@@ -523,4 +783,30 @@ function ProjectsSkeleton() {
 
 function isProjectsListState(value: string | null): value is ProjectsListState {
   return value === 'populated' || value === 'empty' || value === 'loading';
+}
+
+function uniqueProjectOptions(values: string[]) {
+  return Array.from(new Set(values)).sort((first, second) =>
+    first.localeCompare(second)
+  );
+}
+
+function projectRowFromCreatedDraft({ apiProject, description, team }: CreatedProjectDraft): ProjectRow {
+  return {
+    id: apiProject.id,
+    name: apiProject.name,
+    slug: apiProject.slug,
+    repository: apiProject.repositoryUrl ?? 'Repository not connected',
+    team: team || 'Unassigned',
+    framework: apiProject.framework,
+    tags: ['new'],
+    description: description || 'Project reserved in ComponentIQ.',
+    status: 'not_configured',
+    blockingCount: 0,
+    latestAudit: { state: 'not_run', label: 'Not run', relativeTime: 'Never' },
+    designSystem: { state: 'none', label: 'None' },
+    latestActivity: 'Project created',
+    repoCount: apiProject.repositoryUrl ? 1 : 0,
+    lastAudited: 'Never',
+  };
 }
