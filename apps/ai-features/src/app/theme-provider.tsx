@@ -11,8 +11,7 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.dataset.themeMode = themeMode;
-    document.documentElement.style.colorScheme =
-      themeMode === 'system' ? 'light dark' : 'light';
+    document.documentElement.style.colorScheme = 'light';
   }, [themeMode]);
 
   return (
