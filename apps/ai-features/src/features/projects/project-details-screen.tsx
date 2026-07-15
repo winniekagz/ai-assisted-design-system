@@ -17,7 +17,7 @@ import {
   Settings,
   ShieldAlert,
 } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { OrgFrame } from '@/features/org/org-frame';
 import { useWorkspaceStore } from '@/stores/workspace-store';
@@ -32,6 +32,7 @@ import {
   type ProjectRow,
   type SidebarSection,
 } from './fixtures/projects';
+import { ProjectSettingsDrawer } from './project-settings-drawer';
 import { ProjectStatusPill } from './projects-screen';
 
 const unsupportedAuditMessage = 'Run audit needs the audit workflow API before it can be enabled.';
@@ -48,6 +49,7 @@ export function ProjectDetailsScreen({
       {({ membership }) => (
         <ProjectDetailsContent
           projectSlug={projectSlug}
+          orgSlug={orgSlug}
           role={membership.role}
         />
       )}
@@ -57,9 +59,11 @@ export function ProjectDetailsScreen({
 
 function ProjectDetailsContent({
   projectSlug,
+  orgSlug,
   role,
 }: {
   projectSlug: string;
+  orgSlug: string;
   role: string;
 }) {
   const activeSection = useWorkspaceStore(state => state.activeProjectSection);
@@ -70,6 +74,7 @@ function ProjectDetailsContent({
     () => projectRows.find(row => row.slug === projectSlug) ?? projectRows[0],
     [projectSlug]
   );
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     setActiveProjectSection('overview');
@@ -77,16 +82,31 @@ function ProjectDetailsContent({
 
   return (
     <main className='grid min-w-0 gap-4'>
-      <ProjectDetailHeader project={project} role={role} />
+      <ProjectDetailHeader project={project} role={role} onOpenSettings={() => setSettingsOpen(true)} />
       <DeploymentStatusPanel project={project} />
       <LatestAuditSummary project={project} />
       <SectionPanel activeSection={activeSection} />
       <RecentActivityCard activity={projectDetailsFixture.activity} />
+      <ProjectSettingsDrawer
+        open={settingsOpen}
+        project={project}
+        orgSlug={orgSlug}
+        existingProjectNames={projectRows.map(row => row.name)}
+        onOpenChange={setSettingsOpen}
+      />
     </main>
   );
 }
 
-function ProjectDetailHeader({ project, role }: { project: ProjectRow; role: string }) {
+function ProjectDetailHeader({
+  project,
+  role,
+  onOpenSettings,
+}: {
+  project: ProjectRow;
+  role: string;
+  onOpenSettings(): void;
+}) {
   return (
     <header className='border-b border-border bg-transparent pb-5'>
       <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
@@ -108,7 +128,7 @@ function ProjectDetailHeader({ project, role }: { project: ProjectRow; role: str
           </dl>
         </div>
         <div className='flex flex-wrap gap-2'>
-          <Button type='button' variant='outlined' disabled title='Project settings need a project settings API before they can be enabled.' startIcon={<Settings className='size-4' />}>
+          <Button type='button' variant='outlined' onClick={onOpenSettings} startIcon={<Settings className='size-4' />}>
             Project settings
           </Button>
           <Button type='button' disabled title={unsupportedAuditMessage} startIcon={<Clock className='size-4' />}>
