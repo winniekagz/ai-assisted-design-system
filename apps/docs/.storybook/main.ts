@@ -40,6 +40,38 @@ const config: StorybookConfig = {
       '@/ai': path.join(aiRoot, 'ai'),
       '@': path.join(docsRoot, 'src'),
     };
+
+    const existingOnWarn = config.build?.rollupOptions?.onwarn;
+
+    config.build = {
+      ...config.build,
+      rollupOptions: {
+        ...config.build?.rollupOptions,
+        onwarn(warning, defaultHandler) {
+          if (
+            warning.code === 'MODULE_LEVEL_DIRECTIVE' &&
+            warning.message.includes('"use client"')
+          ) {
+            return;
+          }
+
+          if (
+            warning.code === 'SOURCEMAP_ERROR' &&
+            warning.message.includes("Can't resolve original location")
+          ) {
+            return;
+          }
+
+          if (typeof existingOnWarn === 'function') {
+            existingOnWarn(warning, defaultHandler);
+            return;
+          }
+
+          defaultHandler(warning);
+        },
+      },
+    };
+
     return config;
   },
 };
