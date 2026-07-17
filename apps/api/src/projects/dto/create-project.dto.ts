@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsOptional,
   IsString,
-  IsUrl,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -12,54 +12,27 @@ export class CreateProjectDto {
     example: 'Acme Web App',
     description: 'Project name',
     minLength: 2,
-    maxLength: 120,
+    maxLength: 100,
   })
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @MinLength(2)
-  @MaxLength(120)
+  @MaxLength(100)
   name!: string;
 
   @ApiProperty({
-    example: 'acme-web-app',
-    description:
-      'Optional URL-friendly project slug. When omitted, it is generated from the name.',
+    example: 'Customer checkout product',
+    description: 'Optional project description',
     required: false,
-    minLength: 2,
-    maxLength: 80,
+    maxLength: 500,
+  })
+  @Transform(({ value }) => {
+    if (typeof value !== 'string') return value;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
   })
   @IsOptional()
   @IsString()
-  @MinLength(2)
-  @MaxLength(80)
-  slug?: string;
-
-  @ApiProperty({
-    example: 'Next.js',
-    description: 'Primary application framework used by the project',
-  })
-  @IsString()
-  framework!: string;
-
-  @ApiProperty({
-    example: 'npm',
-    description: 'Package manager used by the project',
-  })
-  @IsString()
-  packageManager!: string;
-
-  @ApiProperty({
-    example: 'Tailwind CSS',
-    description: 'Styling system or UI styling approach used by the project',
-  })
-  @IsString()
-  stylingSystem!: string;
-
-  @ApiProperty({
-    example: 'https://github.com/acme/acme-web-app',
-    description: 'Optional source repository URL',
-    required: false,
-  })
-  @IsOptional()
-  @IsUrl({ require_tld: false })
-  repositoryUrl?: string;
+  @MaxLength(500)
+  description?: string;
 }
