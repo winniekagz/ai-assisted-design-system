@@ -36,6 +36,8 @@ type CreateProjectDrawerProps = {
   onOpenChange(open: boolean): void;
   // eslint-disable-next-line no-unused-vars
   onCreated(project: CreatedProjectDraft): void;
+  // eslint-disable-next-line no-unused-vars
+  onConfigureProject?(project: ProjectListItem): void;
 };
 
 type FieldErrors = {
@@ -50,6 +52,7 @@ export function CreateProjectDrawer({
   teamOptions,
   onOpenChange,
   onCreated,
+  onConfigureProject,
 }: CreateProjectDrawerProps) {
   const createProject = useCreateProject(orgSlug);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -138,6 +141,14 @@ export function CreateProjectDrawer({
     }
   }
 
+  function configureCreatedProject() {
+    if (!createdProject) return;
+
+    onConfigureProject?.(createdProject);
+    reset();
+    onOpenChange(false);
+  }
+
   return (
     <Sheet open={open} onOpenChange={requestOpenChange}>
       <SheetContent side='right' size='md' aria-describedby='create-project-description'>
@@ -157,7 +168,7 @@ export function CreateProjectDrawer({
                   {createdProject.name} is ready
                 </h2>
                 <p className='mt-1 text-sm text-muted-foreground'>
-                  The project list is refreshing with the saved database record.
+                  Configure source access now, or come back to setup from the project list.
                 </p>
               </div>
             </div>
@@ -273,9 +284,14 @@ export function CreateProjectDrawer({
 
         <SheetFooter>
           {createdProject ? (
-            <Button type='button' onClick={discardAndClose}>
-              Done
-            </Button>
+            <>
+              <Button type='button' variant='outlined' onClick={discardAndClose}>
+                I&apos;ll do this later
+              </Button>
+              <Button type='button' onClick={configureCreatedProject}>
+                Configure project
+              </Button>
+            </>
           ) : (
             <>
               <Button
