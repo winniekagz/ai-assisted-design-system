@@ -125,10 +125,7 @@ export function ImportProjectFlow({
         organizationId,
         {
           name: discoveryResultFixture.projectName,
-          framework: discoveryResultFixture.framework,
-          packageManager: 'npm',
-          stylingSystem: 'Tailwind CSS',
-          repositoryUrl: `https://github.com/${discoveryResultFixture.repositories[0]}`,
+          description: 'Imported from discovery results.',
         },
         token
       );

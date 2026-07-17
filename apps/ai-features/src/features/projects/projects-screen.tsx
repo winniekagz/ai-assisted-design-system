@@ -1,5 +1,6 @@
 'use client';
 
+import type { ProjectListItem } from '@winniekagendo/componentiq-shared-types';
 import {
   Button,
   DropdownMenu,
@@ -32,13 +33,10 @@ import { useSearchParams } from 'next/navigation';
 import { useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 
 import { OrgFrame } from '@/features/org/org-frame';
+import { useProjects } from '@/hooks/queries/use-projects';
 
+import { CreateProjectDrawer } from './create-project-drawer';
 import {
-  CreateProjectDrawer,
-  type CreatedProjectDraft,
-} from './create-project-drawer';
-import {
-  projectRows,
   projectStatuses,
   type ProjectRow,
   type ProjectStatus,
@@ -76,7 +74,6 @@ export function ProjectsScreen({ orgSlug }: { orgSlug: string }) {
     <OrgFrame orgSlug={orgSlug}>
       {({ organization, membership }) => (
         <ProjectsCatalogue
-          organizationId={organization.id}
           orgSlug={organization.slug}
           organizationName={organization.name}
           role={membership.role}
@@ -87,12 +84,10 @@ export function ProjectsScreen({ orgSlug }: { orgSlug: string }) {
 }
 
 function ProjectsCatalogue({
-  organizationId,
   orgSlug,
   organizationName,
   role,
 }: {
-  organizationId: string;
   orgSlug: string;
   organizationName: string;
   role: string;
@@ -107,14 +102,15 @@ function ProjectsCatalogue({
   const [auditStateFilter, setAuditStateFilter] = useState<ProjectFilterValue>('all');
   const [frameworkFilter, setFrameworkFilter] = useState<ProjectFilterValue>('all');
   const [page, setPage] = useState(1);
-  const [createdProjects, setCreatedProjects] = useState<ProjectRow[]>([]);
+  const projectsQuery = useProjects(orgSlug);
+  const [importedProjects, setImportedProjects] = useState<ProjectRow[]>([]);
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
   const [importFlowOpen, setImportFlowOpen] = useState(false);
   const pageSize = 6;
-  const projects = useMemo(
-    () => [...createdProjects, ...projectRows],
-    [createdProjects]
-  );
+  const projects = useMemo(() => {
+    const apiProjects = projectsQuery.data?.map(projectRowFromApiProject) ?? [];
+    return [...importedProjects, ...apiProjects];
+  }, [importedProjects, projectsQuery.data]);
   const teamOptions = useMemo(
     () => uniqueProjectOptions(projects.map(project => project.team)),
     [projects]
@@ -214,16 +210,34 @@ function ProjectsCatalogue({
     setPage(1);
   }
 
-  function addProject(project: ProjectRow) {
-    setCreatedProjects(current => [project, ...current]);
+  function addImportedProject(project: ProjectRow) {
+    setImportedProjects(current => [project, ...current]);
     clearFilters();
   }
 
-  if (listState === 'loading') {
+  if (listState === 'loading' || projectsQuery.isLoading) {
     return <ProjectsSkeleton />;
   }
 
-  if (listState === 'empty') {
+  if (projectsQuery.isError) {
+    return (
+      <div className='grid gap-5'>
+        <ProjectsHeader
+          organizationName={organizationName}
+          role={role}
+          onCreateProject={() => setCreateDrawerOpen(true)}
+          onImportProject={() => setImportFlowOpen(true)}
+        />
+        <EmptyState
+          icon={<AlertCircle className='size-5' />}
+          title='Projects could not load'
+          description='Refresh the page or try again after the API is available.'
+        />
+      </div>
+    );
+  }
+
+  if (listState === 'empty' || projects.length === 0) {
     return (
       <div className='grid gap-5'>
         <ProjectsHeader
@@ -237,15 +251,15 @@ function ProjectsCatalogue({
           onImportProject={() => setImportFlowOpen(true)}
         />
         <ProjectFlowMounts
-          organizationId={organizationId}
+          orgSlug={orgSlug}
           createDrawerOpen={createDrawerOpen}
           importFlowOpen={importFlowOpen}
           teamOptions={teamOptions}
           existingProjects={projects}
           onCreateDrawerOpenChange={setCreateDrawerOpen}
           onImportFlowOpenChange={setImportFlowOpen}
-          onCreatedDraft={draft => addProject(projectRowFromCreatedDraft(draft))}
-          onImported={addProject}
+          onCreated={clearFilters}
+          onImported={addImportedProject}
         />
       </div>
     );
@@ -335,32 +349,32 @@ function ProjectsCatalogue({
         </div>
       </section>
       <ProjectFlowMounts
-        organizationId={organizationId}
+        orgSlug={orgSlug}
         createDrawerOpen={createDrawerOpen}
         importFlowOpen={importFlowOpen}
         teamOptions={teamOptions}
         existingProjects={projects}
         onCreateDrawerOpenChange={setCreateDrawerOpen}
         onImportFlowOpenChange={setImportFlowOpen}
-        onCreatedDraft={draft => addProject(projectRowFromCreatedDraft(draft))}
-        onImported={addProject}
+        onCreated={clearFilters}
+        onImported={addImportedProject}
       />
     </div>
   );
 }
 
 function ProjectFlowMounts({
-  organizationId,
+  orgSlug,
   createDrawerOpen,
   importFlowOpen,
   teamOptions,
   existingProjects,
   onCreateDrawerOpenChange,
   onImportFlowOpenChange,
-  onCreatedDraft,
+  onCreated,
   onImported,
 }: {
-  organizationId: string;
+  orgSlug: string;
   createDrawerOpen: boolean;
   importFlowOpen: boolean;
   teamOptions: string[];
@@ -369,8 +383,7 @@ function ProjectFlowMounts({
   onCreateDrawerOpenChange(open: boolean): void;
   // eslint-disable-next-line no-unused-vars
   onImportFlowOpenChange(open: boolean): void;
-  // eslint-disable-next-line no-unused-vars
-  onCreatedDraft(draft: CreatedProjectDraft): void;
+  onCreated(): void;
   // eslint-disable-next-line no-unused-vars
   onImported(project: ProjectRow): void;
 }) {
@@ -378,15 +391,15 @@ function ProjectFlowMounts({
     <>
       <CreateProjectDrawer
         open={createDrawerOpen}
-        organizationId={organizationId}
+        orgSlug={orgSlug}
         existingProjectNames={existingProjects.map(project => project.name)}
         teamOptions={teamOptions.length > 0 ? teamOptions : ['Unassigned']}
         onOpenChange={onCreateDrawerOpenChange}
-        onCreated={onCreatedDraft}
+        onCreated={onCreated}
       />
       <ImportProjectFlow
         open={importFlowOpen}
-        organizationId={organizationId}
+        organizationId={orgSlug}
         onOpenChange={onImportFlowOpenChange}
         onImported={onImported}
       />
@@ -791,22 +804,36 @@ function uniqueProjectOptions(values: string[]) {
   );
 }
 
-function projectRowFromCreatedDraft({ apiProject, description, team }: CreatedProjectDraft): ProjectRow {
+function projectRowFromApiProject(apiProject: ProjectListItem): ProjectRow {
   return {
     id: apiProject.id,
     name: apiProject.name,
     slug: apiProject.slug,
     repository: apiProject.repositoryUrl ?? 'Repository not connected',
-    team: team || 'Unassigned',
+    team: 'Unassigned',
     framework: apiProject.framework,
-    tags: ['new'],
-    description: description || 'Project reserved in ComponentIQ.',
+    tags: ['saved'],
+    description: apiProject.description || 'Project reserved in ComponentIQ.',
     status: 'not_configured',
     blockingCount: 0,
     latestAudit: { state: 'not_run', label: 'Not run', relativeTime: 'Never' },
     designSystem: { state: 'none', label: 'None' },
-    latestActivity: 'Project created',
+    latestActivity: `Updated ${formatProjectDate(apiProject.updatedAt)}`,
     repoCount: apiProject.repositoryUrl ? 1 : 0,
     lastAudited: 'Never',
   };
+}
+
+function formatProjectDate(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return 'recently';
+  }
+
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
