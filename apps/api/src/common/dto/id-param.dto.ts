@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID } from 'class-validator';
+import { IsString, IsUUID, MinLength } from 'class-validator';
 
 export class IdParamDto {
   @ApiProperty({
@@ -13,11 +13,11 @@ export class IdParamDto {
 
 export class OrgIdParamDto {
   @ApiProperty({
-    example: '8bbd7a98-6e91-4eb7-a7a3-6ceaf2c4d711',
-    description: 'Organization identifier',
-    format: 'uuid',
+    example: 'acme',
+    description: 'Organization identifier or slug',
   })
-  @IsUUID()
+  @IsString()
+  @MinLength(1)
   orgId!: string;
 }
 

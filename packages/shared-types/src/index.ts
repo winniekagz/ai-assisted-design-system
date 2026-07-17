@@ -1,4 +1,6 @@
 
+import { z } from 'zod';
+
 export const ROLES = [
   'OWNER',
   'ADMIN',
@@ -16,6 +18,115 @@ export const ASSIGNABLE_ROLES = [
   'ENGINEER',
   'VIEWER',
 ] as const satisfies readonly AssignableRole[];
+
+export const PERMISSIONS = {
+  ORG_MANAGE: 'org.manage',
+  MEMBERS_INVITE: 'members.invite',
+  MEMBERS_REMOVE: 'members.remove',
+  PROJECT_VIEW: 'projects.view',
+  PROJECT_CREATE: 'projects.manage',
+  PROJECT_UPDATE: 'projects.manage',
+  PROJECT_ARCHIVE: 'projects.manage',
+  PROJECT_DELETE: 'projects.manage',
+  COMPONENT_VIEW: 'components.view',
+  COMPONENT_MANAGE: 'components.manage',
+  GUARDRAIL_VIEW: 'guardrails.view',
+  GUARDRAIL_MANAGE: 'guardrails.manage',
+  AI_RUN: 'ai.run',
+  AUDIT_VIEW: 'audits.view',
+  AUDIT_VIEW_OWN: 'audits.viewOwn',
+  RECOMMENDATION_VIEW: 'recommendations.view',
+  RECOMMENDATION_VIEW_OWN: 'recommendations.viewOwn',
+} as const;
+
+export const permissions = [
+  PERMISSIONS.ORG_MANAGE,
+  PERMISSIONS.MEMBERS_INVITE,
+  PERMISSIONS.MEMBERS_REMOVE,
+  PERMISSIONS.PROJECT_VIEW,
+  PERMISSIONS.PROJECT_CREATE,
+  PERMISSIONS.COMPONENT_VIEW,
+  PERMISSIONS.COMPONENT_MANAGE,
+  PERMISSIONS.GUARDRAIL_VIEW,
+  PERMISSIONS.GUARDRAIL_MANAGE,
+  PERMISSIONS.AI_RUN,
+  PERMISSIONS.AUDIT_VIEW,
+  PERMISSIONS.AUDIT_VIEW_OWN,
+  PERMISSIONS.RECOMMENDATION_VIEW,
+  PERMISSIONS.RECOMMENDATION_VIEW_OWN,
+] as const;
+
+export type Permission = (typeof permissions)[number];
+
+export const rolePermissions = {
+  OWNER: [
+    PERMISSIONS.ORG_MANAGE,
+    PERMISSIONS.MEMBERS_INVITE,
+    PERMISSIONS.MEMBERS_REMOVE,
+    PERMISSIONS.PROJECT_VIEW,
+    PERMISSIONS.PROJECT_CREATE,
+    PERMISSIONS.COMPONENT_VIEW,
+    PERMISSIONS.COMPONENT_MANAGE,
+    PERMISSIONS.GUARDRAIL_VIEW,
+    PERMISSIONS.GUARDRAIL_MANAGE,
+    PERMISSIONS.AI_RUN,
+    PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.RECOMMENDATION_VIEW,
+  ],
+  ADMIN: [
+    PERMISSIONS.MEMBERS_INVITE,
+    PERMISSIONS.MEMBERS_REMOVE,
+    PERMISSIONS.PROJECT_VIEW,
+    PERMISSIONS.PROJECT_CREATE,
+    PERMISSIONS.COMPONENT_VIEW,
+    PERMISSIONS.COMPONENT_MANAGE,
+    PERMISSIONS.GUARDRAIL_VIEW,
+    PERMISSIONS.GUARDRAIL_MANAGE,
+    PERMISSIONS.AI_RUN,
+    PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.RECOMMENDATION_VIEW,
+  ],
+  MAINTAINER: [
+    PERMISSIONS.PROJECT_VIEW,
+    PERMISSIONS.COMPONENT_VIEW,
+    PERMISSIONS.COMPONENT_MANAGE,
+    PERMISSIONS.GUARDRAIL_VIEW,
+    PERMISSIONS.GUARDRAIL_MANAGE,
+    PERMISSIONS.AI_RUN,
+    PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.RECOMMENDATION_VIEW,
+  ],
+  ENGINEER: [
+    PERMISSIONS.PROJECT_VIEW,
+    PERMISSIONS.COMPONENT_VIEW,
+    PERMISSIONS.GUARDRAIL_VIEW,
+    PERMISSIONS.AI_RUN,
+    PERMISSIONS.AUDIT_VIEW_OWN,
+    PERMISSIONS.RECOMMENDATION_VIEW_OWN,
+  ],
+  VIEWER: [
+    PERMISSIONS.PROJECT_VIEW,
+    PERMISSIONS.COMPONENT_VIEW,
+    PERMISSIONS.GUARDRAIL_VIEW,
+    PERMISSIONS.AUDIT_VIEW_OWN,
+    PERMISSIONS.RECOMMENDATION_VIEW_OWN,
+  ],
+} as const satisfies Record<Role, readonly Permission[]>;
+
+export function hasPermission(role: Role | undefined, permission: unknown) {
+  if (!role || !isPermission(permission)) {
+    return false;
+  }
+
+  return (rolePermissions[role] as readonly Permission[]).includes(permission);
+}
+
+export function isPermission(permission: unknown): permission is Permission {
+  return (
+    typeof permission === 'string' &&
+    (permissions as readonly string[]).includes(permission)
+  );
+}
 
 export const SEVERITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const;
 
@@ -59,6 +170,35 @@ export interface ProjectSummary {
   organizationId: string;
   name: string;
   slug: string;
+  description?: string | null;
+  framework: string;
+  packageManager: string;
+  stylingSystem: string;
+  repositoryUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const createProjectSchema = z
+  .object({
+    name: z.string().trim().min(2).max(100),
+    description: z
+      .string()
+      .trim()
+      .max(500)
+      .optional()
+      .transform(value => (value ? value : undefined)),
+  })
+  .strict();
+
+export type CreateProjectInput = z.input<typeof createProjectSchema>;
+export type NormalizedCreateProjectInput = z.output<typeof createProjectSchema>;
+
+export interface ProjectListItem {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
   framework: string;
   packageManager: string;
   stylingSystem: string;

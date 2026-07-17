@@ -334,8 +334,8 @@
   --duration-slowest: 700ms;
 }
 
-/* Dark Theme */
-@media (prefers-color-scheme: dark) {
+/* Dark theme is intentionally disabled until the app has an explicit dark-mode implementation. */
+@media not all and (prefers-color-scheme: dark) {
   :root {
     /* Override semantic tokens for system dark mode preference */
     --bg-default:     #18100E;

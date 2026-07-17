@@ -7,8 +7,15 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Organization, User } from '@prisma/client';
+import {
+  PERMISSIONS,
+  type ProjectListItem,
+} from '@winniekagendo/componentiq-shared-types';
 
 import { ClerkAuthGuard } from '../auth/clerk-auth.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { CurrentOrganization } from '../authorization/current-organization.decorator';
 import { PermissionsGuard } from '../authorization/permissions.guard';
 import { RequirePermission } from '../authorization/require-permission.decorator';
 import { OrgIdParamDto } from '../common/dto/id-param.dto';
@@ -24,7 +31,7 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
-  @RequirePermission('projects.manage')
+  @RequirePermission(PERMISSIONS.PROJECT_CREATE)
   @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'Create project',
@@ -39,14 +46,10 @@ export class ProjectsController {
     type: CreateProjectDto,
     examples: {
       createProject: {
-        summary: 'Create a Next.js project',
+        summary: 'Create a project',
         value: {
           name: 'Acme Web App',
-          slug: 'acme-web-app',
-          framework: 'Next.js',
-          packageManager: 'npm',
-          stylingSystem: 'Tailwind CSS',
-          repositoryUrl: 'https://github.com/acme/acme-web-app',
+          description: 'Customer checkout product',
         },
       },
     },
@@ -67,12 +70,21 @@ export class ProjectsController {
       },
     },
   })
-  create(@Param() params: OrgIdParamDto, @Body() dto: CreateProjectDto) {
-    return this.projectsService.create(params.orgId, dto);
+  create(
+    @Param() _params: OrgIdParamDto,
+    @CurrentOrganization() organization: Organization,
+    @CurrentUser() user: User,
+    @Body() dto: CreateProjectDto
+  ): Promise<ProjectListItem> {
+    return this.projectsService.create({
+      organizationId: organization.id,
+      actorUserId: user.id,
+      input: dto,
+    });
   }
 
   @Get()
-  @RequirePermission('projects.view')
+  @RequirePermission(PERMISSIONS.PROJECT_VIEW)
   @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'List organization projects',
@@ -99,7 +111,10 @@ export class ProjectsController {
       },
     },
   })
-  findByOrganization(@Param() params: OrgIdParamDto) {
-    return this.projectsService.findByOrganization(params.orgId);
+  findByOrganization(
+    @Param() _params: OrgIdParamDto,
+    @CurrentOrganization() organization: Organization
+  ): Promise<ProjectListItem[]> {
+    return this.projectsService.findByOrganization(organization.id);
   }
 }
