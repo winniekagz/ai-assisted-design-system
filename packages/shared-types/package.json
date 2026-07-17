@@ -19,10 +19,15 @@
   "scripts": {
     "build:lib": "tsup src/index.ts --format cjs,esm --dts",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^4.0.14"
   },
   "devDependencies": {
     "tsup": "^8.5.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }

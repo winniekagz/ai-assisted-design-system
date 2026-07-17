@@ -8,6 +8,7 @@
     "start": "node dist/apps/api/src/main.js",
     "start:prod": "node dist/apps/api/src/main.js",
     "lint": "eslint src --ext .ts",
+    "test": "npm run build:lib --workspace=@winniekagendo/componentiq-shared-types && vitest run test",
     "type-check": "tsc --noEmit",
     "typecheck": "npm run type-check",
     "db:generate": "prisma generate",
@@ -45,7 +46,8 @@
     "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   },
   "prisma": {
     "seed": "node -r ts-node/register -r tsconfig-paths/register prisma/seed.ts"
