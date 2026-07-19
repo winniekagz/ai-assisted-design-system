@@ -1,10 +1,12 @@
 // For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
 import { FlatCompat } from "@eslint/eslintrc";
+import { createRequire } from "module";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const require = createRequire(import.meta.url);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
@@ -140,8 +142,9 @@ export default eslintConfig;
 
 async function loadStorybookConfig() {
   try {
-    const storybook = await import("eslint-plugin-storybook");
-    return storybook.default?.configs?.["flat/recommended"] ?? [];
+    require.resolve("eslint-plugin-storybook");
+    const storybook = require("eslint-plugin-storybook");
+    return storybook.configs?.["flat/recommended"] ?? [];
   } catch (error) {
     if (isMissingStorybookPlugin(error)) {
       return [];
@@ -156,7 +159,7 @@ function isMissingStorybookPlugin(error) {
     error &&
     typeof error === "object" &&
     "code" in error &&
-    error.code === "ERR_MODULE_NOT_FOUND" &&
+    (error.code === "ERR_MODULE_NOT_FOUND" || error.code === "MODULE_NOT_FOUND") &&
     "message" in error &&
     typeof error.message === "string" &&
     error.message.includes("eslint-plugin-storybook")
