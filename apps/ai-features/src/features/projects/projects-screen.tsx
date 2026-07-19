@@ -440,6 +440,7 @@ function ProjectFlowMounts({
       />
       <ProjectConfigurationDrawer
         open={configurationDrawerOpen}
+        orgSlug={orgSlug}
         project={configurationProject}
         onOpenChange={onConfigurationDrawerOpenChange}
       />

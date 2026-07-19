@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -10,6 +20,8 @@ import {
 import type { Organization, User } from '@prisma/client';
 import {
   PERMISSIONS,
+  type LocalProjectUploadResponse,
+  type ProjectConfigurationConfirmResponse,
   type ProjectConfigurationSummary,
   type ProjectListItem,
 } from '@winniekagendo/componentiq-shared-types';
@@ -21,9 +33,17 @@ import { PermissionsGuard } from '../authorization/permissions.guard';
 import { RequirePermission } from '../authorization/require-permission.decorator';
 import { OrgIdParamDto } from '../common/dto/id-param.dto';
 import { ids, projectExample } from '../common/swagger/api-examples';
+import { ConfirmProjectConfigurationDto } from './dto/confirm-project-configuration.dto';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { LocalProjectImportService } from './local-project-import.service';
 import { ProjectConfigurationService } from './project-configuration.service';
 import { ProjectsService } from './projects.service';
+
+type UploadedProjectFile = {
+  originalname: string;
+  buffer: Buffer;
+  size: number;
+};
 
 @ApiTags('Projects')
 @ApiBearerAuth()
@@ -32,7 +52,8 @@ import { ProjectsService } from './projects.service';
 export class ProjectsController {
   constructor(
     private readonly projectsService: ProjectsService,
-    private readonly projectConfigurationService: ProjectConfigurationService
+    private readonly projectConfigurationService: ProjectConfigurationService,
+    private readonly localProjectImportService: LocalProjectImportService
   ) {}
 
   @Post()
@@ -171,6 +192,88 @@ export class ProjectsController {
     return this.projectConfigurationService.getProjectConfigurationSummary({
       organizationId: organization.id,
       projectId,
+    });
+  }
+
+  @Post(':projectId/configuration/confirm')
+  @RequirePermission(PERMISSIONS.PROJECT_UPDATE)
+  @UseGuards(PermissionsGuard)
+  @ApiOperation({
+    summary: 'Confirm project configuration',
+    description:
+      'Persists the reviewed project setup and marks the configuration job complete.',
+  })
+  @ApiParam({
+    name: 'orgId',
+    description: 'Organization identifier',
+    example: ids.organization,
+  })
+  @ApiParam({
+    name: 'projectId',
+    description: 'Project identifier',
+    example: ids.project,
+  })
+  @ApiBody({ type: ConfirmProjectConfigurationDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Project configuration confirmed successfully',
+  })
+  confirmConfiguration(
+    @Param('projectId') projectId: string,
+    @CurrentOrganization() organization: Organization,
+    @CurrentUser() user: User,
+    @Body() dto: ConfirmProjectConfigurationDto
+  ): Promise<ProjectConfigurationConfirmResponse> {
+    return this.projectConfigurationService.confirmProjectConfiguration({
+      organizationId: organization.id,
+      projectId,
+      userId: user.id,
+      input: dto,
+    });
+  }
+
+  @Post(':projectId/local-source')
+  @RequirePermission(PERMISSIONS.PROJECT_CREATE)
+  @UseGuards(PermissionsGuard)
+  @UseInterceptors(
+    FilesInterceptor('files', 5000, {
+      limits: {
+        fileSize: 250 * 1024 * 1024,
+        files: 5000,
+      },
+      preservePath: true,
+    })
+  )
+  @ApiOperation({
+    summary: 'Upload and analyze local project source',
+    description:
+      'Accepts a browser-selected local source snapshot, runs deterministic backend project detection, and moves the configuration job to review required.',
+  })
+  @ApiParam({
+    name: 'orgId',
+    description: 'Organization identifier',
+    example: ids.organization,
+  })
+  @ApiParam({
+    name: 'projectId',
+    description: 'Project identifier',
+    example: ids.project,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Local project source analyzed and review result persisted',
+  })
+  uploadLocalSource(
+    @Param('projectId') projectId: string,
+    @CurrentOrganization() organization: Organization,
+    @CurrentUser() user: User,
+    @UploadedFiles() files: UploadedProjectFile[]
+  ): Promise<LocalProjectUploadResponse> {
+    return this.localProjectImportService.analyzeLocalUpload({
+      organizationId: organization.id,
+      projectId,
+      userId: user.id,
+      files: files ?? [],
     });
   }
 }

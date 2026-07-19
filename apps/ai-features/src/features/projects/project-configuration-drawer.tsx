@@ -1,7 +1,13 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import type { ProjectConfigurationStatus } from '@winniekagendo/componentiq-shared-types';
+import { useAuth } from '@clerk/nextjs';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type {
+  ConfirmProjectConfigurationInput,
+  DetectedProjectConfiguration,
+  ProjectConfigurationStatus,
+} from '@winniekagendo/componentiq-shared-types';
+import type { GitProviderConnectionSummary } from '@winniekagendo/componentiq-shared-types';
 import {
   Badge,
   Button,
@@ -38,6 +44,7 @@ import {
   ShieldCheck,
   Upload,
 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import {
   useEffect,
   useRef,
@@ -47,7 +54,18 @@ import {
 } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { useConnectGithubRepo } from './use-connect-github-repo';
+import {
+  useDisconnectGithubConnection,
+  useStartGithubConnection,
+} from '@/hooks/mutations/use-connect-github';
+import { useGithubConnections } from '@/hooks/queries/use-github-connections';
+import { useProjectConfiguration } from '@/hooks/queries/use-project-configuration';
+import {
+  confirmProjectConfiguration as confirmProjectConfigurationRequest,
+  uploadLocalProjectSource,
+} from '@/lib/api/projects';
+import { requireClerkSessionToken } from '@/lib/auth/clerk-session-token';
+import { queryKeys } from '@/lib/query/query-keys';
 
 export type { ProjectConfigurationStatus };
 
@@ -60,6 +78,7 @@ export type ProjectConfigurationProject = {
 
 type ProjectConfigurationDrawerProps = {
   open: boolean;
+  orgSlug: string;
   project: ProjectConfigurationProject | null;
   initialState?: ConfigurationStateId;
   // eslint-disable-next-line no-unused-vars
@@ -101,7 +120,10 @@ type LocalSourceSelection = {
   kind: 'folder' | 'zip';
   name: string;
   fileCount: number;
+  ignoredFileCount: number;
+  originalFileCount: number;
   totalSize: number;
+  files: File[];
 };
 
 type DirectoryPickerAttributes = {
@@ -150,11 +172,24 @@ const analysisSteps = [
 const localExclusions = [
   'node_modules/',
   '.git/',
+  '.cache/',
+  '.turbo/',
+  '.vercel/',
   'dist/',
+  'build/',
   '.next/',
   'coverage/',
+  '.env*',
+  '*.pem',
+  '*.key',
   '*.log',
+  '*.map',
 ];
+
+const localUploadLimits = {
+  maxFiles: 5000,
+  maxBytes: 250 * 1024 * 1024,
+};
 
 const statusLabels: Record<ProjectConfigurationStatus, string> = {
   NOT_CONFIGURED: 'Setup required',
@@ -167,11 +202,18 @@ const statusLabels: Record<ProjectConfigurationStatus, string> = {
 
 export function ProjectConfigurationDrawer({
   open,
+  orgSlug,
   project,
   initialState,
   onOpenChange,
 }: ProjectConfigurationDrawerProps) {
-  const github = useConnectGithubRepo();
+  const pathname = usePathname();
+  const queryClient = useQueryClient();
+  const { getToken } = useAuth();
+  const githubConnections = useGithubConnections(orgSlug);
+  const startGithubConnection = useStartGithubConnection(orgSlug);
+  const disconnectGithubConnection = useDisconnectGithubConnection(orgSlug);
+  const configurationQuery = useProjectConfiguration(orgSlug, project?.id ?? '');
   const [state, setState] = useState<ConfigurationStateId>(
     initialState ?? configurationStateForStatus(getConfigurationStatus(project))
   );
@@ -179,7 +221,7 @@ export function ProjectConfigurationDrawer({
   const [selectedRepoId, setSelectedRepoId] = useState('checkout-web');
   const [repoSearch, setRepoSearch] = useState('');
   const [localSource, setLocalSource] = useState<LocalSourceSelection | null>(null);
-  const { register, setValue, watch } = useForm<ConfigurationFormValues>({
+  const { getValues, register, setValue, watch } = useForm<ConfigurationFormValues>({
     defaultValues: {
       source: 'github',
       githubAccount: 'Acme',
@@ -196,7 +238,111 @@ export function ProjectConfigurationDrawer({
     },
   });
 
-  const statusQuery = useProjectConfigurationStatus(project);
+  const currentConfigurationStatus = configurationQuery.data
+    ? {
+        status: configurationQuery.data.projectStatus,
+        detail: configurationDetail(configurationQuery.data),
+      }
+    : null;
+  const uploadLocalSource = useMutation({
+    mutationFn: async (selection: LocalSourceSelection) => {
+      if (!project) {
+        throw new Error('Project is required before uploading source.');
+      }
+      if (selection.kind === 'zip') {
+        throw new Error('Zip extraction is not enabled yet. Choose a folder snapshot for this slice.');
+      }
+      if (selection.fileCount > localUploadLimits.maxFiles) {
+        throw new Error(`Filtered source still contains more than ${localUploadLimits.maxFiles.toLocaleString()} files.`);
+      }
+      if (selection.totalSize > localUploadLimits.maxBytes) {
+        throw new Error(`Filtered source still exceeds ${formatBytes(localUploadLimits.maxBytes)}.`);
+      }
+
+      const formData = new FormData();
+      for (const file of selection.files) {
+        const relativePath =
+          (file as File & { webkitRelativePath?: string }).webkitRelativePath ||
+          file.name;
+        formData.append('files', file, relativePath);
+      }
+
+      const token = await requireClerkSessionToken(getToken);
+      return uploadLocalProjectSource(orgSlug, project.id, formData, token);
+    },
+    onSuccess: async response => {
+      setState('reviewSetup');
+      toast({
+        variant: 'success',
+        title: 'Source analyzed',
+        description: 'Backend detection is ready for review.',
+      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.projectConfiguration(orgSlug, response.projectId),
+        }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.projects(orgSlug) }),
+      ]);
+    },
+    onError: error => {
+      setState('analysisFailure');
+      toast({
+        variant: 'error',
+        title: 'Upload failed',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'ComponentIQ could not upload this local source.',
+      });
+    },
+  });
+  const confirmProjectConfiguration = useMutation({
+    mutationFn: async () => {
+      if (!project) {
+        throw new Error('Project is required before confirming configuration.');
+      }
+
+      const token = await requireClerkSessionToken(getToken);
+
+      return confirmProjectConfigurationRequest(
+        orgSlug,
+        project.id,
+        buildConfirmConfigurationInput(
+          getValues(),
+          configurationQuery.data?.detectedConfiguration ?? null
+        ),
+        token
+      );
+    },
+    onSuccess: async response => {
+      setState('success');
+      toast({
+        variant: 'success',
+        title: 'Project configured',
+        description: `${project?.name ?? 'Project'} is ready for its first audit.`,
+      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.projectConfiguration(
+            orgSlug,
+            response.configuration.projectId
+          ),
+        }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.projects(orgSlug) }),
+      ]);
+    },
+    onError: error => {
+      toast({
+        variant: 'error',
+        title: 'Configuration was not saved',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'ComponentIQ could not confirm this project configuration.',
+      });
+    },
+  });
+  const githubConnection = githubConnections.data?.[0] ?? null;
   const selectedRepo = repoRows.find(repo => repo.id === selectedRepoId) ?? repoRows[0];
   const filteredRepos = repoRows.filter(repo =>
     repo.name.toLowerCase().includes(repoSearch.trim().toLowerCase())
@@ -208,6 +354,41 @@ export function ProjectConfigurationDrawer({
     if (!open) return;
     setState(initialState ?? configurationStateForStatus(getConfigurationStatus(project)));
   }, [initialState, open, project]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const detectedConfiguration = configurationQuery.data?.detectedConfiguration;
+    if (!detectedConfiguration) return;
+
+    const setup = detectedConfiguration.setup;
+    setValue(
+      'framework',
+      setup?.framework.value ?? detectedConfiguration.framework ?? 'UNKNOWN'
+    );
+    setValue(
+      'packageManager',
+      setup?.packageManager.value ?? detectedConfiguration.packageManager ?? 'UNKNOWN'
+    );
+    setValue(
+      'stylingSystem',
+      setup?.stylingSystem.value?.join(', ') ??
+        detectedConfiguration.stylingSystem ??
+        'UNKNOWN'
+    );
+    setValue(
+      'projectRoot',
+      setup?.projectRoot.value ?? detectedConfiguration.projectRoot ?? '/'
+    );
+    setValue(
+      'componentDirectories',
+      (setup?.componentPaths.value ?? detectedConfiguration.componentPaths).join(', ')
+    );
+    setValue(
+      'tokenPath',
+      (setup?.tokenPaths.value ?? detectedConfiguration.tokenPaths).join(', ')
+    );
+  }, [configurationQuery.data?.detectedConfiguration, open, setValue]);
 
   function close() {
     onOpenChange(false);
@@ -236,13 +417,21 @@ export function ProjectConfigurationDrawer({
     setState('localPreflight');
   }
 
-  function confirmConfiguration() {
-    setState('success');
-    toast({
-      variant: 'success',
-      title: 'Project configured',
-      description: `${project?.name ?? 'Project'} is ready for its first audit.`,
-    });
+  function uploadSelectedLocalSource() {
+    if (!localSource) return;
+    setState('uploading');
+    uploadLocalSource.mutate(localSource);
+  }
+
+  function confirmReviewedConfiguration() {
+    confirmProjectConfiguration.mutate();
+  }
+
+  async function startGithubInstall() {
+    const returnPath = pathname ?? `/org/${orgSlug}/projects`;
+    const response = await startGithubConnection.mutateAsync(returnPath);
+
+    window.location.assign(response.installationUrl);
   }
 
   return (
@@ -270,11 +459,11 @@ export function ProjectConfigurationDrawer({
               aria-label='Configuration progress'
             />
 
-            {statusQuery.data && (
+            {currentConfigurationStatus && (
               <div className='flex flex-wrap items-center gap-2 rounded-md border border-border bg-background-secondary px-3 py-2 text-sm text-muted-foreground'>
                 <span className='font-medium text-foreground'>Current status:</span>
-                <ConfigurationStatusBadge status={statusQuery.data.status} />
-                <span>{statusQuery.data.detail}</span>
+                <ConfigurationStatusBadge status={currentConfigurationStatus.status} />
+                <span>{currentConfigurationStatus.detail}</span>
               </div>
             )}
 
@@ -292,21 +481,33 @@ export function ProjectConfigurationDrawer({
             {state === 'localPreflight' && (
               <LocalPreflightStep
                 source={localSource}
-                onAnalyze={() => setState('uploading')}
+                onAnalyze={uploadSelectedLocalSource}
               />
             )}
             {state === 'localNoDetect' && (
               <LocalNoDetectStep
-                onUploadAnyway={() => setState('uploading')}
+                onUploadAnyway={uploadSelectedLocalSource}
                 onChooseAnother={() => setState('localUpload')}
               />
             )}
             {state === 'githubPermission' && (
               <GithubPermissionStep
-                githubAvailable={github.isAvailable}
+                connection={githubConnection}
+                isLoading={githubConnections.isLoading}
+                isStarting={startGithubConnection.isPending}
+                isDisconnecting={disconnectGithubConnection.isPending}
+                errorMessage={
+                  githubConnections.isError
+                    ? 'GitHub connection status could not be loaded.'
+                    : startGithubConnection.error instanceof Error
+                      ? startGithubConnection.error.message
+                      : null
+                }
                 onAuthorize={() => {
-                  void github.connect('repository').catch(() => undefined);
-                  setState('githubRepoPicker');
+                  void startGithubInstall();
+                }}
+                onDisconnect={connectionId => {
+                  void disconnectGithubConnection.mutateAsync(connectionId);
                 }}
               />
             )}
@@ -324,7 +525,7 @@ export function ProjectConfigurationDrawer({
               <GithubReviewStep selectedRepo={selectedRepo} values={watch()} />
             )}
             {state === 'uploading' && (
-              <UploadProgressStep onComplete={() => setState('analyzing')} />
+              <UploadProgressStep source={localSource} isPending={uploadLocalSource.isPending} />
             )}
             {state === 'analyzing' && (
               <AnalysisProgressStep
@@ -341,12 +542,21 @@ export function ProjectConfigurationDrawer({
             )}
             {state === 'analysisFailure' && (
               <AnalysisFailureStep
-                onRetry={() => setState('analyzing')}
+                errorMessage={
+                  uploadLocalSource.error instanceof Error
+                    ? uploadLocalSource.error.message
+                    : configurationQuery.data?.lastError?.message ?? null
+                }
+                onRetry={uploadSelectedLocalSource}
                 onDetails={() => setState('resume')}
               />
             )}
             {state === 'reviewSetup' && (
-              <ReviewSetupStep register={register} values={watch()} />
+              <ReviewSetupStep
+                detectedConfiguration={configurationQuery.data?.detectedConfiguration ?? null}
+                register={register}
+                values={watch()}
+              />
             )}
             {state === 'success' && <SuccessStep projectName={project?.name ?? 'Project'} />}
             {state === 'resume' && (
@@ -381,8 +591,19 @@ export function ProjectConfigurationDrawer({
                 <Button type='button' variant='outlined' onClick={close}>
                   Save and review later
                 </Button>
-                <Button type='button' onClick={confirmConfiguration}>
-                  Confirm configuration
+                <Button
+                  type='button'
+                  disabled={confirmProjectConfiguration.isPending}
+                  onClick={confirmReviewedConfiguration}
+                  startIcon={
+                    confirmProjectConfiguration.isPending
+                      ? <Loader2 className='size-4 animate-spin' />
+                      : undefined
+                  }
+                >
+                  {confirmProjectConfiguration.isPending
+                    ? 'Confirming'
+                    : 'Confirm configuration'}
                 </Button>
               </>
             )}
@@ -435,16 +656,22 @@ export function getConfigurationStatus(project?: Pick<ProjectConfigurationProjec
   return 'NOT_CONFIGURED';
 }
 
-function useProjectConfigurationStatus(project: ProjectConfigurationProject | null) {
-  return useQuery({
-    queryKey: ['project-configuration', project?.id ?? 'unknown'],
-    queryFn: async () => ({
-      status: getConfigurationStatus(project),
-      detail: 'Configuration state is mocked until source-connection APIs exist.',
-    }),
-    enabled: Boolean(project),
-    staleTime: 1000 * 60,
-  });
+function configurationDetail(summary: {
+  projectStatus: ProjectConfigurationStatus;
+  latestJobStatus: string | null;
+  lastError: { message: string | null } | null;
+}) {
+  if (summary.projectStatus === 'REVIEW_REQUIRED') {
+    return 'Backend detection is ready for human review.';
+  }
+  if (summary.projectStatus === 'CONFIGURING') {
+    return `Configuration job is ${summary.latestJobStatus?.toLowerCase() ?? 'running'}.`;
+  }
+  if (summary.projectStatus === 'CONFIGURATION_FAILED') {
+    return summary.lastError?.message ?? 'Detection failed with a safe recoverable error.';
+  }
+
+  return statusLabels[summary.projectStatus];
 }
 
 function SourceChoiceStep({
@@ -529,12 +756,16 @@ function LocalUploadStep({
     const firstFile = files[0] as File & { webkitRelativePath?: string };
     const rootFolder =
       firstFile.webkitRelativePath?.split('/').filter(Boolean)[0] ?? firstFile.name;
+    const filteredFiles = files.filter(file => !shouldIgnoreLocalFile(file));
 
     onSourceSelected({
       kind: 'folder',
       name: rootFolder,
-      fileCount: files.length,
-      totalSize: totalFileSize(files),
+      fileCount: filteredFiles.length,
+      ignoredFileCount: files.length - filteredFiles.length,
+      originalFileCount: files.length,
+      totalSize: totalFileSize(filteredFiles),
+      files: filteredFiles,
     });
     event.target.value = '';
   }
@@ -547,7 +778,10 @@ function LocalUploadStep({
       kind: 'zip',
       name: file.name,
       fileCount: 1,
+      ignoredFileCount: 0,
+      originalFileCount: 1,
       totalSize: file.size,
+      files: [file],
     });
     event.target.value = '';
   }
@@ -588,18 +822,19 @@ function LocalUploadStep({
             <Button
               type='button'
               variant='outlined'
-              onClick={() => zipInputRef.current?.click()}
+              disabled
+              title='Zip extraction is deferred until archive safety handling is implemented.'
               startIcon={<FileArchive className='size-4' />}
             >
-              Upload a .zip instead
+              Zip upload unavailable
             </Button>
           </div>
         </div>
       </div>
       <div className='rounded-md border border-border bg-background px-4 py-3 text-sm text-muted-foreground'>
         <p>
-          Max size 250 MB. Folder selection uses the browser file picker; if your
-          browser does not support folder picking, upload a .zip instead.
+          Max size {formatBytes(localUploadLimits.maxBytes)} and {localUploadLimits.maxFiles.toLocaleString()} included files after exclusions. Folder selection uses the browser file picker.
+          Zip upload is deferred until archive extraction safety is implemented.
         </p>
         <button type='button' className='mt-2 font-semibold text-primary' onClick={onToggleExclusions}>
           {showExclusions ? 'Hide exclusions' : 'Show auto-excluded paths'}
@@ -625,35 +860,66 @@ function LocalPreflightStep({
   onAnalyze(): void;
 }) {
   const rows = [
-    ['Selected source', source ? source.name : 'No source selected', source ? 'Detected' : 'Warning'],
-    ['Framework', 'Next.js', 'Detected'],
-    ['Language', 'TypeScript', 'Detected'],
-    ['Package manager', 'npm', 'Detected'],
-    ['Styling', 'Tailwind CSS', 'Warning'],
+    ['Selected source', source ? source.name : 'No source selected', source ? 'Selected' : 'Warning'],
+    ['Detection source', 'Backend analysis after upload', 'Pending'],
     [
       'Files',
       source
-        ? `${source.fileCount.toLocaleString()} ${source.fileCount === 1 ? 'file' : 'files'} · ${formatBytes(source.totalSize)}`
+        ? `${source.fileCount.toLocaleString()} included of ${source.originalFileCount.toLocaleString()} selected · ${formatBytes(source.totalSize)}`
         : 'Waiting for selection',
-      source ? 'Detected' : 'Warning',
+      source ? 'Selected' : 'Warning',
+    ],
+    [
+      'Ignored files',
+      source ? `${source.ignoredFileCount.toLocaleString()} excluded before upload` : 'Waiting for selection',
+      source && source.ignoredFileCount > 0 ? 'Selected' : 'Pending',
     ],
   ];
+  const limitWarning =
+    source && (source.fileCount > localUploadLimits.maxFiles || source.totalSize > localUploadLimits.maxBytes)
+      ? `The filtered upload must be ${localUploadLimits.maxFiles.toLocaleString()} files or fewer and under ${formatBytes(localUploadLimits.maxBytes)}.`
+      : null;
+  const noIncludedFilesWarning =
+    source && source.fileCount === 0
+      ? 'All selected files were excluded. Choose the project source folder, not a generated output or dependency folder.'
+      : null;
+  const zipWarning =
+    source?.kind === 'zip'
+      ? 'Zip upload is not enabled in this slice. Choose a project folder instead.'
+      : null;
+  const disabledReason = limitWarning ?? noIncludedFilesWarning ?? zipWarning;
 
   return (
     <div className='grid gap-4'>
-      <StatusCallout tone='info' title='Preflight complete' detail='Review what ComponentIQ detected before uploading this snapshot.' />
+      <StatusCallout tone='info' title='Source selected' detail='Framework, language, package manager, and styling are detected by the backend after upload.' />
+      {limitWarning && (
+        <StatusCallout tone='warning' title='Source is too large' detail={limitWarning} />
+      )}
+      {noIncludedFilesWarning && (
+        <StatusCallout tone='warning' title='No uploadable files' detail={noIncludedFilesWarning} />
+      )}
+      {zipWarning && (
+        <StatusCallout tone='warning' title='Zip upload unavailable' detail={zipWarning} />
+      )}
       <div className='grid gap-2'>
         {rows.map(([label, value, status]) => (
           <div key={label} className='flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2'>
             <span className='text-sm text-muted-foreground'>{label}</span>
             <span className='flex items-center gap-2 text-sm font-medium text-foreground'>
               {value}
-              <Badge status={status === 'Warning' ? 'warning' : 'success'}>{status}</Badge>
+              <Badge status={status === 'Warning' || status === 'Pending' ? 'warning' : 'success'}>{status}</Badge>
             </span>
           </div>
         ))}
       </div>
-      <Button type='button' onClick={onAnalyze}>Upload and analyze</Button>
+      <Button
+        type='button'
+        disabled={Boolean(disabledReason) || !source}
+        title={disabledReason ?? undefined}
+        onClick={onAnalyze}
+      >
+        Upload and analyze
+      </Button>
     </div>
   );
 }
@@ -670,6 +936,44 @@ function formatBytes(bytes: number) {
   const value = bytes / 1024 ** unitIndex;
 
   return `${value >= 10 || unitIndex === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[unitIndex]}`;
+}
+
+function shouldIgnoreLocalFile(file: File) {
+  const relativePath =
+    (file as File & { webkitRelativePath?: string }).webkitRelativePath ||
+    file.name;
+  const normalized = relativePath.replace(/\\/g, '/');
+  const parts = normalized.split('/').filter(Boolean);
+  const basename = parts.at(-1)?.toLowerCase() ?? '';
+  const excludedSegments = new Set([
+    'node_modules',
+    '.git',
+    '.next',
+    'dist',
+    'build',
+    'coverage',
+    '.cache',
+    '.turbo',
+    '.vercel',
+    '.output',
+  ]);
+  const excludedBasenames = new Set([
+    '.env',
+    '.env.local',
+    '.env.development',
+    '.env.production',
+    'id_rsa',
+    'id_dsa',
+    'id_ecdsa',
+    'id_ed25519',
+  ]);
+
+  if (parts.some(part => excludedSegments.has(part))) return true;
+  if (excludedBasenames.has(basename)) return true;
+  if (basename.endsWith('.pem') || basename.endsWith('.key')) return true;
+  if (basename.endsWith('.log') || basename.endsWith('.map')) return true;
+
+  return false;
 }
 
 function LocalNoDetectStep({
@@ -695,41 +999,109 @@ function LocalNoDetectStep({
 }
 
 function GithubPermissionStep({
-  githubAvailable,
+  connection,
+  isLoading,
+  isStarting,
+  isDisconnecting,
+  errorMessage,
   onAuthorize,
+  onDisconnect,
 }: {
-  githubAvailable: boolean;
+  connection: GitProviderConnectionSummary | null;
+  isLoading: boolean;
+  isStarting: boolean;
+  isDisconnecting: boolean;
+  errorMessage: string | null;
   onAuthorize(): void;
+  // eslint-disable-next-line no-unused-vars
+  onDisconnect(connectionId: string): void;
 }) {
+  const active = connection?.status === 'ACTIVE';
+
   return (
     <div className='grid gap-4'>
       <StatusCallout
         tone='info'
-        title='GitHub OAuth is pending backend wiring'
-        detail='This pass shows the permission review and repository picker without claiming a real connection.'
+        title='Connect GitHub App'
+        detail='GitHub repository selection happens after the app installation is connected.'
       />
+      {errorMessage && (
+        <StatusCallout
+          tone='warning'
+          title='GitHub connection needs attention'
+          detail={errorMessage}
+        />
+      )}
+      {active && (
+        <StatusCallout
+          tone='info'
+          title={`Connected to ${connection.accountLogin}`}
+          detail='Continue to repository selection after the repository picker is available.'
+        />
+      )}
+      {connection?.status === 'DISCONNECTED' && (
+        <StatusCallout
+          tone='warning'
+          title='GitHub disconnected'
+          detail='Reconnect GitHub before selecting repositories for this project.'
+        />
+      )}
+      {(connection?.status === 'REVOKED' || connection?.status === 'FAILED') && (
+        <StatusCallout
+          tone='warning'
+          title='Repair GitHub connection'
+          detail='GitHub access is not currently valid. Reconnect the GitHub App before selecting repositories.'
+        />
+      )}
       <PermissionList
         title='ComponentIQ requests permission to'
         items={[
-          'Read repository metadata and source files',
-          'Read branches needed for configuration',
-          'Store detected setup for this project',
+          'Use the permissions configured on your GitHub App installation',
+          'Read installation and repository metadata after you choose repositories',
+          'Store the installation association for this Component IQ organization',
         ]}
       />
       <PermissionList
         title='ComponentIQ cannot'
         items={[
-          'Push code to your repository',
-          'Read secrets or encrypted CI variables',
-          'Run audits until you confirm configuration',
+          'Store GitHub installation access tokens in the database',
+          'Select repositories in this slice',
+          'Run audits or pull-request checks from GitHub yet',
         ]}
       />
-      <Button type='button' disabled={!githubAvailable} title={!githubAvailable ? 'GitHub OAuth/repository picker is not wired yet.' : undefined} onClick={onAuthorize}>
-        Continue to repository picker
-      </Button>
-      {!githubAvailable && (
-        <Button type='button' variant='outlined' onClick={onAuthorize}>
-          Preview repository picker
+      <div className='rounded-md border border-border bg-background px-4 py-3 text-sm text-muted-foreground'>
+        Access can be revoked from GitHub installation settings. Disconnecting
+        here only removes the Component IQ association; it does not uninstall the
+        GitHub App or delete projects, configuration jobs, audits, or findings.
+      </div>
+      {active ? (
+        <div className='flex flex-wrap gap-2'>
+          <Button
+            type='button'
+            disabled
+            title='Repository selection is intentionally deferred to a later slice.'
+          >
+            Continue to repositories
+          </Button>
+          <Button
+            type='button'
+            variant='outlined'
+            disabled={isDisconnecting}
+            onClick={() => onDisconnect(connection.id)}
+          >
+            Disconnect association
+          </Button>
+        </div>
+      ) : (
+        <Button
+          type='button'
+          disabled={isLoading || isStarting}
+          onClick={onAuthorize}
+          startIcon={
+            isStarting ? <Loader2 className='size-4 animate-spin' /> : undefined
+          }
+        >
+          {connection ? 'Repair GitHub connection' : 'Connect GitHub'}
         </Button>
       )}
     </div>
@@ -837,12 +1209,25 @@ function GithubReviewStep({
   );
 }
 
-function UploadProgressStep({ onComplete }: { onComplete(): void }) {
+function UploadProgressStep({
+  source,
+  isPending,
+}: {
+  source: LocalSourceSelection | null;
+  isPending: boolean;
+}) {
   return (
     <div className='grid gap-4' aria-live='polite'>
-      <Progress value={72} label='Uploading project snapshot' showValue />
-      <StatusCallout tone='info' title='Uploading source' detail='Keep this drawer open or continue later. Analysis can resume after upload completes.' />
-      <Button type='button' onClick={onComplete}>Simulate upload complete</Button>
+      <Progress value={isPending ? 72 : 100} label='Uploading project snapshot' showValue />
+      <StatusCallout
+        tone='info'
+        title={isPending ? 'Uploading source' : 'Finishing analysis'}
+        detail={
+          source
+            ? `${source.fileCount.toLocaleString()} filtered files (${formatBytes(source.totalSize)}) are being uploaded for backend detection.`
+            : 'ComponentIQ is uploading the snapshot and running bounded backend detection.'
+        }
+      />
     </div>
   );
 }
@@ -904,16 +1289,18 @@ function AnalysisWarningStep({
 }
 
 function AnalysisFailureStep({
+  errorMessage,
   onRetry,
   onDetails,
 }: {
+  errorMessage: string | null;
   onRetry(): void;
   onDetails(): void;
 }) {
   return (
     <div className='grid gap-4'>
       <StatusCallout tone='error' title='Analysis could not be completed' detail='The uploaded source is still available. Retry analysis or review technical details without exposing raw stack traces here.' />
-      <Textarea readOnly value={'Analyzer exited before framework detection. Retry usually resolves transient source parsing failures.'} />
+      <Textarea readOnly value={errorMessage ?? 'Analyzer exited before framework detection. Retry usually resolves transient source parsing failures.'} />
       <div className='flex flex-wrap gap-2'>
         <Button type='button' onClick={onRetry} startIcon={<RefreshCcw className='size-4' />}>Retry analysis</Button>
         <Button type='button' variant='outlined' onClick={onDetails}>View technical details</Button>
@@ -923,24 +1310,58 @@ function AnalysisFailureStep({
 }
 
 function ReviewSetupStep({
+  detectedConfiguration,
   register,
   values,
 }: {
+  detectedConfiguration: DetectedProjectConfiguration | null;
   register: ReturnType<typeof useForm<ConfigurationFormValues>>['register'];
   values: ConfigurationFormValues;
 }) {
+  const setup = detectedConfiguration?.setup;
+  const framework = setup?.framework.value ?? detectedConfiguration?.framework ?? 'UNKNOWN';
+  const packageManager = setup?.packageManager.value ?? detectedConfiguration?.packageManager ?? 'UNKNOWN';
+  const styling = setup?.stylingSystem.value?.join(', ') ?? detectedConfiguration?.stylingSystem ?? 'UNKNOWN';
+  const warnings = setup?.globalWarnings ?? detectedConfiguration?.warnings ?? [];
+  const evidence = setup?.framework.evidence ?? [];
+
   return (
     <div className='grid gap-4'>
       <StatusCallout tone='info' title='Review detected setup' detail='Only uncertain fields are editable before saving this configuration.' />
       <SummaryRows rows={[
-        ['Framework', `${values.framework} · High confidence · package.json`],
-        ['Package manager', `${values.packageManager} · High confidence · lockfile`],
-        ['Styling system', `${values.stylingSystem} · Medium confidence · CSS imports`],
+        ['Framework', `${framework} · ${setup?.framework.confidence ?? detectedConfiguration?.confidence ?? 'LOW'} confidence`],
+        ['Package manager', `${packageManager} · ${setup?.packageManager.confidence ?? 'LOW'} confidence`],
+        ['Styling system', `${styling} · ${setup?.stylingSystem.confidence ?? 'LOW'} confidence`],
+        ['Language', setup?.language.value ?? detectedConfiguration?.language ?? 'UNKNOWN'],
+        ['Project root', setup?.projectRoot.value ?? detectedConfiguration?.projectRoot ?? values.projectRoot],
       ]} />
+      {evidence.length > 0 && (
+        <div className='rounded-md border border-border bg-background px-4 py-3'>
+          <h3 className='text-sm font-semibold text-foreground'>Evidence</h3>
+          <ul className='mt-2 grid gap-1 text-xs text-muted-foreground'>
+            {evidence.slice(0, 5).map(item => (
+              <li key={`${item.type}-${item.path}`}>{item.path}: {item.detail}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {warnings.length > 0 && (
+        <StatusCallout tone='warning' title='Review warnings' detail={warnings.slice(0, 2).join(' ')} />
+      )}
+      {setup && setup.candidateProjectRoots.length > 1 && (
+        <div className='rounded-md border border-border bg-background px-4 py-3'>
+          <h3 className='text-sm font-semibold text-foreground'>Candidate roots</h3>
+          <ul className='mt-2 grid gap-1 text-xs text-muted-foreground'>
+            {setup.candidateProjectRoots.map(candidate => (
+              <li key={candidate.path}>{candidate.path} · score {candidate.score}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className='grid gap-3'>
-        <Input label='Project root' {...register('projectRoot')} />
-        <Input label='Component directories' {...register('componentDirectories')} />
-        <Input label='Design-token path' {...register('tokenPath')} />
+        <Input label='Project root' {...register('projectRoot')} placeholder={setup?.projectRoot.value ?? detectedConfiguration?.projectRoot ?? '/'} />
+        <Input label='Component directories' {...register('componentDirectories')} placeholder={(setup?.componentPaths.value ?? detectedConfiguration?.componentPaths ?? []).join(', ')} />
+        <Input label='Design-token path' {...register('tokenPath')} placeholder={(setup?.tokenPaths.value ?? detectedConfiguration?.tokenPaths ?? []).join(', ')} />
         <div className='grid gap-2'>
           <label className='text-sm font-medium text-muted-foreground' htmlFor='configuration-reviewer-notes'>
             Reviewer notes
@@ -1024,9 +1445,65 @@ function SummaryRows({ rows }: { rows: [string, string][] }) {
   );
 }
 
+function buildConfirmConfigurationInput(
+  values: ConfigurationFormValues,
+  detectedConfiguration: DetectedProjectConfiguration | null
+): ConfirmProjectConfigurationInput {
+  const setup = detectedConfiguration?.setup;
+  const componentPaths = parsePathList(values.componentDirectories);
+  const tokenPaths = parsePathList(values.tokenPath);
+
+  return {
+    framework:
+      cleanOptional(values.framework) ??
+      setup?.framework.value ??
+      detectedConfiguration?.framework ??
+      undefined,
+    language:
+      setup?.language.value ?? detectedConfiguration?.language ?? undefined,
+    packageManager:
+      cleanOptional(values.packageManager) ??
+      setup?.packageManager.value ??
+      detectedConfiguration?.packageManager ??
+      undefined,
+    stylingSystem:
+      cleanOptional(values.stylingSystem) ??
+      setup?.stylingSystem.value?.join(', ') ??
+      detectedConfiguration?.stylingSystem ??
+      undefined,
+    projectRoot:
+      cleanOptional(values.projectRoot) ??
+      setup?.projectRoot.value ??
+      detectedConfiguration?.projectRoot ??
+      undefined,
+    componentPaths:
+      componentPaths.length > 0
+        ? componentPaths
+        : setup?.componentPaths.value ?? detectedConfiguration?.componentPaths ?? undefined,
+    tokenPaths:
+      tokenPaths.length > 0
+        ? tokenPaths
+        : setup?.tokenPaths.value ?? detectedConfiguration?.tokenPaths ?? undefined,
+    notes: cleanOptional(values.notes),
+  };
+}
+
+function parsePathList(value: string) {
+  return value
+    .split(',')
+    .map(item => item.trim())
+    .filter(Boolean);
+}
+
+function cleanOptional(value: string) {
+  const trimmed = value.trim();
+
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 function stageIndexForState(state: ConfigurationStateId) {
-  if (state.startsWith('github') || state.startsWith('local')) return state === 'sourceChoice' ? 0 : 1;
-  if (state === 'sourceChoice') return 0;
+  if (state === 'sourceChoice' || state === 'localUpload' || state === 'localPreflight' || state === 'localNoDetect') return 0;
+  if (state.startsWith('github')) return 1;
   if (state === 'uploading' || state === 'analyzing' || state.startsWith('analysis') || state === 'resume') return 2;
   return 3;
 }

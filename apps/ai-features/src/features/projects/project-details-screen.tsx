@@ -125,6 +125,7 @@ function ProjectDetailsContent({
       <RecentActivityCard activity={projectDetailsFixture.activity} />
       <ProjectConfigurationDrawer
         open={configurationOpen}
+        orgSlug={orgSlug}
         project={project}
         onOpenChange={setConfigurationOpen}
       />

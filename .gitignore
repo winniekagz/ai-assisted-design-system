@@ -82,6 +82,7 @@ yarn-error.log
 # repository specific ignores
 /packages/**/.npmignore
 /packages/**/LICENSE
+/apps/api/.componentiq/
 
 # example folders
 /quick-start

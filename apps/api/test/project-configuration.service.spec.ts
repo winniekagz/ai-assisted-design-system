@@ -8,6 +8,11 @@ const olderJobUpdatedAt = new Date('2026-07-17T10:00:00.000Z');
 const latestJobUpdatedAt = new Date('2026-07-17T11:00:00.000Z');
 
 function createPrismaMock() {
+  const transactionClient = {
+    $queryRaw: vi.fn().mockResolvedValue([createConfirmedConfigurationRecord()]),
+    $executeRaw: vi.fn().mockResolvedValue(1),
+  };
+
   return {
     project: {
       findFirst: vi.fn().mockResolvedValue(createProjectRecord()),
@@ -18,6 +23,10 @@ function createPrismaMock() {
     detectedConfiguration: {
       findUnique: vi.fn().mockResolvedValue(null),
     },
+    $transaction: vi.fn((callback: (tx: typeof transactionClient) => unknown) =>
+      callback(transactionClient)
+    ),
+    __tx: transactionClient,
   };
 }
 
@@ -41,7 +50,55 @@ function createConfigurationJobRecord(
     progress: overrides.progress ?? null,
     errorCode: overrides.errorCode ?? null,
     errorMessage: overrides.errorMessage ?? null,
+    projectSourceId: overrides.projectSourceId ?? null,
+    projectSource: overrides.projectSource ?? null,
     updatedAt: overrides.updatedAt ?? latestJobUpdatedAt,
+  };
+}
+
+function createDetectedConfigurationRecord() {
+  return {
+    framework: 'MOBILE_WEB',
+    language: 'TYPESCRIPT',
+    packageManager: 'NPM',
+    stylingSystem: 'TAILWIND',
+    projectRoot: '.',
+    componentPaths: ['src/components'],
+    tokenPaths: ['src/styles/tokens.css'],
+    monorepoDetected: false,
+    storybookDetected: false,
+    confidence: 'high',
+    evidence: { packageJson: true },
+    rawDetectionResult: {
+      globalWarnings: [],
+      candidateProjectRoots: [{ path: '.', score: 20, evidence: [] }],
+      detectorVersion: '1',
+      analyzedAt: latestJobUpdatedAt.toISOString(),
+      sourceSnapshotId: 'snapshot_1',
+    },
+    createdAt: latestJobUpdatedAt,
+  };
+}
+
+function createConfirmedConfigurationRecord() {
+  return {
+    id: 'confirmed_1',
+    projectId: 'project_1',
+    organizationId: 'org_1',
+    configurationJobId: 'job_latest',
+    sourceType: 'LOCAL_UPLOAD',
+    framework: 'MOBILE_WEB',
+    language: 'TYPESCRIPT',
+    packageManager: 'NPM',
+    stylingSystem: 'TAILWIND',
+    projectRoot: '.',
+    componentPaths: ['src/components', 'src/features'],
+    tokenPaths: ['src/styles/tokens.css'],
+    notes: 'Looks right.',
+    confirmedByUserId: 'user_1',
+    confirmedAt: latestJobUpdatedAt,
+    createdAt: latestJobUpdatedAt,
+    updatedAt: latestJobUpdatedAt,
   };
 }
 
@@ -73,6 +130,10 @@ type ConfigurationJobRecord = {
   progress: number | null;
   errorCode: string | null;
   errorMessage: string | null;
+  projectSourceId: string | null;
+  projectSource: {
+    sourceSnapshotId: string | null;
+  } | null;
   updatedAt: Date;
 };
 
@@ -155,6 +216,26 @@ describe('ProjectConfigurationService', () => {
       storybookDetected: false,
       confidence: 'medium',
       evidence: { packageJson: true },
+      rawDetectionResult: {
+        framework: {
+          value: 'NEXTJS',
+          confidence: 'HIGH',
+          evidence: [
+            {
+              type: 'dependency',
+              path: 'package.json',
+              detail: 'next dependency found.',
+            },
+          ],
+          warnings: [],
+        },
+        globalWarnings: [],
+        candidateProjectRoots: [{ path: '.', score: 20, evidence: [] }],
+        detectorVersion: '1',
+        analyzedAt: '2026-07-17T11:00:00.000Z',
+        sourceSnapshotId: 'snapshot_1',
+      },
+      createdAt: latestJobUpdatedAt,
     });
     const service = new ProjectConfigurationService(prisma as never);
 
@@ -171,6 +252,12 @@ describe('ProjectConfigurationService', () => {
         framework: 'Next.js',
         componentPaths: ['src/components'],
         tokenPaths: ['src/styles/tokens.css'],
+        setup: expect.objectContaining({
+          detectorVersion: '1',
+          sourceSnapshotId: 'snapshot_1',
+        }),
+        detectorVersion: '1',
+        sourceSnapshotId: 'snapshot_1',
       })
     );
   });
@@ -273,5 +360,51 @@ describe('ProjectConfigurationService', () => {
     expect(summary.projectStatus).toBe('ARCHIVED');
     expect(summary.canRetry).toBe(false);
     expect(summary.requiresReview).toBe(false);
+  });
+
+  it('persists reviewed configuration and returns a READY summary', async () => {
+    const prisma = createPrismaMock();
+    prisma.project.findFirst
+      .mockResolvedValueOnce(
+        createProjectRecord({ configurationStatus: 'REVIEW_REQUIRED' })
+      )
+      .mockResolvedValueOnce(
+        createProjectRecord({ configurationStatus: 'READY' })
+      );
+    prisma.configurationJob.findFirst
+      .mockResolvedValueOnce(
+        createConfigurationJobRecord({ status: 'REVIEW_REQUIRED' })
+      )
+      .mockResolvedValueOnce(
+        createConfigurationJobRecord({ status: 'COMPLETED', progress: 100 })
+      );
+    prisma.detectedConfiguration.findUnique.mockResolvedValue(
+      createDetectedConfigurationRecord()
+    );
+    const service = new ProjectConfigurationService(prisma as never);
+
+    const response = await service.confirmProjectConfiguration({
+      organizationId: 'org_1',
+      projectId: 'project_1',
+      userId: 'user_1',
+      input: {
+        componentPaths: ['src/components', 'src/features'],
+        notes: 'Looks right.',
+      },
+    });
+
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    expect(prisma.__tx.$queryRaw).toHaveBeenCalledTimes(1);
+    expect(prisma.__tx.$executeRaw).toHaveBeenCalledTimes(2);
+    expect(response.configuration.projectStatus).toBe('READY');
+    expect(response.configuration.latestJobStatus).toBe('COMPLETED');
+    expect(response.confirmedConfiguration).toEqual(
+      expect.objectContaining({
+        projectId: 'project_1',
+        framework: 'MOBILE_WEB',
+        componentPaths: ['src/components', 'src/features'],
+        notes: 'Looks right.',
+      })
+    );
   });
 });
