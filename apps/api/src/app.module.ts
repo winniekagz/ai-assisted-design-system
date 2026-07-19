@@ -7,6 +7,7 @@ import { AuthorizationModule } from './authorization/authorization.module';
 import { AuditsModule } from './audits/audits.module';
 import { ComponentsModule } from './components/components.module';
 import { GuardrailsModule } from './guardrails/guardrails.module';
+import { IntegrationsModule } from './integrations/integrations.module';
 import { OrganizationInvitesModule } from './organization-invites/organization-invites.module';
 import { OrganizationMembersModule } from './organization-members/organization-members.module';
 import { OrganizationsModule } from './organizations/organizations.module';
@@ -34,6 +35,7 @@ import { apiEnvFilePath, validateEnv } from './config/env';
     ProjectsModule,
     ComponentsModule,
     GuardrailsModule,
+    IntegrationsModule,
     PromptsModule,
     AiModule,
     AuditsModule,
