@@ -13,6 +13,12 @@
 # testing
 /coverage
 
+# cache
+.cache
+
+# logs
+*.log
+
 # turbo
 .turbo/
 
