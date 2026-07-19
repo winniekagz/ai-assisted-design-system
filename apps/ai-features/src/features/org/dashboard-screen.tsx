@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   Users,
 } from 'lucide-react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState, type ComponentProps, type ReactNode } from 'react';
 
@@ -60,23 +59,6 @@ type StatusMeta = {
 };
 
 const unsupportedActionMessage = 'This action needs the audit workflow API before it can be enabled.';
-
-const stateLabels: Record<DashboardState, string> = {
-  blocked: 'Blocked',
-  'at-risk': 'At risk',
-  healthy: 'Healthy',
-  'no-audit': 'No audit yet',
-  disconnected: 'Disconnected',
-  stale: 'Stale data',
-  'refresh-error': 'Refresh error',
-  'audit-running': 'Audit running',
-};
-
-const roleLabels: Record<DashboardRoleView, string> = {
-  manager: 'Manager',
-  maintainer: 'Maintainer',
-  developer: 'Developer',
-};
 
 const statusMeta: Record<DashboardState, StatusMeta> = {
   blocked: {
@@ -158,7 +140,6 @@ export function OrganizationDashboardScreen({ orgSlug }: { orgSlug: string }) {
     <OrgFrame orgSlug={orgSlug}>
       {({ organization, membership, me }) => (
         <OrganizationDashboardContent
-          orgSlug={orgSlug}
           organizationSlug={organization.slug}
           membershipRole={membership.role}
           userName={me.user.name ?? me.user.email}
@@ -169,12 +150,10 @@ export function OrganizationDashboardScreen({ orgSlug }: { orgSlug: string }) {
 }
 
 function OrganizationDashboardContent({
-  orgSlug,
   organizationSlug,
   membershipRole,
   userName,
 }: {
-  orgSlug: string;
   organizationSlug: string;
   membershipRole: Role;
   userName: string;
@@ -227,36 +206,6 @@ function OrganizationDashboardContent({
         </p>
       )}
     </div>
-  );
-}
-
-
-
-function PreviewPill({
-  href,
-  active,
-  tone = 'primary',
-  children,
-}: {
-  href: string;
-  active: boolean;
-  tone?: 'primary' | 'secondary';
-  children: ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        'rounded-full border px-2.5 py-1 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        active
-          ? tone === 'primary'
-            ? 'border-primary bg-primary text-primary-foreground'
-            : 'border-secondary bg-secondary text-secondary-foreground'
-          : 'border-border bg-card text-foreground hover:bg-background-secondary'
-      )}
-    >
-      {children}
-    </Link>
   );
 }
 
