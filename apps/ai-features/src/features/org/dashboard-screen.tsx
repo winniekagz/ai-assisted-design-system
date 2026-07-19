@@ -193,12 +193,6 @@ function OrganizationDashboardContent({
 
   return (
     <div className='grid gap-5'>
-      <DashboardPreviewControls
-        activeState={dashboardState}
-        activeRole={roleView}
-        orgSlug={orgSlug}
-      />
-
       {dashboardState === 'refresh-error' && <DashboardErrorBanner />}
 
       <ProjectHeader
@@ -236,47 +230,7 @@ function OrganizationDashboardContent({
   );
 }
 
-function DashboardPreviewControls({
-  activeState,
-  activeRole,
-  orgSlug,
-}: {
-  activeState: DashboardState;
-  activeRole: DashboardRoleView;
-  orgSlug: string;
-}) {
-  return (
-    <section
-      aria-label='Dashboard preview controls'
-      className='rounded-md border border-dashed border-border bg-background-secondary p-3'
-    >
-      <div className='flex flex-wrap items-center gap-2 text-xs text-muted-foreground'>
-        <span className='font-semibold text-foreground'>Preview controls</span>
-        <span className='ml-1'>Role</span>
-        {dashboardRoleViews.map(role => (
-          <PreviewPill
-            key={role}
-            href={`/org/${orgSlug}/dashboard?dashboard_role=${role}&dashboard_state=${activeState}`}
-            active={activeRole === role}
-          >
-            {roleLabels[role]}
-          </PreviewPill>
-        ))}
-        <span className='ml-2'>State</span>
-        {dashboardStates.map(state => (
-          <PreviewPill
-            key={state}
-            href={`/org/${orgSlug}/dashboard?dashboard_role=${activeRole}&dashboard_state=${state}`}
-            active={activeState === state}
-            tone='secondary'
-          >
-            {stateLabels[state]}
-          </PreviewPill>
-        ))}
-      </div>
-    </section>
-  );
-}
+
 
 function PreviewPill({
   href,
