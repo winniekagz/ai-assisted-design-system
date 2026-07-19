@@ -31,6 +31,34 @@ function createPrismaMock() {
   };
 }
 
+type ProjectRecordOverrides = {
+  id?: string;
+  name?: string;
+  slug?: string;
+  description?: string | null;
+  framework?: string;
+  packageManager?: string;
+  stylingSystem?: string;
+  repositoryUrl?: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+function createProjectRecord(overrides: ProjectRecordOverrides = {}) {
+  return {
+    id: overrides.id ?? 'project_1',
+    name: overrides.name ?? 'Checkout Platform',
+    slug: overrides.slug ?? 'checkout-platform',
+    description: overrides.description ?? null,
+    framework: overrides.framework ?? 'Not configured',
+    packageManager: overrides.packageManager ?? 'Not configured',
+    stylingSystem: overrides.stylingSystem ?? 'Not configured',
+    repositoryUrl: overrides.repositoryUrl ?? null,
+    createdAt: overrides.createdAt ?? createdAt,
+    updatedAt: overrides.updatedAt ?? updatedAt,
+  };
+}
+
 describe('ProjectsService', () => {
   it('creates a project in the resolved organization with normalized input', async () => {
     const prisma = createPrismaMock();
@@ -112,6 +140,88 @@ describe('ProjectsService', () => {
       })
     ).rejects.toThrow(
       'A project with this name already exists in this organization.'
+    );
+  });
+
+  it('returns organization-scoped projects sorted by updated date', async () => {
+    const prisma = createPrismaMock();
+    const firstUpdated = new Date('2026-07-17T11:00:00.000Z');
+    const secondUpdated = new Date('2026-07-17T10:00:00.000Z');
+    prisma.project.findMany.mockResolvedValue([
+      createProjectRecord({
+        id: 'project_new',
+        name: 'Newer Project',
+        slug: 'newer-project',
+        description: 'Most recently updated',
+        updatedAt: firstUpdated,
+      }),
+      createProjectRecord({
+        id: 'project_old',
+        name: 'Older Project',
+        slug: 'older-project',
+        updatedAt: secondUpdated,
+      }),
+    ]);
+    const service = new ProjectsService(prisma as never);
+
+    const projects = await service.findByOrganization('resolved_org');
+
+    expect(prisma.project.findMany).toHaveBeenCalledWith({
+      where: { organizationId: 'resolved_org' },
+      orderBy: { updatedAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        framework: true,
+        packageManager: true,
+        stylingSystem: true,
+        repositoryUrl: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    expect(projects).toEqual([
+      expect.objectContaining({
+        id: 'project_new',
+        name: 'Newer Project',
+        slug: 'newer-project',
+        description: 'Most recently updated',
+        updatedAt: firstUpdated.toISOString(),
+      }),
+      expect.objectContaining({
+        id: 'project_old',
+        name: 'Older Project',
+        slug: 'older-project',
+        description: null,
+        updatedAt: secondUpdated.toISOString(),
+      }),
+    ]);
+  });
+
+  it('returns an empty array when the organization has no projects', async () => {
+    const prisma = createPrismaMock();
+    const service = new ProjectsService(prisma as never);
+
+    await expect(service.findByOrganization('resolved_org')).resolves.toEqual([]);
+  });
+
+  it('does not query projects outside the resolved organization', async () => {
+    const prisma = createPrismaMock();
+    const service = new ProjectsService(prisma as never);
+
+    await service.findByOrganization('organization_a');
+
+    expect(prisma.project.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { organizationId: 'organization_a' },
+      })
+    );
+    expect(prisma.project.findMany).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ organizationId: 'organization_b' }),
+      })
     );
   });
 });

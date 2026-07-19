@@ -67,6 +67,7 @@
     "react-dom": ">=18"
   },
   "devDependencies": {
+    "@storybook/nextjs-vite": "^9.1.1",
     "@types/lodash": "^4.17.20",
     "@types/node": "^20",
     "@types/react": "^19",

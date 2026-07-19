@@ -33,6 +33,7 @@ import { useSearchParams } from 'next/navigation';
 import { useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 
 import { OrgFrame } from '@/features/org/org-frame';
+import { useProjectConfiguration } from '@/hooks/queries/use-project-configuration';
 import { useProjects } from '@/hooks/queries/use-projects';
 
 import { CreateProjectDrawer } from './create-project-drawer';
@@ -43,6 +44,12 @@ import {
   type ProjectsListState,
 } from './fixtures/projects';
 import { ImportProjectFlow } from './import-project-flow';
+import {
+  ConfigurationStatusBadge,
+  ProjectConfigurationDrawer,
+  type ProjectConfigurationProject,
+  getConfigurationStatus,
+} from './project-configuration-drawer';
 
 const statusLabels: Record<ProjectStatus, string> = {
   healthy: 'Healthy',
@@ -103,14 +110,15 @@ function ProjectsCatalogue({
   const [frameworkFilter, setFrameworkFilter] = useState<ProjectFilterValue>('all');
   const [page, setPage] = useState(1);
   const projectsQuery = useProjects(orgSlug);
-  const [importedProjects, setImportedProjects] = useState<ProjectRow[]>([]);
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
   const [importFlowOpen, setImportFlowOpen] = useState(false);
+  const [configurationProject, setConfigurationProject] =
+    useState<ProjectConfigurationProject | null>(null);
+  const [configurationDrawerOpen, setConfigurationDrawerOpen] = useState(false);
   const pageSize = 6;
   const projects = useMemo(() => {
-    const apiProjects = projectsQuery.data?.map(projectRowFromApiProject) ?? [];
-    return [...importedProjects, ...apiProjects];
-  }, [importedProjects, projectsQuery.data]);
+    return projectsQuery.data?.map(projectRowFromApiProject) ?? [];
+  }, [projectsQuery.data]);
   const teamOptions = useMemo(
     () => uniqueProjectOptions(projects.map(project => project.team)),
     [projects]
@@ -210,9 +218,14 @@ function ProjectsCatalogue({
     setPage(1);
   }
 
-  function addImportedProject(project: ProjectRow) {
-    setImportedProjects(current => [project, ...current]);
+  function refetchPersistedProjects() {
     clearFilters();
+    void projectsQuery.refetch();
+  }
+
+  function openConfiguration(project: ProjectConfigurationProject) {
+    setConfigurationProject(project);
+    setConfigurationDrawerOpen(true);
   }
 
   if (listState === 'loading' || projectsQuery.isLoading) {
@@ -258,8 +271,12 @@ function ProjectsCatalogue({
           existingProjects={projects}
           onCreateDrawerOpenChange={setCreateDrawerOpen}
           onImportFlowOpenChange={setImportFlowOpen}
+          configurationProject={configurationProject}
+          configurationDrawerOpen={configurationDrawerOpen}
+          onConfigurationDrawerOpenChange={setConfigurationDrawerOpen}
+          onConfigureProject={openConfiguration}
           onCreated={clearFilters}
-          onImported={addImportedProject}
+          onImported={refetchPersistedProjects}
         />
       </div>
     );
@@ -324,7 +341,11 @@ function ProjectsCatalogue({
 
           {visibleProjects.length > 0 ? (
             <>
-              <ProjectsTable orgSlug={orgSlug} projects={visibleProjects} />
+              <ProjectsTable
+                orgSlug={orgSlug}
+                projects={visibleProjects}
+                onConfigureProject={openConfiguration}
+              />
               <ProjectsPagination
                 page={currentPage}
                 pageCount={pageCount}
@@ -356,8 +377,12 @@ function ProjectsCatalogue({
         existingProjects={projects}
         onCreateDrawerOpenChange={setCreateDrawerOpen}
         onImportFlowOpenChange={setImportFlowOpen}
+        configurationProject={configurationProject}
+        configurationDrawerOpen={configurationDrawerOpen}
+        onConfigurationDrawerOpenChange={setConfigurationDrawerOpen}
+        onConfigureProject={openConfiguration}
         onCreated={clearFilters}
-        onImported={addImportedProject}
+        onImported={refetchPersistedProjects}
       />
     </div>
   );
@@ -369,8 +394,12 @@ function ProjectFlowMounts({
   importFlowOpen,
   teamOptions,
   existingProjects,
+  configurationProject,
+  configurationDrawerOpen,
   onCreateDrawerOpenChange,
   onImportFlowOpenChange,
+  onConfigurationDrawerOpenChange,
+  onConfigureProject,
   onCreated,
   onImported,
 }: {
@@ -379,13 +408,18 @@ function ProjectFlowMounts({
   importFlowOpen: boolean;
   teamOptions: string[];
   existingProjects: ProjectRow[];
+  configurationProject: ProjectConfigurationProject | null;
+  configurationDrawerOpen: boolean;
   // eslint-disable-next-line no-unused-vars
   onCreateDrawerOpenChange(open: boolean): void;
   // eslint-disable-next-line no-unused-vars
   onImportFlowOpenChange(open: boolean): void;
-  onCreated(): void;
   // eslint-disable-next-line no-unused-vars
-  onImported(project: ProjectRow): void;
+  onConfigurationDrawerOpenChange(open: boolean): void;
+  // eslint-disable-next-line no-unused-vars
+  onConfigureProject(project: ProjectConfigurationProject): void;
+  onCreated(): void;
+  onImported(): void;
 }) {
   return (
     <>
@@ -396,12 +430,19 @@ function ProjectFlowMounts({
         teamOptions={teamOptions.length > 0 ? teamOptions : ['Unassigned']}
         onOpenChange={onCreateDrawerOpenChange}
         onCreated={onCreated}
+        onConfigureProject={project => onConfigureProject(projectRowFromApiProject(project))}
       />
       <ImportProjectFlow
         open={importFlowOpen}
         organizationId={orgSlug}
         onOpenChange={onImportFlowOpenChange}
         onImported={onImported}
+      />
+      <ProjectConfigurationDrawer
+        open={configurationDrawerOpen}
+        orgSlug={orgSlug}
+        project={configurationProject}
+        onOpenChange={onConfigurationDrawerOpenChange}
       />
     </>
   );
@@ -570,7 +611,16 @@ function ProjectMenuFilter({
   );
 }
 
-function ProjectsTable({ orgSlug, projects }: { orgSlug: string; projects: ProjectRow[] }) {
+function ProjectsTable({
+  orgSlug,
+  projects,
+  onConfigureProject,
+}: {
+  orgSlug: string;
+  projects: ProjectRow[];
+  // eslint-disable-next-line no-unused-vars
+  onConfigureProject(project: ProjectConfigurationProject): void;
+}) {
   return (
     <div className='overflow-x-auto'>
       <table className='min-w-[980px] w-full border-collapse text-left text-sm'>
@@ -587,7 +637,12 @@ function ProjectsTable({ orgSlug, projects }: { orgSlug: string; projects: Proje
         </thead>
         <tbody className='divide-y divide-border'>
           {projects.map(project => (
-            <ProjectRowItem key={project.id} orgSlug={orgSlug} project={project} />
+            <ProjectRowItem
+              key={project.id}
+              orgSlug={orgSlug}
+              project={project}
+              onConfigureProject={onConfigureProject}
+            />
           ))}
         </tbody>
       </table>
@@ -595,9 +650,23 @@ function ProjectsTable({ orgSlug, projects }: { orgSlug: string; projects: Proje
   );
 }
 
-function ProjectRowItem({ orgSlug, project }: { orgSlug: string; project: ProjectRow }) {
+function ProjectRowItem({
+  orgSlug,
+  project,
+  onConfigureProject,
+}: {
+  orgSlug: string;
+  project: ProjectRow;
+  // eslint-disable-next-line no-unused-vars
+  onConfigureProject(project: ProjectConfigurationProject): void;
+}) {
   const href = `/org/${orgSlug}/projects/${project.slug}`;
-  const needsConfiguration = project.status === 'not_configured';
+  const configurationQuery = useProjectConfiguration(orgSlug, project.id);
+  const configurationStatus =
+    configurationQuery.data?.projectStatus ?? getConfigurationStatus(project);
+  const configurationComplete = configurationStatus === 'READY';
+  const archived = configurationStatus === 'ARCHIVED';
+  const setupActionLabel = setupActionLabelForStatus(configurationStatus);
 
   return (
     <tr className='group hover:bg-background-secondary/70'>
@@ -610,7 +679,7 @@ function ProjectRowItem({ orgSlug, project }: { orgSlug: string; project: Projec
           <span className='mt-1 block font-mono text-xs text-muted-foreground'>{project.repository}</span>
         </Link>
       </td>
-      <td className='px-4 py-3'><ProjectStatusPill status={project.status} /></td>
+      <td className='px-4 py-3'><ConfigurationStatusBadge status={configurationStatus} /></td>
       <td className='px-4 py-3'>
         <span className={cn('font-semibold', project.blockingCount > 0 ? 'text-status-error' : 'text-muted-foreground')}>
           {project.blockingCount}
@@ -628,32 +697,49 @@ function ProjectRowItem({ orgSlug, project }: { orgSlug: string; project: Projec
       </td>
       <td className='px-4 py-3'>
         <div className='flex items-center justify-end gap-2'>
-          <Button
-            type='button'
-            variant='outlined'
-            size='sm'
-            disabled
-            title='Run audit needs the audit workflow API before it can be enabled.'
-            className='opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100'
-          >
-            Run audit
-          </Button>
+          {configurationComplete && (
+            <Button
+              type='button'
+              variant='outlined'
+              size='sm'
+              disabled
+              title='Run audit needs the audit workflow API before it can be enabled.'
+              className='opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100'
+            >
+              Run audit
+            </Button>
+          )}
+          {!configurationComplete && !archived && (
+            <Button
+              type='button'
+              size='sm'
+              className='bg-status-success text-white hover:bg-status-success/90 focus-visible:ring-status-success/30'
+              onClick={() => onConfigureProject(project)}
+            >
+              {configurationStatus === 'CONFIGURING' && configurationQuery.data?.progress === null
+                ? 'Resume setup'
+                : setupActionLabel}
+            </Button>
+          )}
           <Button
             asChild
             size='sm'
+            variant={configurationComplete || archived ? undefined : 'outlined'}
             endIcon={<ChevronRight className='size-4' />}
-            className={
-              needsConfiguration
-                ? 'bg-status-success text-white hover:bg-status-success/90 focus-visible:ring-status-success/30'
-                : undefined
-            }
           >
-            <Link href={href}>{needsConfiguration ? 'Configure' : 'Open'}</Link>
+            <Link href={href}>Open</Link>
           </Button>
         </div>
       </td>
     </tr>
   );
+}
+
+function setupActionLabelForStatus(status: ReturnType<typeof getConfigurationStatus>) {
+  if (status === 'CONFIGURING') return 'Resume setup';
+  if (status === 'REVIEW_REQUIRED') return 'Review setup';
+  if (status === 'CONFIGURATION_FAILED') return 'Retry setup';
+  return 'Configure';
 }
 
 export function ProjectStatusPill({ status }: { status: ProjectStatus }) {

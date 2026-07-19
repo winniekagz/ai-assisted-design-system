@@ -1,22 +1,26 @@
 // For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
-import storybook from "eslint-plugin-storybook";
-
 import { FlatCompat } from "@eslint/eslintrc";
+import { createRequire } from "module";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const require = createRequire(import.meta.url);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
+const nextConfig = compat.extends("next/core-web-vitals", "next/typescript");
+const storybookConfig = await loadStorybookConfig();
+const prettierConfig = loadPrettierConfig();
+
 const eslintConfig = [
   // Base configurations
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-  ...storybook.configs["flat/recommended"],
-  ...compat.extends("prettier"), // Disable conflicting rules
+  ...nextConfig,
+  ...storybookConfig,
+  ...prettierConfig, // Disable conflicting rules when available
 
   // Global settings
   {
@@ -135,3 +139,51 @@ const eslintConfig = [
 ];
 
 export default eslintConfig;
+
+async function loadStorybookConfig() {
+  try {
+    require.resolve("eslint-plugin-storybook");
+    const storybook = require("eslint-plugin-storybook");
+    return storybook.configs?.["flat/recommended"] ?? [];
+  } catch (error) {
+    if (isMissingStorybookPlugin(error)) {
+      return [];
+    }
+
+    throw error;
+  }
+}
+
+function isMissingStorybookPlugin(error) {
+  return (
+    error &&
+    typeof error === "object" &&
+    "code" in error &&
+    (error.code === "ERR_MODULE_NOT_FOUND" || error.code === "MODULE_NOT_FOUND") &&
+    "message" in error &&
+    typeof error.message === "string" &&
+    error.message.includes("eslint-plugin-storybook")
+  );
+}
+
+function loadPrettierConfig() {
+  try {
+    return compat.extends("prettier");
+  } catch (error) {
+    if (isMissingPrettierConfig(error)) {
+      return [];
+    }
+
+    throw error;
+  }
+}
+
+function isMissingPrettierConfig(error) {
+  return (
+    error &&
+    typeof error === "object" &&
+    "message" in error &&
+    typeof error.message === "string" &&
+    error.message.includes('Failed to load config "prettier"')
+  );
+}

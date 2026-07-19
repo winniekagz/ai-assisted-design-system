@@ -148,14 +148,136 @@ export const PROMPT_TYPES = [
 
 export const AUDIT_STATUSES = ['PASSED', 'NEEDS_CHANGES', 'FAILED'] as const;
 
+export const PROJECT_CONFIGURATION_STATUSES = [
+  'NOT_CONFIGURED',
+  'CONFIGURING',
+  'REVIEW_REQUIRED',
+  'READY',
+  'CONFIGURATION_FAILED',
+  'ARCHIVED',
+] as const;
+
+export const CONFIGURATION_SOURCE_TYPES = [
+  'LOCAL_UPLOAD',
+  'GIT_REPOSITORY',
+] as const;
+
+export const CONFIGURATION_JOB_STATUSES = [
+  'PENDING',
+  'UPLOADING',
+  'ANALYZING',
+  'REVIEW_REQUIRED',
+  'COMPLETED',
+  'FAILED',
+  'CANCELLED',
+] as const;
+
+export const SOURCE_PROVIDERS = ['LOCAL', 'GITHUB'] as const;
+
+export const PROJECT_SOURCE_TYPES = [
+  'LOCAL_UPLOAD',
+  'GITHUB_REPOSITORY',
+] as const;
+
+export const SOURCE_CONNECTION_STATUSES = [
+  'ACTIVE',
+  'DISCONNECTED',
+  'REVOKED',
+  'FAILED',
+] as const;
+
+export const GIT_PROVIDER_CONNECTION_STATUSES = [
+  'ACTIVE',
+  'DISCONNECTED',
+  'REVOKED',
+  'FAILED',
+] as const;
+
 export type Severity = (typeof SEVERITIES)[number];
 export type GuardrailCategory = (typeof GUARDRAIL_CATEGORIES)[number];
 export type PromptType = (typeof PROMPT_TYPES)[number];
 export type AuditStatus = (typeof AUDIT_STATUSES)[number];
+export type ProjectConfigurationStatus =
+  (typeof PROJECT_CONFIGURATION_STATUSES)[number];
+export type ConfigurationSourceType =
+  (typeof CONFIGURATION_SOURCE_TYPES)[number];
+export type ConfigurationJobStatus =
+  (typeof CONFIGURATION_JOB_STATUSES)[number];
+export type SourceProvider = (typeof SOURCE_PROVIDERS)[number];
+export type ProjectSourceType = (typeof PROJECT_SOURCE_TYPES)[number];
+export type SourceConnectionStatus =
+  (typeof SOURCE_CONNECTION_STATUSES)[number];
+export type GitProviderConnectionStatus =
+  (typeof GIT_PROVIDER_CONNECTION_STATUSES)[number];
 
 export type Confidence = 'low' | 'medium' | 'high';
+export type DetectionConfidence = 'LOW' | 'MEDIUM' | 'HIGH';
 export type AuditResponseStatus = 'passed' | 'needs_changes' | 'failed';
 export type AuditInputType = 'jsx' | 'plan' | 'diff';
+export type ProjectFramework =
+  | 'NEXTJS'
+  | 'REACT_VITE'
+  | 'REACT'
+  | 'VUE'
+  | 'NUXT'
+  | 'ANGULAR'
+  | 'SVELTE'
+  | 'SVELTEKIT'
+  | 'REMIX'
+  | 'ASTRO'
+  | 'MOBILE_WEB'
+  | 'UNKNOWN';
+export type ProjectLanguage = 'TYPESCRIPT' | 'JAVASCRIPT' | 'UNKNOWN';
+export type PackageManager = 'PNPM' | 'NPM' | 'YARN' | 'BUN' | 'UNKNOWN';
+export type StylingSystem =
+  | 'TAILWIND'
+  | 'CSS_MODULES'
+  | 'SASS'
+  | 'STYLED_COMPONENTS'
+  | 'EMOTION'
+  | 'PLAIN_CSS'
+  | 'UNKNOWN';
+export type MonorepoTool = 'PNPM_WORKSPACE' | 'TURBO' | 'NX' | 'LERNA' | 'PACKAGE_WORKSPACES' | 'UNKNOWN';
+
+export interface DetectionEvidence {
+  type: string;
+  path: string;
+  detail: string;
+}
+
+export interface DetectionField<T> {
+  value: T | null;
+  confidence: DetectionConfidence;
+  evidence: DetectionEvidence[];
+  warnings: string[];
+}
+
+export interface DetectedProjectSetup {
+  framework: DetectionField<ProjectFramework>;
+  language: DetectionField<ProjectLanguage>;
+  packageManager: DetectionField<PackageManager>;
+  stylingSystem: DetectionField<StylingSystem[]>;
+  monorepo: DetectionField<{
+    detected: boolean;
+    tool: MonorepoTool | null;
+    candidateWorkspaceRoots: string[];
+  }>;
+  storybook: DetectionField<boolean>;
+  projectRoot: DetectionField<string>;
+  componentPaths: DetectionField<string[]>;
+  tokenPaths: DetectionField<string[]>;
+  candidateProjectRoots: Array<{
+    path: string;
+    score: number;
+    evidence: DetectionEvidence[];
+  }>;
+  globalWarnings: string[];
+  analyzedFileCount: number;
+  ignoredFileCount: number;
+  analyzedAt: string;
+  detectorVersion: string;
+  sourceSnapshotId: string | null;
+}
 
 export interface OrganizationSummary {
   id: string;
@@ -205,6 +327,138 @@ export interface ProjectListItem {
   repositoryUrl?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ConfigurationJobSummary {
+  id: string;
+  projectId: string;
+  organizationId: string;
+  sourceType: ConfigurationSourceType;
+  status: ConfigurationJobStatus;
+  progress: number | null;
+  errorCode: string | null;
+  errorMessage: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DetectedProjectConfiguration {
+  framework: string | null;
+  language: string | null;
+  packageManager: string | null;
+  stylingSystem: string | null;
+  projectRoot: string | null;
+  componentPaths: string[];
+  tokenPaths: string[];
+  monorepoDetected: boolean;
+  storybookDetected: boolean;
+  confidence: string | null;
+  evidence: unknown | null;
+  setup: DetectedProjectSetup | null;
+  warnings: string[];
+  candidateProjectRoots: DetectedProjectSetup['candidateProjectRoots'];
+  detectorVersion: string | null;
+  analyzedAt: string | null;
+  sourceSnapshotId: string | null;
+}
+
+const confirmedPathListSchema = z
+  .array(z.string().trim().min(1).max(300))
+  .max(50)
+  .optional();
+
+export const confirmProjectConfigurationSchema = z
+  .object({
+    framework: z.string().trim().max(80).optional(),
+    language: z.string().trim().max(80).optional(),
+    packageManager: z.string().trim().max(80).optional(),
+    stylingSystem: z.string().trim().max(120).optional(),
+    projectRoot: z.string().trim().max(300).optional(),
+    componentPaths: confirmedPathListSchema,
+    tokenPaths: confirmedPathListSchema,
+    notes: z.string().trim().max(1000).optional(),
+  })
+  .strict();
+
+export type ConfirmProjectConfigurationInput = z.input<
+  typeof confirmProjectConfigurationSchema
+>;
+export type NormalizedConfirmProjectConfigurationInput = z.output<
+  typeof confirmProjectConfigurationSchema
+>;
+
+export interface ConfirmedProjectConfiguration {
+  id: string;
+  projectId: string;
+  organizationId: string;
+  configurationJobId: string | null;
+  sourceType: ConfigurationSourceType | null;
+  framework: string | null;
+  language: string | null;
+  packageManager: string | null;
+  stylingSystem: string | null;
+  projectRoot: string | null;
+  componentPaths: string[];
+  tokenPaths: string[];
+  notes: string | null;
+  confirmedByUserId: string | null;
+  confirmedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectConfigurationSummary {
+  projectId: string;
+  projectStatus: ProjectConfigurationStatus;
+  latestJobId: string | null;
+  latestJobStatus: ConfigurationJobStatus | null;
+  sourceType: ConfigurationSourceType | null;
+  progress: number | null;
+  requiresReview: boolean;
+  canRetry: boolean;
+  lastError: {
+    code: string | null;
+    message: string | null;
+  } | null;
+  detectedConfiguration: DetectedProjectConfiguration | null;
+  updatedAt: string;
+}
+
+export interface ProjectConfigurationConfirmResponse {
+  configuration: ProjectConfigurationSummary;
+  confirmedConfiguration: ConfirmedProjectConfiguration;
+}
+
+export interface LocalProjectUploadResponse {
+  projectId: string;
+  sourceId: string;
+  configurationJobId: string;
+  configuration: ProjectConfigurationSummary;
+}
+
+export interface GitProviderConnectionSummary {
+  id: string;
+  provider: Extract<SourceProvider, 'GITHUB'>;
+  accountLogin: string;
+  accountType: string | null;
+  status: GitProviderConnectionStatus;
+  installedAt: string | null;
+  lastVerifiedAt: string | null;
+  canDisconnect: boolean;
+}
+
+export interface GitHubConnectionStartResponse {
+  provider: Extract<SourceProvider, 'GITHUB'>;
+  installationUrl: string;
+  expiresAt: string;
+}
+
+export interface GitHubConnectionCallbackResult {
+  status: 'connected';
+  connection: GitProviderConnectionSummary;
+  returnPath: string;
 }
 
 export interface ComponentRuleSummary {

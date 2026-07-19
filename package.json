@@ -15,6 +15,7 @@
     "test": "turbo test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "check:deps": "node scripts/check-workspace-dependencies.mjs",
     "dev:api": "npm run dev --workspace=@winniekagendo/componentiq-api",
     "db:generate": "npm run db:generate --workspace=@winniekagendo/componentiq-api",
     "db:migrate": "npm run db:migrate --workspace=@winniekagendo/componentiq-api",
@@ -26,8 +27,8 @@
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
-    "storybook": "npm run storybook --workspace=apps/docs",
-    "build-storybook": "npm run build-storybook --workspace=apps/docs"
+    "storybook": "npm run storybook --workspace=@winniekagendo/docs",
+    "build-storybook": "npm run build-storybook --workspace=@winniekagendo/docs"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
@@ -42,6 +43,7 @@
     "eslint-plugin-prettier": "^5.5.3",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-storybook": "^9.1.20",
     "prettier": "^3.6.2",
     "turbo": "^2.5.4",
     "typescript": "^5"

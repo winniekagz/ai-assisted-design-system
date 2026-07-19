@@ -38,6 +38,12 @@ const envSchema = z
     CLERK_AUTHORIZED_PARTIES: optionalCsv,
     RESEND_API_KEY: optionalString,
     EMAIL_FROM: optionalString,
+    GITHUB_APP_ID: optionalString,
+    GITHUB_APP_CLIENT_ID: optionalString,
+    GITHUB_APP_PRIVATE_KEY: optionalString,
+    GITHUB_APP_INSTALLATION_URL: optionalString,
+    GITHUB_APP_CALLBACK_URL: optionalString,
+    GITHUB_APP_WEBHOOK_SECRET: optionalString,
   })
   .superRefine((env, context) => {
     if (env.AI_PROVIDER === 'openai' && !env.OPENAI_API_KEY) {
@@ -45,6 +51,25 @@ const envSchema = z
         code: z.ZodIssueCode.custom,
         path: ['OPENAI_API_KEY'],
         message: 'OPENAI_API_KEY is required when AI_PROVIDER=openai',
+      });
+    }
+
+    const githubValues = [
+      env.GITHUB_APP_ID,
+      env.GITHUB_APP_CLIENT_ID,
+      env.GITHUB_APP_PRIVATE_KEY,
+      env.GITHUB_APP_INSTALLATION_URL,
+      env.GITHUB_APP_CALLBACK_URL,
+    ];
+    const hasPartialGithubConfig = githubValues.some(Boolean);
+    const hasCompleteGithubConfig = githubValues.every(Boolean);
+
+    if (hasPartialGithubConfig && !hasCompleteGithubConfig) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['GITHUB_APP_ID'],
+        message:
+          'GitHub App connection requires GITHUB_APP_ID, GITHUB_APP_CLIENT_ID, GITHUB_APP_PRIVATE_KEY, GITHUB_APP_INSTALLATION_URL, and GITHUB_APP_CALLBACK_URL',
       });
     }
   });
