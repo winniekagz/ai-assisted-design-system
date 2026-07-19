@@ -10,13 +10,15 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
+const nextConfig = compat.extends("next/core-web-vitals", "next/typescript");
 const storybookConfig = await loadStorybookConfig();
+const prettierConfig = loadPrettierConfig();
 
 const eslintConfig = [
   // Base configurations
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...nextConfig,
   ...storybookConfig,
-  ...compat.extends("prettier"), // Disable conflicting rules
+  ...prettierConfig, // Disable conflicting rules when available
 
   // Global settings
   {
@@ -158,5 +160,27 @@ function isMissingStorybookPlugin(error) {
     "message" in error &&
     typeof error.message === "string" &&
     error.message.includes("eslint-plugin-storybook")
+  );
+}
+
+function loadPrettierConfig() {
+  try {
+    return compat.extends("prettier");
+  } catch (error) {
+    if (isMissingPrettierConfig(error)) {
+      return [];
+    }
+
+    throw error;
+  }
+}
+
+function isMissingPrettierConfig(error) {
+  return (
+    error &&
+    typeof error === "object" &&
+    "message" in error &&
+    typeof error.message === "string" &&
+    error.message.includes('Failed to load config "prettier"')
   );
 }
