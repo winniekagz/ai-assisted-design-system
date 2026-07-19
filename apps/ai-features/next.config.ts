@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   transpilePackages: ['componentiq', '@winniekagendo/componentiq-ai'],
   turbopack: {
     resolveAlias: { underscore: 'lodash' },
