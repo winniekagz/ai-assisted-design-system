@@ -22,6 +22,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 
 import { OrgFrame } from '@/features/org/org-frame';
+import { useProjectConfiguration } from '@/hooks/queries/use-project-configuration';
 import { useWorkspaceStore } from '@/stores/workspace-store';
 
 import {
@@ -83,10 +84,12 @@ function ProjectDetailsContent({
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [configurationOpen, setConfigurationOpen] = useState(false);
-  const configurationStatus = getConfigurationStatus(project);
-  const configurationComplete = configurationStatus === 'CONFIGURED';
+  const configurationQuery = useProjectConfiguration(orgSlug, project.id);
+  const configurationStatus =
+    configurationQuery.data?.projectStatus ?? getConfigurationStatus(project);
+  const configurationComplete = configurationStatus === 'READY';
   const showSetupCard =
-    configurationStatus !== 'CONFIGURED' && configurationStatus !== 'ARCHIVED';
+    configurationStatus !== 'READY' && configurationStatus !== 'ARCHIVED';
 
   useEffect(() => {
     setActiveProjectSection('overview');
@@ -268,7 +271,7 @@ function setupCardContent(status: ProjectConfigurationStatus, projectName: strin
       action: 'Retry setup',
       className: 'border-l-status-error bg-status-error-bg',
     },
-    CONFIGURED: {
+    READY: {
       icon: CheckCircle2,
       title: 'Project configured',
       description: 'Source configuration is complete.',

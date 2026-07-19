@@ -51,36 +51,61 @@ enum AuditStatus {
   FAILED
 }
 
-model User {
-  id          String               @id @default(uuid())
-  clerkUserId String?              @unique
-  name        String?
-  email       String               @unique
-  imageUrl    String?
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-  memberships OrganizationMember[]
-  sentInvites OrganizationInvite[]  @relation("InvitedBy")
-  recommendations RecommendationSession[]
-  audits      AuditSession[]
-  usageLogs   AiUsageLog[]
+enum ProjectConfigurationStatus {
+  NOT_CONFIGURED
+  CONFIGURING
+  REVIEW_REQUIRED
+  READY
+  CONFIGURATION_FAILED
+  ARCHIVED
 }
 
-model Organization {
+enum ConfigurationSourceType {
+  LOCAL_UPLOAD
+  GIT_REPOSITORY
+}
+
+enum ConfigurationJobStatus {
+  PENDING
+  UPLOADING
+  ANALYZING
+  REVIEW_REQUIRED
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model User {
   id              String                  @id @default(uuid())
-  name            String
-  slug            String                  @unique
+  clerkUserId     String?                 @unique
+  name            String?
+  email           String                  @unique
+  imageUrl        String?
   createdAt       DateTime                @default(now())
   updatedAt       DateTime                @updatedAt
-  members         OrganizationMember[]
-  invites         OrganizationInvite[]
-  projects        Project[]
-  components      Component[]
-  guardrails      Guardrail[]
-  promptTemplates PromptTemplate[]
+  memberships     OrganizationMember[]
+  sentInvites     OrganizationInvite[]    @relation("InvitedBy")
   recommendations RecommendationSession[]
   audits          AuditSession[]
   usageLogs       AiUsageLog[]
+}
+
+model Organization {
+  id                String                  @id @default(uuid())
+  name              String
+  slug              String                  @unique
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  members           OrganizationMember[]
+  invites           OrganizationInvite[]
+  projects          Project[]
+  configurationJobs ConfigurationJob[]
+  components        Component[]
+  guardrails        Guardrail[]
+  promptTemplates   PromptTemplate[]
+  recommendations   RecommendationSession[]
+  audits            AuditSession[]
+  usageLogs         AiUsageLog[]
 }
 
 model OrganizationMember {
@@ -118,23 +143,69 @@ model OrganizationInvite {
 }
 
 model Project {
-  id             String       @id @default(uuid())
-  organizationId String
-  name           String
-  slug           String
-  description    String?
-  framework      String
-  packageManager String
-  stylingSystem  String
-  repositoryUrl  String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  recommendations RecommendationSession[]
-  audits         AuditSession[]
+  id                  String                     @id @default(uuid())
+  organizationId      String
+  name                String
+  slug                String
+  description         String?
+  framework           String
+  packageManager      String
+  stylingSystem       String
+  repositoryUrl       String?
+  configurationStatus ProjectConfigurationStatus @default(NOT_CONFIGURED)
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+  organization        Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  configurationJobs   ConfigurationJob[]
+  recommendations     RecommendationSession[]
+  audits              AuditSession[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
+  @@index([organizationId, configurationStatus])
+}
+
+model ConfigurationJob {
+  id                    String                  @id @default(uuid())
+  projectId             String
+  organizationId        String
+  sourceType            ConfigurationSourceType
+  status                ConfigurationJobStatus  @default(PENDING)
+  progress              Int?
+  errorCode             String?
+  errorMessage          String?
+  startedAt             DateTime?
+  completedAt           DateTime?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  project               Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  organization          Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  detectedConfiguration DetectedConfiguration?
+
+  @@index([projectId])
+  @@index([projectId, createdAt])
+  @@index([organizationId])
+  @@index([status])
+}
+
+model DetectedConfiguration {
+  id                 String           @id @default(uuid())
+  configurationJobId String           @unique
+  framework          String?
+  language           String?
+  packageManager     String?
+  stylingSystem      String?
+  projectRoot        String?
+  componentPaths     Json?
+  tokenPaths         Json?
+  monorepoDetected   Boolean          @default(false)
+  storybookDetected  Boolean          @default(false)
+  confidence         String?
+  evidence           Json?
+  rawDetectionResult Json?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  configurationJob   ConfigurationJob @relation(fields: [configurationJobId], references: [id], onDelete: Cascade)
 }
 
 model Component {

@@ -33,6 +33,7 @@ import { useSearchParams } from 'next/navigation';
 import { useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 
 import { OrgFrame } from '@/features/org/org-frame';
+import { useProjectConfiguration } from '@/hooks/queries/use-project-configuration';
 import { useProjects } from '@/hooks/queries/use-projects';
 
 import { CreateProjectDrawer } from './create-project-drawer';
@@ -659,8 +660,10 @@ function ProjectRowItem({
   onConfigureProject(project: ProjectConfigurationProject): void;
 }) {
   const href = `/org/${orgSlug}/projects/${project.slug}`;
-  const configurationStatus = getConfigurationStatus(project);
-  const configurationComplete = configurationStatus === 'CONFIGURED';
+  const configurationQuery = useProjectConfiguration(orgSlug, project.id);
+  const configurationStatus =
+    configurationQuery.data?.projectStatus ?? getConfigurationStatus(project);
+  const configurationComplete = configurationStatus === 'READY';
   const archived = configurationStatus === 'ARCHIVED';
   const setupActionLabel = setupActionLabelForStatus(configurationStatus);
 
@@ -712,7 +715,9 @@ function ProjectRowItem({
               className='bg-status-success text-white hover:bg-status-success/90 focus-visible:ring-status-success/30'
               onClick={() => onConfigureProject(project)}
             >
-              {setupActionLabel}
+              {configurationStatus === 'CONFIGURING' && configurationQuery.data?.progress === null
+                ? 'Resume setup'
+                : setupActionLabel}
             </Button>
           )}
           <Button

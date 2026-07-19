@@ -148,10 +148,40 @@ export const PROMPT_TYPES = [
 
 export const AUDIT_STATUSES = ['PASSED', 'NEEDS_CHANGES', 'FAILED'] as const;
 
+export const PROJECT_CONFIGURATION_STATUSES = [
+  'NOT_CONFIGURED',
+  'CONFIGURING',
+  'REVIEW_REQUIRED',
+  'READY',
+  'CONFIGURATION_FAILED',
+  'ARCHIVED',
+] as const;
+
+export const CONFIGURATION_SOURCE_TYPES = [
+  'LOCAL_UPLOAD',
+  'GIT_REPOSITORY',
+] as const;
+
+export const CONFIGURATION_JOB_STATUSES = [
+  'PENDING',
+  'UPLOADING',
+  'ANALYZING',
+  'REVIEW_REQUIRED',
+  'COMPLETED',
+  'FAILED',
+  'CANCELLED',
+] as const;
+
 export type Severity = (typeof SEVERITIES)[number];
 export type GuardrailCategory = (typeof GUARDRAIL_CATEGORIES)[number];
 export type PromptType = (typeof PROMPT_TYPES)[number];
 export type AuditStatus = (typeof AUDIT_STATUSES)[number];
+export type ProjectConfigurationStatus =
+  (typeof PROJECT_CONFIGURATION_STATUSES)[number];
+export type ConfigurationSourceType =
+  (typeof CONFIGURATION_SOURCE_TYPES)[number];
+export type ConfigurationJobStatus =
+  (typeof CONFIGURATION_JOB_STATUSES)[number];
 
 export type Confidence = 'low' | 'medium' | 'high';
 export type AuditResponseStatus = 'passed' | 'needs_changes' | 'failed';
@@ -204,6 +234,52 @@ export interface ProjectListItem {
   stylingSystem: string;
   repositoryUrl?: string | null;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConfigurationJobSummary {
+  id: string;
+  projectId: string;
+  organizationId: string;
+  sourceType: ConfigurationSourceType;
+  status: ConfigurationJobStatus;
+  progress: number | null;
+  errorCode: string | null;
+  errorMessage: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DetectedProjectConfiguration {
+  framework: string | null;
+  language: string | null;
+  packageManager: string | null;
+  stylingSystem: string | null;
+  projectRoot: string | null;
+  componentPaths: string[];
+  tokenPaths: string[];
+  monorepoDetected: boolean;
+  storybookDetected: boolean;
+  confidence: string | null;
+  evidence: unknown | null;
+}
+
+export interface ProjectConfigurationSummary {
+  projectId: string;
+  projectStatus: ProjectConfigurationStatus;
+  latestJobId: string | null;
+  latestJobStatus: ConfigurationJobStatus | null;
+  sourceType: ConfigurationSourceType | null;
+  progress: number | null;
+  requiresReview: boolean;
+  canRetry: boolean;
+  lastError: {
+    code: string | null;
+    message: string | null;
+  } | null;
+  detectedConfiguration: DetectedProjectConfiguration | null;
   updatedAt: string;
 }
 

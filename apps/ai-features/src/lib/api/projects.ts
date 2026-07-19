@@ -1,4 +1,5 @@
 import type {
+  ProjectConfigurationSummary,
   CreateProjectInput,
   ProjectListItem,
 } from '@winniekagendo/componentiq-shared-types';
@@ -6,6 +7,7 @@ import type {
 import { apiClient } from './client';
 
 export type { CreateProjectInput, ProjectListItem };
+export type { ProjectConfigurationSummary };
 export type ApiProject = ProjectListItem;
 
 export function getProjects(
@@ -28,5 +30,17 @@ export function createProject(
     `/organizations/${encodeURIComponent(orgIdentifier)}/projects`,
     input,
     { clerkSessionToken }
+  );
+}
+
+export function getProjectConfiguration(
+  orgIdentifier: string,
+  projectId: string,
+  clerkSessionToken?: string | null,
+  signal?: AbortSignal
+) {
+  return apiClient.get<ProjectConfigurationSummary>(
+    `/organizations/${encodeURIComponent(orgIdentifier)}/projects/${encodeURIComponent(projectId)}/configuration`,
+    { clerkSessionToken, signal }
   );
 }

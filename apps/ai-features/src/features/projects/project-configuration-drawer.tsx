@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import type { ProjectConfigurationStatus } from '@winniekagendo/componentiq-shared-types';
 import {
   Badge,
   Button,
@@ -48,13 +49,7 @@ import { useForm } from 'react-hook-form';
 
 import { useConnectGithubRepo } from './use-connect-github-repo';
 
-export type ProjectConfigurationStatus =
-  | 'NOT_CONFIGURED'
-  | 'CONFIGURING'
-  | 'REVIEW_REQUIRED'
-  | 'CONFIGURED'
-  | 'CONFIGURATION_FAILED'
-  | 'ARCHIVED';
+export type { ProjectConfigurationStatus };
 
 export type ProjectConfigurationProject = {
   id: string;
@@ -165,7 +160,7 @@ const statusLabels: Record<ProjectConfigurationStatus, string> = {
   NOT_CONFIGURED: 'Setup required',
   CONFIGURING: 'Configuring',
   REVIEW_REQUIRED: 'Review setup',
-  CONFIGURED: 'Ready',
+  READY: 'Ready',
   CONFIGURATION_FAILED: 'Setup failed',
   ARCHIVED: 'Archived',
 };
@@ -417,7 +412,7 @@ export function ConfigurationStatusBadge({
     NOT_CONFIGURED: { icon: Clock, className: 'border-border bg-background-secondary text-muted-foreground' },
     CONFIGURING: { icon: Loader2, className: 'border-status-info bg-status-info-bg text-status-info' },
     REVIEW_REQUIRED: { icon: AlertCircle, className: 'border-status-warning bg-status-warning-bg text-status-warning' },
-    CONFIGURED: { icon: CheckCircle2, className: 'border-status-success bg-status-success-bg text-status-success' },
+    READY: { icon: CheckCircle2, className: 'border-status-success bg-status-success-bg text-status-success' },
     CONFIGURATION_FAILED: { icon: AlertCircle, className: 'border-status-error bg-status-error-bg text-status-error' },
     ARCHIVED: { icon: Archive, className: 'border-border bg-background-secondary text-muted-foreground' },
   } satisfies Record<ProjectConfigurationStatus, { icon: typeof Clock; className: string }>;
@@ -434,7 +429,7 @@ export function ConfigurationStatusBadge({
 export function getConfigurationStatus(project?: Pick<ProjectConfigurationProject, 'status'> | null): ProjectConfigurationStatus {
   if (!project) return 'NOT_CONFIGURED';
   if (project.status === 'archived') return 'ARCHIVED';
-  if (project.status === 'healthy') return 'CONFIGURED';
+  if (project.status === 'healthy') return 'READY';
   if (project.status === 'needs_attention') return 'REVIEW_REQUIRED';
   if (project.status === 'blocked') return 'CONFIGURATION_FAILED';
   return 'NOT_CONFIGURED';

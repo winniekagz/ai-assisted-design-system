@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  CONFIGURATION_JOB_STATUSES,
+  CONFIGURATION_SOURCE_TYPES,
   PERMISSIONS,
+  PROJECT_CONFIGURATION_STATUSES,
   createProjectSchema,
   hasPermission,
   rolePermissions,
@@ -29,6 +32,38 @@ describe('permissions', () => {
 
   it('maps semantic project create to the current projects.manage permission', () => {
     expect(PERMISSIONS.PROJECT_CREATE).toBe('projects.manage');
+  });
+});
+
+describe('project configuration contracts', () => {
+  it('exposes semantic project configuration statuses', () => {
+    expect(PROJECT_CONFIGURATION_STATUSES).toEqual([
+      'NOT_CONFIGURED',
+      'CONFIGURING',
+      'REVIEW_REQUIRED',
+      'READY',
+      'CONFIGURATION_FAILED',
+      'ARCHIVED',
+    ]);
+  });
+
+  it('exposes provider-neutral source types', () => {
+    expect(CONFIGURATION_SOURCE_TYPES).toEqual([
+      'LOCAL_UPLOAD',
+      'GIT_REPOSITORY',
+    ]);
+  });
+
+  it('exposes configuration job lifecycle statuses', () => {
+    expect(CONFIGURATION_JOB_STATUSES).toEqual([
+      'PENDING',
+      'UPLOADING',
+      'ANALYZING',
+      'REVIEW_REQUIRED',
+      'COMPLETED',
+      'FAILED',
+      'CANCELLED',
+    ]);
   });
 });
 

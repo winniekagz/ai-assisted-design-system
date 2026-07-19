@@ -10,6 +10,7 @@ import {
 import type { Organization, User } from '@prisma/client';
 import {
   PERMISSIONS,
+  type ProjectConfigurationSummary,
   type ProjectListItem,
 } from '@winniekagendo/componentiq-shared-types';
 
@@ -21,6 +22,7 @@ import { RequirePermission } from '../authorization/require-permission.decorator
 import { OrgIdParamDto } from '../common/dto/id-param.dto';
 import { ids, projectExample } from '../common/swagger/api-examples';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { ProjectConfigurationService } from './project-configuration.service';
 import { ProjectsService } from './projects.service';
 
 @ApiTags('Projects')
@@ -28,7 +30,10 @@ import { ProjectsService } from './projects.service';
 @UseGuards(ClerkAuthGuard)
 @Controller('organizations/:orgId/projects')
 export class ProjectsController {
-  constructor(private readonly projectsService: ProjectsService) {}
+  constructor(
+    private readonly projectsService: ProjectsService,
+    private readonly projectConfigurationService: ProjectConfigurationService
+  ) {}
 
   @Post()
   @RequirePermission(PERMISSIONS.PROJECT_CREATE)
@@ -116,5 +121,56 @@ export class ProjectsController {
     @CurrentOrganization() organization: Organization
   ): Promise<ProjectListItem[]> {
     return this.projectsService.findByOrganization(organization.id);
+  }
+
+  @Get(':projectId/configuration')
+  @RequirePermission(PERMISSIONS.PROJECT_VIEW)
+  @UseGuards(PermissionsGuard)
+  @ApiOperation({
+    summary: 'Get project configuration status',
+    description:
+      'Returns the organization-scoped configuration summary for a project.',
+  })
+  @ApiParam({
+    name: 'orgId',
+    description: 'Organization identifier',
+    example: ids.organization,
+  })
+  @ApiParam({
+    name: 'projectId',
+    description: 'Project identifier',
+    example: ids.project,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Project configuration summary returned successfully',
+    schema: {
+      example: {
+        projectId: ids.project,
+        projectStatus: 'NOT_CONFIGURED',
+        latestJobId: null,
+        latestJobStatus: null,
+        sourceType: null,
+        progress: null,
+        requiresReview: false,
+        canRetry: false,
+        lastError: null,
+        detectedConfiguration: null,
+        updatedAt: '2026-07-17T09:30:00.000Z',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Project not found',
+  })
+  getConfigurationSummary(
+    @Param('projectId') projectId: string,
+    @CurrentOrganization() organization: Organization
+  ): Promise<ProjectConfigurationSummary> {
+    return this.projectConfigurationService.getProjectConfigurationSummary({
+      organizationId: organization.id,
+      projectId,
+    });
   }
 }
