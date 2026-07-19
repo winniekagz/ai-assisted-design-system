@@ -75,37 +75,67 @@ enum ConfigurationJobStatus {
   CANCELLED
 }
 
+enum SourceProvider {
+  LOCAL
+  GITHUB
+}
+
+enum ProjectSourceType {
+  LOCAL_UPLOAD
+  GITHUB_REPOSITORY
+}
+
+enum SourceConnectionStatus {
+  ACTIVE
+  DISCONNECTED
+  REVOKED
+  FAILED
+}
+
+enum GitProviderConnectionStatus {
+  ACTIVE
+  DISCONNECTED
+  REVOKED
+  FAILED
+}
+
 model User {
-  id              String                  @id @default(uuid())
-  clerkUserId     String?                 @unique
-  name            String?
-  email           String                  @unique
-  imageUrl        String?
-  createdAt       DateTime                @default(now())
-  updatedAt       DateTime                @updatedAt
-  memberships     OrganizationMember[]
-  sentInvites     OrganizationInvite[]    @relation("InvitedBy")
-  recommendations RecommendationSession[]
-  audits          AuditSession[]
-  usageLogs       AiUsageLog[]
+  id                             String                          @id @default(uuid())
+  clerkUserId                    String?                         @unique
+  name                           String?
+  email                          String                          @unique
+  imageUrl                       String?
+  createdAt                      DateTime                        @default(now())
+  updatedAt                      DateTime                        @updatedAt
+  memberships                    OrganizationMember[]
+  sentInvites                    OrganizationInvite[]            @relation("InvitedBy")
+  recommendations                RecommendationSession[]
+  audits                         AuditSession[]
+  usageLogs                      AiUsageLog[]
+  createdProjectSources          ProjectSource[]                 @relation("ProjectSourceCreatedBy")
+  connectedGitProviders          GitProviderConnection[]         @relation("GitProviderConnectionConnectedBy")
+  confirmedProjectConfigurations ConfirmedProjectConfiguration[] @relation("ProjectConfigurationConfirmedBy")
 }
 
 model Organization {
-  id                String                  @id @default(uuid())
-  name              String
-  slug              String                  @unique
-  createdAt         DateTime                @default(now())
-  updatedAt         DateTime                @updatedAt
-  members           OrganizationMember[]
-  invites           OrganizationInvite[]
-  projects          Project[]
-  configurationJobs ConfigurationJob[]
-  components        Component[]
-  guardrails        Guardrail[]
-  promptTemplates   PromptTemplate[]
-  recommendations   RecommendationSession[]
-  audits            AuditSession[]
-  usageLogs         AiUsageLog[]
+  id                             String                          @id @default(uuid())
+  name                           String
+  slug                           String                          @unique
+  createdAt                      DateTime                        @default(now())
+  updatedAt                      DateTime                        @updatedAt
+  members                        OrganizationMember[]
+  invites                        OrganizationInvite[]
+  projects                       Project[]
+  configurationJobs              ConfigurationJob[]
+  projectSources                 ProjectSource[]
+  gitProviderConnections         GitProviderConnection[]
+  confirmedProjectConfigurations ConfirmedProjectConfiguration[]
+  components                     Component[]
+  guardrails                     Guardrail[]
+  promptTemplates                PromptTemplate[]
+  recommendations                RecommendationSession[]
+  audits                         AuditSession[]
+  usageLogs                      AiUsageLog[]
 }
 
 model OrganizationMember {
@@ -143,22 +173,24 @@ model OrganizationInvite {
 }
 
 model Project {
-  id                  String                     @id @default(uuid())
-  organizationId      String
-  name                String
-  slug                String
-  description         String?
-  framework           String
-  packageManager      String
-  stylingSystem       String
-  repositoryUrl       String?
-  configurationStatus ProjectConfigurationStatus @default(NOT_CONFIGURED)
-  createdAt           DateTime                   @default(now())
-  updatedAt           DateTime                   @updatedAt
-  organization        Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  configurationJobs   ConfigurationJob[]
-  recommendations     RecommendationSession[]
-  audits              AuditSession[]
+  id                     String                         @id @default(uuid())
+  organizationId         String
+  name                   String
+  slug                   String
+  description            String?
+  framework              String
+  packageManager         String
+  stylingSystem          String
+  repositoryUrl          String?
+  configurationStatus    ProjectConfigurationStatus     @default(NOT_CONFIGURED)
+  createdAt              DateTime                       @default(now())
+  updatedAt              DateTime                       @updatedAt
+  organization           Organization                   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  configurationJobs      ConfigurationJob[]
+  sources                ProjectSource[]
+  confirmedConfiguration ConfirmedProjectConfiguration?
+  recommendations        RecommendationSession[]
+  audits                 AuditSession[]
 
   @@unique([organizationId, slug])
   @@index([organizationId])
@@ -166,25 +198,93 @@ model Project {
 }
 
 model ConfigurationJob {
-  id                    String                  @id @default(uuid())
-  projectId             String
-  organizationId        String
-  sourceType            ConfigurationSourceType
-  status                ConfigurationJobStatus  @default(PENDING)
-  progress              Int?
-  errorCode             String?
-  errorMessage          String?
-  startedAt             DateTime?
-  completedAt           DateTime?
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
-  project               Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  organization          Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  detectedConfiguration DetectedConfiguration?
+  id                            String                         @id @default(uuid())
+  projectId                     String
+  organizationId                String
+  projectSourceId               String?
+  sourceType                    ConfigurationSourceType
+  status                        ConfigurationJobStatus         @default(PENDING)
+  progress                      Int?
+  errorCode                     String?
+  errorMessage                  String?
+  startedAt                     DateTime?
+  completedAt                   DateTime?
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+  project                       Project                        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  organization                  Organization                   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  projectSource                 ProjectSource?                 @relation(fields: [projectSourceId], references: [id], onDelete: SetNull)
+  detectedConfiguration         DetectedConfiguration?
+  confirmedProjectConfiguration ConfirmedProjectConfiguration?
 
   @@index([projectId])
   @@index([projectId, createdAt])
   @@index([organizationId])
+  @@index([projectSourceId])
+  @@index([status])
+}
+
+model ProjectSource {
+  id                   String                 @id @default(uuid())
+  organizationId       String
+  projectId            String
+  type                 ProjectSourceType
+  status               SourceConnectionStatus @default(ACTIVE)
+  provider             SourceProvider
+  providerConnectionId String?
+  repositoryId         String?
+  repositoryOwner      String?
+  repositoryName       String?
+  repositoryFullName   String?
+  defaultBranch        String?
+  selectedBranch       String?
+  projectRoot          String?
+  latestCommitSha      String?
+  sourceSnapshotId     String?
+  artifactPath         String?
+  artifactChecksum     String?
+  originalName         String?
+  fileCount            Int?
+  totalBytes           Int?
+  retainedUntil        DateTime?
+  createdByUserId      String?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  organization         Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project              Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  providerConnection   GitProviderConnection? @relation(fields: [providerConnectionId], references: [id], onDelete: SetNull)
+  createdBy            User?                  @relation("ProjectSourceCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  configurationJobs    ConfigurationJob[]
+
+  @@index([projectId])
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([providerConnectionId])
+  @@index([sourceSnapshotId])
+}
+
+model GitProviderConnection {
+  id                String                      @id @default(uuid())
+  organizationId    String
+  provider          SourceProvider              @default(GITHUB)
+  installationId    String
+  externalAccountId String?
+  accountLogin      String
+  accountType       String?
+  status            GitProviderConnectionStatus @default(ACTIVE)
+  connectedByUserId String?
+  installedAt       DateTime?
+  lastVerifiedAt    DateTime?
+  disconnectedAt    DateTime?
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+  organization      Organization                @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  connectedBy       User?                       @relation("GitProviderConnectionConnectedBy", fields: [connectedByUserId], references: [id], onDelete: SetNull)
+  projectSources    ProjectSource[]
+
+  @@unique([organizationId, installationId])
+  @@index([organizationId])
+  @@index([installationId])
   @@index([status])
 }
 
@@ -206,6 +306,33 @@ model DetectedConfiguration {
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
   configurationJob   ConfigurationJob @relation(fields: [configurationJobId], references: [id], onDelete: Cascade)
+}
+
+model ConfirmedProjectConfiguration {
+  id                 String                   @id @default(uuid())
+  projectId          String                   @unique
+  organizationId     String
+  configurationJobId String?                  @unique
+  sourceType         ConfigurationSourceType?
+  framework          String?
+  language           String?
+  packageManager     String?
+  stylingSystem      String?
+  projectRoot        String?
+  componentPaths     Json?
+  tokenPaths         Json?
+  notes              String?
+  confirmedByUserId  String?
+  confirmedAt        DateTime                 @default(now())
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  project            Project                  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  organization       Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  configurationJob   ConfigurationJob?        @relation(fields: [configurationJobId], references: [id], onDelete: SetNull)
+  confirmedBy        User?                    @relation("ProjectConfigurationConfirmedBy", fields: [confirmedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([confirmedByUserId])
 }
 
 model Component {

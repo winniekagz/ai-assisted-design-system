@@ -3,8 +3,12 @@ import { describe, expect, it } from 'vitest';
 import {
   CONFIGURATION_JOB_STATUSES,
   CONFIGURATION_SOURCE_TYPES,
+  GIT_PROVIDER_CONNECTION_STATUSES,
   PERMISSIONS,
+  PROJECT_SOURCE_TYPES,
   PROJECT_CONFIGURATION_STATUSES,
+  SOURCE_CONNECTION_STATUSES,
+  SOURCE_PROVIDERS,
   createProjectSchema,
   hasPermission,
   rolePermissions,
@@ -63,6 +67,23 @@ describe('project configuration contracts', () => {
       'COMPLETED',
       'FAILED',
       'CANCELLED',
+    ]);
+  });
+
+  it('exposes provider and project source contracts', () => {
+    expect(SOURCE_PROVIDERS).toEqual(['LOCAL', 'GITHUB']);
+    expect(PROJECT_SOURCE_TYPES).toEqual(['LOCAL_UPLOAD', 'GITHUB_REPOSITORY']);
+    expect(SOURCE_CONNECTION_STATUSES).toEqual([
+      'ACTIVE',
+      'DISCONNECTED',
+      'REVOKED',
+      'FAILED',
+    ]);
+    expect(GIT_PROVIDER_CONNECTION_STATUSES).toEqual([
+      'ACTIVE',
+      'DISCONNECTED',
+      'REVOKED',
+      'FAILED',
     ]);
   });
 });
