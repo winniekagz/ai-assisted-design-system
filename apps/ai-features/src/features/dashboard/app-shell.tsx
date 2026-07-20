@@ -28,8 +28,8 @@ import {
   projectRows,
   sidebarSectionLabels,
   sidebarSections,
-  type SidebarSection,
 } from '@/features/projects/fixtures/projects';
+import type { SidebarSection } from '@/features/projects/types';
 import { useWorkspaceStore } from '@/stores/workspace-store';
 
 const navItems = [

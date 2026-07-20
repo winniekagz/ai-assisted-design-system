@@ -20,30 +20,15 @@ import {
 import { Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useCreateProject } from '@/hooks/mutations/use-create-project';
-import { ApiError } from '@/lib/api/client';
+import { useCreateProject } from '@/features/projects/hooks';
+import type { CreateProjectDrawerProps, FieldErrors } from './types';
+import {
+  errorMessageFromCreateFailure,
+  fieldErrorsFromIssuePaths,
+  focusFirstInvalidField,
+} from './validation';
 
-export type CreatedProjectDraft = {
-  apiProject: ProjectListItem;
-};
-
-type CreateProjectDrawerProps = {
-  open: boolean;
-  orgSlug: string;
-  existingProjectNames: string[];
-  teamOptions: string[];
-  // eslint-disable-next-line no-unused-vars
-  onOpenChange(open: boolean): void;
-  // eslint-disable-next-line no-unused-vars
-  onCreated(project: CreatedProjectDraft): void;
-  // eslint-disable-next-line no-unused-vars
-  onConfigureProject?(project: ProjectListItem): void;
-};
-
-type FieldErrors = {
-  name?: string;
-  description?: string;
-};
+export type { CreatedProjectDraft } from './types';
 
 export function CreateProjectDrawer({
   open,
@@ -320,56 +305,4 @@ export function CreateProjectDrawer({
       </SheetContent>
     </Sheet>
   );
-}
-
-function fieldErrorsFromIssuePaths(
-  issues: { path: PropertyKey[]; message: string }[]
-): FieldErrors {
-  return issues.reduce<FieldErrors>((errors, issue) => {
-    const field = issue.path[0];
-
-    if (field === 'name' && !errors.name) {
-      errors.name = humanizeValidationMessage(issue.message, 'Project name');
-    }
-
-    if (field === 'description' && !errors.description) {
-      errors.description = humanizeValidationMessage(issue.message, 'Description');
-    }
-
-    return errors;
-  }, {});
-}
-
-function humanizeValidationMessage(message: string, label: string) {
-  if (message.includes('Too small')) return `${label} must be at least 2 characters.`;
-  if (message.includes('Too big')) return `${label} is too long.`;
-  if (message.includes('Invalid input')) return `${label} is invalid.`;
-  return message;
-}
-
-function errorMessageFromCreateFailure(error: unknown) {
-  if (error instanceof ApiError) {
-    if (error.code === 'conflict') {
-      return 'A project with this name already exists in this organization.';
-    }
-
-    if (error.code === 'forbidden') {
-      return 'You do not have permission to create projects in this organization.';
-    }
-
-    return error.message;
-  }
-
-  return 'We could not create this project. Try again.';
-}
-
-function focusFirstInvalidField(errors: FieldErrors) {
-  if (errors.name) {
-    document.querySelector<HTMLInputElement>('input[name="project-name"]')?.focus();
-    return;
-  }
-
-  if (errors.description) {
-    document.getElementById('project-description')?.focus();
-  }
 }

@@ -1,4 +1,4 @@
-import { ProjectDetailsScreen } from '../../../../../features/projects/project-details-screen';
+import { ProjectDetailsScreen } from '@/features/projects/project-details-screen';
 
 type PageProps = {
   params: Promise<{ orgSlug: string; projectSlug: string }>;
