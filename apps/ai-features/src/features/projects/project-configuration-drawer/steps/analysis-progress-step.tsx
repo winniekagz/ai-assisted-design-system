@@ -57,6 +57,7 @@ import {
   useDisconnectGithubConnection,
   useStartGithubConnection,
 } from '@/hooks/mutations/use-connect-github';
+import { AnalysisLoadingState } from '@/features/loading';
 import { useGithubConnections } from '@/hooks/queries/use-github-connections';
 import { useProjectConfiguration } from '@/features/projects/hooks';
 import {
@@ -110,22 +111,8 @@ export function AnalysisProgressStep({
 }) {
   return (
     <div className='grid gap-4'>
-      <div className='rounded-md border border-border bg-background px-4 py-4'>
-        <h3 className='font-semibold text-foreground'>Analyzing source</h3>
-        <ol className='mt-4 grid gap-3'>
-          {analysisSteps.map((step, index) => (
-            <li key={step} className='flex items-center gap-3 text-sm'>
-              {index < 2 ? (
-                <CheckCircle2 className='size-4 text-status-success' aria-hidden='true' />
-              ) : index === 2 ? (
-                <Loader2 className='size-4 animate-spin text-primary' aria-hidden='true' />
-              ) : (
-                <Clock className='size-4 text-muted-foreground' aria-hidden='true' />
-              )}
-              <span className={index <= 2 ? 'text-foreground' : 'text-muted-foreground'}>{step}</span>
-            </li>
-          ))}
-        </ol>
+      <div className='rounded-md border border-border bg-background px-4 py-6'>
+        <AnalysisLoadingState />
       </div>
       <StatusCallout tone='info' title='You can leave this page' detail='Analysis continues in the background and can be resumed from the project.' />
       <div className='flex flex-wrap gap-2'>

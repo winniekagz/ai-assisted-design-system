@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { AppShell, PageHeader } from '@/features/dashboard/app-shell';
+import { AppShell, PageHeader } from '@/features/layout';
 import { toast } from 'componentiq';
 
 const needOnlySchema = z.object({

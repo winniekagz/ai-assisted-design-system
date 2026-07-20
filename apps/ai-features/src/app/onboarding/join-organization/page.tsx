@@ -3,7 +3,7 @@
 import Link from 'next/link';
 
 import { Button } from 'componentiq';
-import { OnboardingLayout } from '@/features/shared/onboarding-layout';
+import { OnboardingLayout } from '@/features/onboarding/ui';
 
 export default function JoinOrganizationPage() {
   return (
