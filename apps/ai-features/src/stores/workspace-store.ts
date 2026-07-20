@@ -7,7 +7,7 @@ import {
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import type { SidebarSection } from '@/features/projects/fixtures/projects';
+import type { SidebarSection } from '@/features/projects/types';
 
 export { permissions, rolePermissions, type Permission };
 

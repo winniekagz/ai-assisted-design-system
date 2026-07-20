@@ -22,6 +22,7 @@ function createPrismaMock() {
         framework: 'Not configured',
         packageManager: 'Not configured',
         stylingSystem: 'Not configured',
+        configurationStatus: 'NOT_CONFIGURED',
         repositoryUrl: null,
         createdAt,
         updatedAt,
@@ -39,6 +40,7 @@ type ProjectRecordOverrides = {
   framework?: string;
   packageManager?: string;
   stylingSystem?: string;
+  configurationStatus?: 'NOT_CONFIGURED' | 'CONFIGURING' | 'REVIEW_REQUIRED' | 'READY' | 'CONFIGURATION_FAILED' | 'ARCHIVED';
   repositoryUrl?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
@@ -53,6 +55,7 @@ function createProjectRecord(overrides: ProjectRecordOverrides = {}) {
     framework: overrides.framework ?? 'Not configured',
     packageManager: overrides.packageManager ?? 'Not configured',
     stylingSystem: overrides.stylingSystem ?? 'Not configured',
+    configurationStatus: overrides.configurationStatus ?? 'NOT_CONFIGURED',
     repositoryUrl: overrides.repositoryUrl ?? null,
     createdAt: overrides.createdAt ?? createdAt,
     updatedAt: overrides.updatedAt ?? updatedAt,
@@ -91,6 +94,7 @@ describe('ProjectsService', () => {
       framework: 'Not configured',
       packageManager: 'Not configured',
       stylingSystem: 'Not configured',
+      configurationStatus: 'NOT_CONFIGURED',
       repositoryUrl: null,
       createdAt: createdAt.toISOString(),
       updatedAt: updatedAt.toISOString(),
@@ -169,6 +173,8 @@ describe('ProjectsService', () => {
     expect(prisma.project.findMany).toHaveBeenCalledWith({
       where: { organizationId: 'resolved_org' },
       orderBy: { updatedAt: 'desc' },
+      take: 50,
+      skip: 0,
       select: {
         id: true,
         name: true,
@@ -178,6 +184,7 @@ describe('ProjectsService', () => {
         packageManager: true,
         stylingSystem: true,
         repositoryUrl: true,
+        configurationStatus: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -198,6 +205,30 @@ describe('ProjectsService', () => {
         updatedAt: secondUpdated.toISOString(),
       }),
     ]);
+  });
+
+  it('bounds project list queries and applies server-side filters', async () => {
+    const prisma = createPrismaMock();
+    const service = new ProjectsService(prisma as never);
+
+    await service.findByOrganization('resolved_org', {
+      limit: 250,
+      offset: 12,
+      search: 'checkout',
+      configurationStatus: 'READY',
+    });
+
+    expect(prisma.project.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        take: 100,
+        skip: 12,
+        where: expect.objectContaining({
+          organizationId: 'resolved_org',
+          configurationStatus: 'READY',
+          OR: expect.any(Array),
+        }),
+      })
+    );
   });
 
   it('returns an empty array when the organization has no projects', async () => {

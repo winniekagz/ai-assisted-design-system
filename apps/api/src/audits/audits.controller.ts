@@ -1,8 +1,9 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -15,7 +16,7 @@ import { OrgMembershipGuard } from '../authorization/org-membership.guard';
 import { hasPermission } from '../authorization/permissions';
 import { IdParamDto, OrgIdParamDto } from '../common/dto/id-param.dto';
 import { auditSessionExample, ids } from '../common/swagger/api-examples';
-import { AuditsService } from './audits.service';
+import { AuditsService, mapAuditSessionSummary } from './audits.service';
 import type { OrganizationMember, User } from '@prisma/client';
 
 @ApiTags('Audits')
@@ -39,6 +40,12 @@ export class AuditsController {
     description: 'Organization identifier',
     example: ids.organization,
   })
+  @ApiQuery({
+    name: 'projectId',
+    description: 'Optional project identifier to scope results to one project',
+    required: false,
+    example: ids.project,
+  })
   @ApiResponse({
     status: 200,
     description: 'Audit sessions returned successfully',
@@ -58,12 +65,14 @@ export class AuditsController {
   findByOrganization(
     @Param() params: OrgIdParamDto,
     @CurrentUser() user: User,
-    @CurrentMembership() membership: OrganizationMember
+    @CurrentMembership() membership: OrganizationMember,
+    @Query('projectId') projectId?: string
   ) {
     const viewAll = hasPermission(membership.role, 'audits.view');
     return this.auditsService.findByOrganization(
       params.orgId,
-      viewAll ? undefined : user.id
+      viewAll ? undefined : user.id,
+      projectId
     );
   }
 
@@ -104,10 +113,10 @@ export class AuditsController {
       audit.userId === user.id &&
       hasPermission(membership.role, 'audits.viewOwn')
     ) {
-      return audit;
+      return mapAuditSessionSummary(audit);
     }
 
     this.authorizationService.assertPermission(membership, 'audits.view');
-    return audit;
+    return mapAuditSessionSummary(audit);
   }
 }

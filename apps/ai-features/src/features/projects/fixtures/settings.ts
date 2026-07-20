@@ -2,7 +2,7 @@
 // Replace with real project settings, repositories, rule summary, integrations,
 // and ownership APIs once those backend endpoints exist.
 
-import type { ProjectRow } from './projects';
+import type { ProjectRow } from '@/features/projects/types';
 
 export type ProjectSettingsStatus = 'active' | 'archived' | 'read_only' | 'pending_setup';
 export type ProjectSettingsSection =

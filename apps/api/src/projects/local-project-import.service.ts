@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -19,6 +20,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { LocalSourceStorageService } from './local-source-storage.service';
 import { ProjectConfigurationService } from './project-configuration.service';
+import { failStaleConfigurationJobs } from './configuration-job-maintenance';
 
 export type AnalyzeLocalProjectCommand = {
   organizationId: string;
@@ -79,37 +81,69 @@ export class LocalProjectImportService {
       throw new NotFoundException('Project not found');
     }
 
+    await failStaleConfigurationJobs(prisma);
+    const [activeJob] = await prisma.$queryRaw<Array<{ id: string }>>`
+      SELECT id
+      FROM "ConfigurationJob"
+      WHERE
+        "projectId" = ${projectId}
+        AND "organizationId" = ${organizationId}
+        AND status IN (
+          'PENDING'::"ConfigurationJobStatus",
+          'UPLOADING'::"ConfigurationJobStatus",
+          'ANALYZING'::"ConfigurationJobStatus"
+        )
+      ORDER BY "createdAt" DESC
+      LIMIT 1
+    `;
+
+    if (activeJob) {
+      throw new ConflictException('Project configuration is already in progress.');
+    }
+
     let stage = 'CREATING_JOB';
     const started = Date.now();
     let job: { id: string } | null = null;
 
     try {
       const jobId = randomUUID();
-      [job] = await prisma.$queryRaw<Array<{ id: string }>>`
-        INSERT INTO "ConfigurationJob" (
-          id,
-          "projectId",
-          "organizationId",
-          "sourceType",
-          status,
-          progress,
-          "startedAt",
-          "createdAt",
-          "updatedAt"
-        )
-        VALUES (
-          ${jobId},
-          ${projectId},
-          ${organizationId},
-          'LOCAL_UPLOAD'::"ConfigurationSourceType",
-          'ANALYZING'::"ConfigurationJobStatus",
-          15,
-          NOW(),
-          NOW(),
-          NOW()
-        )
-        RETURNING id
-      `;
+      job = await prisma.$transaction(async tx => {
+        const [createdJob] = await tx.$queryRaw<Array<{ id: string }>>`
+          INSERT INTO "ConfigurationJob" (
+            id,
+            "projectId",
+            "organizationId",
+            "sourceType",
+            status,
+            progress,
+            "startedAt",
+            "createdAt",
+            "updatedAt"
+          )
+          VALUES (
+            ${jobId},
+            ${projectId},
+            ${organizationId},
+            'LOCAL_UPLOAD'::"ConfigurationSourceType",
+            'ANALYZING'::"ConfigurationJobStatus",
+            15,
+            NOW(),
+            NOW(),
+            NOW()
+          )
+          RETURNING id
+        `;
+
+        await tx.$executeRaw`
+          UPDATE "Project"
+          SET
+            "configurationStatus" = 'CONFIGURING'::"ProjectConfigurationStatus",
+            "updatedAt" = NOW()
+          WHERE id = ${projectId} AND "organizationId" = ${organizationId}
+        `;
+
+        return createdJob ?? null;
+      });
 
       if (!job) {
         throw new Error('Configuration job was not created.');
@@ -262,6 +296,18 @@ export class LocalProjectImportService {
         "completedAt" = NOW(),
         "updatedAt" = NOW()
       WHERE id = ${jobId}
+    `;
+
+    await prisma.$executeRaw`
+      UPDATE "Project" project
+      SET
+        "configurationStatus" = 'CONFIGURATION_FAILED'::"ProjectConfigurationStatus",
+        "updatedAt" = NOW()
+      FROM "ConfigurationJob" job
+      WHERE
+        job.id = ${jobId}
+        AND project.id = job."projectId"
+        AND project."organizationId" = job."organizationId"
     `;
   }
 

@@ -22,6 +22,16 @@ export type CreateProjectCommand = {
   input: CreateProjectInput;
 };
 
+export type ListProjectsQuery = {
+  limit?: number;
+  offset?: number;
+  search?: string;
+  configurationStatus?: ProjectListItem['configurationStatus'];
+};
+
+const DEFAULT_PROJECT_LIST_LIMIT = 50;
+const MAX_PROJECT_LIST_LIMIT = 100;
+
 @Injectable()
 export class ProjectsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -66,12 +76,35 @@ export class ProjectsService {
     }
   }
 
-  async findByOrganization(organizationId: string): Promise<ProjectListItem[]> {
+  async findByOrganization(
+    organizationId: string,
+    query: ListProjectsQuery = {}
+  ): Promise<ProjectListItem[]> {
     await this.ensureOrganization(organizationId);
+    const limit = normalizeLimit(query.limit);
+    const offset = normalizeOffset(query.offset);
+    const search = query.search?.trim();
 
     const projects = await this.prisma.project.findMany({
-      where: { organizationId },
+      where: {
+        organizationId,
+        ...(query.configurationStatus
+          ? { configurationStatus: query.configurationStatus }
+          : {}),
+        ...(search
+          ? {
+              OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { slug: { contains: search, mode: 'insensitive' } },
+                { description: { contains: search, mode: 'insensitive' } },
+                { repositoryUrl: { contains: search, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+      },
       orderBy: { updatedAt: 'desc' },
+      take: limit,
+      skip: offset,
       select: projectListSelect,
     });
 
@@ -99,6 +132,7 @@ const projectListSelect = {
   packageManager: true,
   stylingSystem: true,
   repositoryUrl: true,
+  configurationStatus: true,
   createdAt: true,
   updatedAt: true,
 } satisfies Prisma.ProjectSelect;
@@ -116,10 +150,27 @@ function mapProjectListItem(project: SelectedProject): ProjectListItem {
     framework: project.framework,
     packageManager: project.packageManager,
     stylingSystem: project.stylingSystem,
+    configurationStatus: project.configurationStatus,
     repositoryUrl: project.repositoryUrl,
     createdAt: project.createdAt.toISOString(),
     updatedAt: project.updatedAt.toISOString(),
   };
+}
+
+function normalizeLimit(value: number | undefined) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return DEFAULT_PROJECT_LIST_LIMIT;
+  }
+
+  return Math.min(Math.max(Math.trunc(value), 1), MAX_PROJECT_LIST_LIMIT);
+}
+
+function normalizeOffset(value: number | undefined) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(Math.trunc(value), 0);
 }
 
 function isProjectSlugConflict(error: unknown) {

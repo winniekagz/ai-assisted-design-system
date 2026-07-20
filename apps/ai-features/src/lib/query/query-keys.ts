@@ -5,6 +5,8 @@ export const queryKeys = {
   projects: (orgSlug: string) => ['organizations', orgSlug, 'projects'] as const,
   projectConfiguration: (orgSlug: string, projectId: string) =>
     ['organizations', orgSlug, 'projects', projectId, 'configuration'] as const,
+  projectAudits: (orgSlug: string, projectId: string) =>
+    ['organizations', orgSlug, 'projects', projectId, 'audits'] as const,
   githubConnections: (orgSlug: string) =>
     ['organizations', orgSlug, 'integrations', 'github'] as const,
   members: (orgSlug: string) => ['organizations', orgSlug, 'members'] as const,

@@ -20,6 +20,7 @@ import {
 } from '@winniekagendo/componentiq-shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { failStaleConfigurationJobs } from './configuration-job-maintenance';
 
 export type GetProjectConfigurationSummaryQuery = {
   organizationId: string;
@@ -125,6 +126,7 @@ export class ProjectConfigurationService {
       throw new NotFoundException('Project not found');
     }
 
+    await failStaleConfigurationJobs(prisma);
     const latestJob = await this.findLatestJob(prisma, organizationId, project.id);
 
     const projectStatus = getProjectStatus(project.configurationStatus, latestJob?.status);
@@ -277,7 +279,10 @@ export class ProjectConfigurationService {
           progress = 100,
           "completedAt" = NOW(),
           "updatedAt" = NOW()
-        WHERE id = ${latestJob.id}
+        WHERE
+          id = ${latestJob.id}
+          AND "projectId" = ${projectId}
+          AND "organizationId" = ${organizationId}
       `;
 
       await tx.$executeRaw`
