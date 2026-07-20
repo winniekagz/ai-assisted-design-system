@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Loader2, UserPlus } from 'lucide-react';
 
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from 'componentiq';
-import { PageHeader } from '@/features/dashboard/app-shell';
+import { PageHeader } from '@/features/layout';
 import { useMembers } from '@/hooks/queries/use-members';
 import { formatDate } from './utils';
 import { OrgFrame } from './org-frame';

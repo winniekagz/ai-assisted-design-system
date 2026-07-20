@@ -1,6 +1,8 @@
 import { Check, ShieldCheck } from 'lucide-react';
 import * as React from 'react';
 
+import { ComponentIqLogo } from '@/features/brand';
+
 /**
  * AuthLayout — the two-pane shell used by every auth surface
  * (welcome, sign-in, sign-up, accept-invite).
@@ -40,9 +42,7 @@ export function AuthLayout({ children, rail, tone = 'primary' }: AuthLayoutProps
 
         <section className='flex flex-col justify-center px-6 py-12 sm:px-10'>
           <div className='mb-8 flex items-center gap-2.5 lg:hidden'>
-            <span className='grid size-8 place-items-center rounded-md bg-primary text-sm font-bold text-primary-foreground'>
-              IQ
-            </span>
+            <ComponentIqLogo size={32} className='size-8' />
             <span className='text-[15px] font-semibold text-foreground'>ComponentIQ</span>
           </div>
           <div className='mx-auto w-full max-w-sm'>{children}</div>
@@ -74,9 +74,7 @@ export function AuthRail({
   return (
     <div className='flex h-full flex-col'>
       <div className='flex items-center gap-2.5'>
-        <span className='grid size-[30px] place-items-center rounded-md bg-primary-foreground text-[13px] font-bold text-primary'>
-          IQ
-        </span>
+        <ComponentIqLogo surface='dark' size={30} className='size-[30px]' />
         <span className='text-[15px] font-semibold'>ComponentIQ</span>
       </div>
 

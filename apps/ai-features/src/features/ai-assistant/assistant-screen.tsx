@@ -10,7 +10,7 @@ import { Badge } from 'componentiq';
 import { Button } from 'componentiq';
 import { Card, CardContent, CardHeader, CardTitle } from 'componentiq';
 import { Select } from 'componentiq';
-import { AppShell, PageHeader } from '@/features/dashboard/app-shell';
+import { AppShell, PageHeader } from '@/features/layout';
 
 const contexts = ['Feature UI', 'Form', 'Dashboard', 'Marketing', 'Data Display', 'Navigation', 'Feedback', 'Settings', 'Checkout'];
 const platforms = ['Web', 'Mobile Web', 'Admin Dashboard', 'React Native'];

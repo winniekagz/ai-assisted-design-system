@@ -28,7 +28,7 @@ import {
   toast,
 } from 'componentiq';
 
-import { PageHeader } from '@/features/dashboard/app-shell';
+import { PageHeader } from '@/features/layout';
 import { useCreateInvite } from '@/hooks/mutations/use-create-invite';
 import { useInvites } from '@/hooks/queries/use-invites';
 import { inviteManagementAvailable, useResendInvite, useRevokeInvite } from './use-manage-invite';

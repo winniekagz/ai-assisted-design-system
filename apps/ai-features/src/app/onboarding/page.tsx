@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
-import { OnboardingScreen } from '@/features/onboarding/onboarding-screen';
+import { OnboardingScreen } from '@/features/onboarding';
 import { getMe } from '@/lib/api/users';
 import { createQueryClient } from '@/lib/query/query-client';
 import { queryKeys } from '@/lib/query/query-keys';

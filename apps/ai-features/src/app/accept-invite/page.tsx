@@ -1,6 +1,6 @@
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
-import { AcceptInviteScreen } from '@/features/onboarding/accept-invite-screen';
+import { AcceptInviteScreen } from '@/features/onboarding';
 import { validateInvite } from '@/lib/api/invites';
 import { createQueryClient } from '@/lib/query/query-client';
 import { queryKeys } from '@/lib/query/query-keys';

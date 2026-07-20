@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent } from 'componentiq';
-import { PageHeader } from '@/features/dashboard/app-shell';
+import { PageHeader } from '@/features/layout';
 import { OrgFrame } from './org-frame';
 
 export function PlaceholderOrgScreen({

@@ -1,4 +1,4 @@
-import { CreateOrganizationScreen } from '@/features/onboarding/create-organization-screen';
+import { CreateOrganizationScreen } from '@/features/onboarding';
 
 export default function CreateOrganizationPage() {
   return <CreateOrganizationScreen />;
