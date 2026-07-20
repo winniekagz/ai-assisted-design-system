@@ -54,19 +54,24 @@ export function OfflineBoundary({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(timer);
   }, [attempt, online, retry]);
 
-  if (!online) {
-    return (
-      <ErrorPage
-        kind='offline'
-        retryStatus={
-          attempt >= MAX_RETRY_ATTEMPTS
-            ? `Automatic retries paused after ${MAX_RETRY_ATTEMPTS} attempts.`
-            : `Retrying automatically... attempt ${Math.max(attempt, 1)} of ${MAX_RETRY_ATTEMPTS}`
-        }
-        actions={<RetryAction onRetry={retry} />}
-      />
-    );
-  }
-
-  return children;
+  return (
+    <>
+      <div className='contents' hidden={!online}>
+        {children}
+      </div>
+      {!online ? (
+        <div className='fixed inset-0 z-50 overflow-y-auto bg-background'>
+          <ErrorPage
+            kind='offline'
+            retryStatus={
+              attempt >= MAX_RETRY_ATTEMPTS
+                ? `Automatic retries paused after ${MAX_RETRY_ATTEMPTS} attempts.`
+                : `Retrying automatically... attempt ${Math.max(attempt, 1)} of ${MAX_RETRY_ATTEMPTS}`
+            }
+            actions={<RetryAction onRetry={retry} />}
+          />
+        </div>
+      ) : null}
+    </>
+  );
 }

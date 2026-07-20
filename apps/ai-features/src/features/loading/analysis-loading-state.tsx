@@ -9,6 +9,10 @@ export function AnalysisLoadingState({
   description?: string;
   progress?: number;
 }) {
+  const normalizedProgress = Number.isFinite(progress)
+    ? Math.min(100, Math.max(0, progress))
+    : 0;
+
   return (
     <div className='mx-auto grid max-w-[420px] justify-items-center text-center'>
       <svg
@@ -43,10 +47,17 @@ export function AnalysisLoadingState({
       <p className='mt-2 text-[13px] leading-5 text-muted-foreground'>
         {description}
       </p>
-      <div className='mt-[18px] h-1.5 w-full overflow-hidden rounded-full bg-background-secondary'>
+      <div
+        role='progressbar'
+        aria-label='Analysis progress'
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={normalizedProgress}
+        className='mt-[18px] h-1.5 w-full overflow-hidden rounded-full bg-background-secondary'
+      >
         <div
           className='h-full rounded-full bg-primary motion-safe:animate-pulse'
-          style={{ width: `${progress}%` }}
+          style={{ width: `${normalizedProgress}%` }}
         />
       </div>
     </div>

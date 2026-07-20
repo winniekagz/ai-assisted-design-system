@@ -10,6 +10,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import type { FormEvent } from 'react';
 import { useMemo, useRef, useState } from 'react';
 
@@ -40,6 +41,7 @@ export function InviteTeamScreen() {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const orgSlug = searchParams?.get('org') ?? '';
+  const hasOrgSlug = orgSlug.length > 0;
 
   const [invites, setInvites] = useState<InviteDraft[]>([
     { id: crypto.randomUUID(), email: '', role: 'ENGINEER' },
@@ -87,6 +89,9 @@ export function InviteTeamScreen() {
 
   const sendMutation = useMutation({
     mutationFn: async () => {
+      if (!hasOrgSlug) {
+        throw new Error('Choose or create a workspace before inviting teammates.');
+      }
       const clerkSessionToken = await requireClerkSessionToken(getToken);
       const results = await Promise.allSettled(
         prepared.map(i =>
@@ -99,12 +104,17 @@ export function InviteTeamScreen() {
       };
     },
     onSuccess: ({ failed }) => {
+      if (!hasOrgSlug) return;
       queryClient.invalidateQueries({ queryKey: queryKeys.invites(orgSlug) });
       if (failed === 0) goToDashboard();
     },
   });
 
   function goToDashboard() {
+    if (!hasOrgSlug) {
+      router.replace('/onboarding/create-organization');
+      return;
+    }
     router.replace(`/org/${orgSlug}/dashboard`);
   }
 
@@ -126,6 +136,57 @@ export function InviteTeamScreen() {
 
   const failed = sendMutation.data?.failed ?? 0;
   const sent = sendMutation.data?.sent ?? 0;
+
+  if (!hasOrgSlug) {
+    return (
+      <OnboardingLayout
+        current='invite'
+        completed={['account', 'choose']}
+        stepNumber='4 of 4'
+        title='Choose a workspace first'
+        explanation='Invites need to be attached to a workspace before they can be sent.'
+        happens={[
+          'Return to workspace setup.',
+          'Create or choose the workspace you want teammates to join.',
+          'Come back to invites once the workspace is ready.',
+        ]}
+        benefits={[
+          'Invites go to the right organization.',
+          'Your dashboard link is created from a valid workspace.',
+        ]}
+      >
+        <section className='grid gap-5'>
+          <div
+            role='alert'
+            className='flex items-start gap-3 rounded-md border border-status-warning bg-status-warning-bg p-4 text-sm text-status-warning'
+          >
+            <AlertTriangle
+              className='mt-0.5 size-4 shrink-0'
+              aria-hidden='true'
+            />
+            <div>
+              <p className='font-medium'>Workspace missing</p>
+              <p className='mt-1 text-status-warning/90'>
+                This invite step was opened without a workspace. Start from
+                workspace setup so ComponentIQ knows where to send the invites.
+              </p>
+            </div>
+          </div>
+
+          <div className='flex flex-col gap-3 sm:flex-row'>
+            <Button asChild endIcon={<ArrowRight className='size-4' />}>
+              <Link href='/onboarding/create-organization'>
+                Set up workspace
+              </Link>
+            </Button>
+            <Button asChild variant='text'>
+              <Link href='/onboarding'>Back to onboarding</Link>
+            </Button>
+          </div>
+        </section>
+      </OnboardingLayout>
+    );
+  }
 
   return (
     <OnboardingLayout

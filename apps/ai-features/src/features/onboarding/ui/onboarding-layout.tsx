@@ -33,8 +33,8 @@ export function OnboardingLayout({
   backLabel = 'Back',
 }: OnboardingLayoutProps) {
   return (
-    <main className='min-h-screen bg-background lg:h-screen lg:overflow-hidden'>
-      <div className='grid min-h-screen grid-cols-1 lg:h-screen lg:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)]'>
+    <main className='min-h-screen bg-background'>
+      <div className='grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)]'>
         <aside className='relative isolate overflow-hidden bg-primary-900 px-6 py-8 text-primary-foreground sm:px-10 lg:flex lg:min-h-screen lg:flex-col lg:px-12 lg:py-12'>
           <div
             className='absolute inset-0 -z-20 bg-[linear-gradient(145deg,var(--primary-950),var(--primary-800)_48%,var(--color-primary))]'
@@ -118,7 +118,7 @@ export function OnboardingLayout({
           </div>
         </aside>
 
-        <section className='flex min-h-screen bg-background px-5 py-8 sm:px-8 lg:min-h-0 lg:h-screen lg:items-center lg:justify-center lg:px-12 lg:py-10'>
+        <section className='flex min-h-screen bg-background px-5 py-8 sm:px-8 lg:items-center lg:justify-center lg:px-12 lg:py-10'>
           <div className='mx-auto grid w-full max-w-[640px] gap-8'>
             <header className='grid gap-6'>
               {backHref ? (
