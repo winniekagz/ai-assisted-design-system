@@ -149,30 +149,30 @@ export function ProjectsTableSkeleton({ rowCount = 6 }: { rowCount?: number }) {
           {rows.map((_, index) => (
             <tr key={index}>
               <td className='px-4 py-3'>
-                <Skeleton className='h-4 w-36' />
-                <Skeleton className='mt-2 h-3 w-48' />
+                <Skeleton className='cq-shimmer h-4 w-36 animate-none' />
+                <Skeleton className='cq-shimmer mt-2 h-3 w-48 animate-none' />
               </td>
               <td className='px-4 py-3'>
-                <Skeleton className='h-7 w-28 rounded-md' />
+                <Skeleton className='cq-shimmer h-7 w-28 animate-none rounded-full' />
               </td>
               <td className='px-4 py-3'>
-                <Skeleton className='h-4 w-6' />
+                <Skeleton className='cq-shimmer h-4 w-6 animate-none' />
               </td>
               <td className='px-4 py-3'>
-                <Skeleton className='h-4 w-24' />
-                <Skeleton className='mt-2 h-3 w-20' />
+                <Skeleton className='cq-shimmer h-4 w-24 animate-none' />
+                <Skeleton className='cq-shimmer mt-2 h-3 w-20 animate-none' />
               </td>
               <td className='px-4 py-3'>
-                <Skeleton className='h-4 w-32' />
-                <Skeleton className='mt-2 h-3 w-16' />
+                <Skeleton className='cq-shimmer h-4 w-32 animate-none' />
+                <Skeleton className='cq-shimmer mt-2 h-3 w-16 animate-none' />
               </td>
               <td className='max-w-[220px] px-4 py-3'>
-                <Skeleton className='h-4 w-full' />
+                <Skeleton className='cq-shimmer h-4 w-full animate-none' />
               </td>
               <td className='px-4 py-3'>
                 <div className='flex items-center justify-end gap-2'>
-                  <Skeleton className='h-8 w-20 rounded-md' />
-                  <Skeleton className='h-8 w-16 rounded-md' />
+                  <Skeleton className='cq-shimmer h-8 w-20 animate-none rounded-md' />
+                  <Skeleton className='cq-shimmer h-8 w-16 animate-none rounded-md' />
                 </div>
               </td>
             </tr>

@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 import { useState } from 'react';
 
 import { createQueryClient } from '@/lib/query/query-client';
+import { OfflineBoundary } from '@/features/error-pages';
 import { AppThemeProvider } from './theme-provider';
 
 export function AppProviders({ children }: { children: ReactNode }) {
@@ -17,7 +18,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <AppThemeProvider>
           <ToastProvider>
-            {children}
+            <OfflineBoundary>{children}</OfflineBoundary>
             <ToastViewport />
           </ToastProvider>
         </AppThemeProvider>

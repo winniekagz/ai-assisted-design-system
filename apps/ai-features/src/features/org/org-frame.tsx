@@ -5,7 +5,8 @@ import { Loader2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo } from 'react';
 
-import { AppShell } from '@/features/dashboard/app-shell';
+import { AppShell } from '@/features/layout';
+import { ErrorPage } from '@/features/error-pages';
 import { ApiError } from '@/lib/api/client';
 import { useMe } from '@/hooks/queries/use-me';
 import { useOrganization } from '@/hooks/queries/use-organization';
@@ -91,12 +92,15 @@ export function OrgFrame({
       <AppShell orgSlug={orgSlug}>
         <div className='grid min-h-96 place-items-center rounded-md border border-border bg-card py-8 text-center'>
           {error ? (
-            <div>
-              <h1 className='text-xl font-semibold'>Unable to open organization</h1>
-              <p className='mt-2 text-sm text-muted-foreground'>
-                {getOrganizationErrorMessage(error)}
-              </p>
-            </div>
+            <ErrorPage
+              kind={getOrganizationErrorKind(error)}
+              title={getOrganizationErrorTitle(error)}
+              description={getOrganizationErrorMessage(error)}
+              orgName={organization?.name ?? orgSlug}
+              projectName='this organization'
+              dashboardHref={`/org/${orgSlug}/dashboard`}
+              compact
+            />
           ) : (
             <Loader2 className='size-6 animate-spin text-primary' />
           )}
@@ -116,9 +120,37 @@ export function OrgFrame({
   );
 }
 
+function getOrganizationErrorKind(error: unknown) {
+  if (error instanceof ApiError && error.status === 404) {
+    return 'not-found';
+  }
+
+  if (error instanceof ApiError && error.status === 403) {
+    return 'forbidden';
+  }
+
+  return 'server';
+}
+
+function getOrganizationErrorTitle(error: unknown) {
+  if (error instanceof ApiError && error.status === 404) {
+    return 'Organization not found';
+  }
+
+  if (error instanceof ApiError && error.status === 403) {
+    return 'You do not have access to this organization';
+  }
+
+  return 'Unable to open organization';
+}
+
 function getOrganizationErrorMessage(error: unknown) {
   if (error instanceof ApiError && error.status === 404) {
     return 'Organization not found.';
+  }
+
+  if (error instanceof ApiError && error.status === 403) {
+    return 'Ask an organization admin to invite you or update your role.';
   }
 
   if (error instanceof ApiError && error.status === 401) {
