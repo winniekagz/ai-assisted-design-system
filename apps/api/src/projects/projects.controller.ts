@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -20,7 +21,9 @@ import {
 import type { Organization, User } from '@prisma/client';
 import {
   PERMISSIONS,
+  PROJECT_CONFIGURATION_STATUSES,
   type LocalProjectUploadResponse,
+  type ProjectConfigurationStatus,
   type ProjectConfigurationConfirmResponse,
   type ProjectConfigurationSummary,
   type ProjectListItem,
@@ -139,9 +142,18 @@ export class ProjectsController {
   })
   findByOrganization(
     @Param() _params: OrgIdParamDto,
-    @CurrentOrganization() organization: Organization
+    @CurrentOrganization() organization: Organization,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+    @Query('search') search?: string,
+    @Query('configurationStatus') configurationStatus?: string
   ): Promise<ProjectListItem[]> {
-    return this.projectsService.findByOrganization(organization.id);
+    return this.projectsService.findByOrganization(organization.id, {
+      limit: parseOptionalInteger(limit),
+      offset: parseOptionalInteger(offset),
+      search,
+      configurationStatus: parseConfigurationStatus(configurationStatus),
+    });
   }
 
   @Get(':projectId/configuration')
@@ -276,4 +288,28 @@ export class ProjectsController {
       files: files ?? [],
     });
   }
+}
+
+function parseOptionalInteger(value: string | undefined) {
+  if (!value) {
+    return undefined;
+  }
+
+  const parsed = Number(value);
+
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function parseConfigurationStatus(
+  value: string | undefined
+): ProjectConfigurationStatus | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return PROJECT_CONFIGURATION_STATUSES.includes(
+    value as ProjectConfigurationStatus
+  )
+    ? (value as ProjectConfigurationStatus)
+    : undefined;
 }

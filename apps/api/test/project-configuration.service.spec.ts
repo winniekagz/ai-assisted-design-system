@@ -26,6 +26,7 @@ function createPrismaMock() {
     $transaction: vi.fn((callback: (tx: typeof transactionClient) => unknown) =>
       callback(transactionClient)
     ),
+    $executeRaw: vi.fn().mockResolvedValue(0),
     __tx: transactionClient,
   };
 }
@@ -194,6 +195,19 @@ describe('ProjectConfigurationService', () => {
     );
     expect(summary.updatedAt).toBe(latestJobUpdatedAt.toISOString());
     expect(olderJobUpdatedAt.getTime()).toBeLessThan(latestJobUpdatedAt.getTime());
+  });
+
+  it('fails stale active jobs before deriving configuration status', async () => {
+    const prisma = createPrismaMock();
+    const service = new ProjectConfigurationService(prisma as never);
+
+    await service.getProjectConfigurationSummary({
+      organizationId: 'org_1',
+      projectId: 'project_1',
+    });
+
+    expect(prisma.$executeRaw).toHaveBeenCalledTimes(1);
+    expect(prisma.configurationJob.findFirst).toHaveBeenCalled();
   });
 
   it('returns REVIEW_REQUIRED state with detected configuration', async () => {

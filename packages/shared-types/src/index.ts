@@ -324,6 +324,7 @@ export interface ProjectListItem {
   framework: string;
   packageManager: string;
   stylingSystem: string;
+  configurationStatus: ProjectConfigurationStatus;
   repositoryUrl?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -552,6 +553,17 @@ export interface AuditResponse {
   id: string;
   status: AuditResponseStatus;
   summary: string;
+  findings: AuditFindingResponse[];
+}
+
+export interface AuditSessionSummary {
+  id: string;
+  projectId: string | null;
+  auditType: string;
+  inputType: AuditInputType;
+  status: AuditResponseStatus;
+  summary: string;
+  createdAt: string;
   findings: AuditFindingResponse[];
 }
 
