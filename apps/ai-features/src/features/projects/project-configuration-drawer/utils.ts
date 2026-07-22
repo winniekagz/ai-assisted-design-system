@@ -13,13 +13,13 @@ import {
   type StylingSystem,
 } from '@winniekagendo/componentiq-shared-types';
 
+import { localExclusions } from './constants';
 import type {
   ConfigurationFormValues,
   ConfigurationStateId,
   ProjectConfigurationProject,
   ProjectConfigurationStatus,
 } from './types';
-import { localExclusions } from './constants';
 
 export function getConfigurationStatus(project?: Pick<ProjectConfigurationProject, 'configurationStatus' | 'status'> | null): ProjectConfigurationStatus {
   if (!project) return 'NOT_CONFIGURED';
@@ -79,27 +79,57 @@ export function buildConfirmConfigurationInput(
 }
 
 function canonicalProjectFramework(value: string | undefined): ProjectFramework | undefined {
-  return PROJECT_FRAMEWORKS.includes(value as ProjectFramework)
-    ? (value as ProjectFramework)
-    : undefined;
+  return canonicalEnumValue(value, PROJECT_FRAMEWORKS, {
+    next: 'NEXTJS',
+    nextjs: 'NEXTJS',
+    reactvite: 'REACT_VITE',
+    vite: 'REACT_VITE',
+    vuejs: 'VUE',
+    nuxtjs: 'NUXT',
+    sveltekit: 'SVELTEKIT',
+    mobileweb: 'MOBILE_WEB',
+  });
 }
 
 function canonicalProjectLanguage(value: string | undefined): ProjectLanguage | undefined {
-  return PROJECT_LANGUAGES.includes(value as ProjectLanguage)
-    ? (value as ProjectLanguage)
-    : undefined;
+  return canonicalEnumValue(value, PROJECT_LANGUAGES, {
+    ts: 'TYPESCRIPT',
+    js: 'JAVASCRIPT',
+  });
 }
 
 function canonicalPackageManager(value: string | undefined): PackageManager | undefined {
-  return PACKAGE_MANAGERS.includes(value as PackageManager)
-    ? (value as PackageManager)
-    : undefined;
+  return canonicalEnumValue(value, PACKAGE_MANAGERS);
 }
 
 function canonicalStylingSystem(value: string | undefined): StylingSystem | undefined {
-  return STYLING_SYSTEMS.includes(value as StylingSystem)
-    ? (value as StylingSystem)
-    : undefined;
+  return canonicalEnumValue(value, STYLING_SYSTEMS, {
+    tailwindcss: 'TAILWIND',
+    cssmodules: 'CSS_MODULES',
+    cssmodule: 'CSS_MODULES',
+    scss: 'SASS',
+    styledcomponents: 'STYLED_COMPONENTS',
+    emotioncss: 'EMOTION',
+    css: 'PLAIN_CSS',
+    plaincss: 'PLAIN_CSS',
+  });
+}
+
+function canonicalEnumValue<T extends string>(
+  value: string | undefined,
+  options: readonly T[],
+  aliases: Record<string, T> = {}
+): T | undefined {
+  if (!value) return undefined;
+
+  const exact = value.trim().toUpperCase();
+  if (options.includes(exact as T)) return exact as T;
+
+  const normalized = value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const aliased = aliases[normalized] ?? aliases[exact.toLowerCase()];
+  if (aliased && options.includes(aliased)) return aliased;
+
+  return undefined;
 }
 
 export function parsePathList(value: string) {
