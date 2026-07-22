@@ -27,6 +27,7 @@ export type ConfigurationStateId =
   | 'githubPermission'
   | 'githubRepoPicker'
   | 'githubReview'
+  | 'githubReadyToAnalyze'
   | 'uploading'
   | 'analyzing'
   | 'analysisWarning'
@@ -58,6 +59,19 @@ export type LocalSourceSelection = {
   originalFileCount: number;
   totalSize: number;
   files: File[];
+};
+
+export type SelectedGithubRepository = {
+  connectionId: string;
+  repositoryId: string;
+  repositoryOwner: string;
+  repositoryName: string;
+  repositoryFullName: string;
+  defaultBranch: string;
+  private: boolean;
+  updatedAt: string | null;
+  sizeKb: number | null;
+  installationAccountLogin: string;
 };
 
 export type DirectoryPickerAttributes = {

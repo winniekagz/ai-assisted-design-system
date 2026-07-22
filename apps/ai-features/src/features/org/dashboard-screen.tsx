@@ -1,20 +1,6 @@
 'use client';
 
 import {
-  AlertCircle,
-  ArrowRight,
-  Check,
-  Circle,
-  ClipboardCheck,
-  RefreshCw,
-  Settings,
-  ShieldCheck,
-  Users,
-} from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
-import { useState, type ComponentProps, type ReactNode } from 'react';
-
-import {
   Button,
   Card,
   CardContent,
@@ -26,9 +12,17 @@ import {
   TabsTrigger,
   cn,
 } from 'componentiq';
+import {
+  AlertCircle,
+  ArrowRight,
+  Check,
+  Circle,
+  RefreshCw,
+  ShieldCheck,
+} from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { useState, type ComponentProps, type ReactNode } from 'react';
 
-import type { Role } from './types';
-import { OrgFrame } from './org-frame';
 import {
   dashboardCounts,
   dashboardRoleViews,
@@ -43,6 +37,8 @@ import {
   type SuggestedAction,
   type ViolatedRule,
 } from './fixtures/dashboard';
+import { OrgFrame } from './org-frame';
+import type { Role } from './types';
 
 type ActionTab = 'blocking' | 'overrides' | 'unassigned' | 'mine';
 
@@ -184,7 +180,7 @@ function OrganizationDashboardContent({
         <DashboardEmptyState state={dashboardState} />
       ) : (
         <>
-          <DeploymentStatusPanel meta={meta} counts={counts} state={dashboardState} />
+          <DeploymentStatusPanel meta={meta} counts={counts} />
           {dashboardState === 'audit-running' ? (
             <AuditRunningCard />
           ) : (
@@ -254,16 +250,20 @@ function ProjectHeader({
             audited {lastAuditedLabel}
           </p>
         </div>
-        <div className='flex flex-wrap gap-2'>
-          <UnsupportedButton variant='outlined' icon={<Settings className='size-4' />}>
-            Project settings
-          </UnsupportedButton>
-          {!disconnected && (
-            <UnsupportedButton icon={<ClipboardCheck className='size-4' />}>
-              Run audit
+        {/*
+          Dashboard header actions are hidden until project settings and manual
+          audit workflows are wired to real APIs.
+          <div className='flex flex-wrap gap-2'>
+            <UnsupportedButton variant='outlined' icon={<Settings className='size-4' />}>
+              Project settings
             </UnsupportedButton>
-          )}
-        </div>
+            {!disconnected && (
+              <UnsupportedButton icon={<ClipboardCheck className='size-4' />}>
+                Run audit
+              </UnsupportedButton>
+            )}
+          </div>
+        */}
       </div>
     </header>
   );
@@ -294,14 +294,11 @@ function ConnectionPill({ disconnected }: { disconnected: boolean }) {
 function DeploymentStatusPanel({
   meta,
   counts,
-  state,
 }: {
   meta: StatusMeta;
   counts: DashboardCounts;
-  state: DashboardState;
 }) {
   const tone = toneClasses(meta.tone);
-  const showActions = state !== 'healthy';
 
   return (
     <section
@@ -327,18 +324,22 @@ function DeploymentStatusPanel({
           <StatusMetric label='Overrides' value={counts.overrides} />
         </div>
       </div>
-      {showActions && (
-        <div className='mt-4 flex flex-wrap items-center gap-2.5'>
-          <UnsupportedButton className='bg-neutral-950 text-white hover:bg-neutral-950/90'>
-            {meta.primaryAction}
-          </UnsupportedButton>
-          <UnsupportedButton variant='outlined' icon={<Users className='size-4' />}>
-            Assign owners
-          </UnsupportedButton>
-          <UnsupportedButton variant='outlined'>Review overrides</UnsupportedButton>
-          <UnsupportedButton variant='outlined'>Open latest audit</UnsupportedButton>
-        </div>
-      )}
+      {/*
+        Dashboard status actions are hidden until audit workflow endpoints are
+        ready.
+        {showActions && (
+          <div className='mt-4 flex flex-wrap items-center gap-2.5'>
+            <UnsupportedButton className='bg-neutral-950 text-white hover:bg-neutral-950/90'>
+              {meta.primaryAction}
+            </UnsupportedButton>
+            <UnsupportedButton variant='outlined' icon={<Users className='size-4' />}>
+              Assign owners
+            </UnsupportedButton>
+            <UnsupportedButton variant='outlined'>Review overrides</UnsupportedButton>
+            <UnsupportedButton variant='outlined'>Open latest audit</UnsupportedButton>
+          </div>
+        )}
+      */}
     </section>
   );
 }

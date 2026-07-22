@@ -1,157 +1,122 @@
 'use client';
 
-import { useAuth } from '@clerk/nextjs';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type {
-  DetectedProjectConfiguration,
-  ProjectConfigurationStatus,
-} from '@winniekagendo/componentiq-shared-types';
-import type { GitProviderConnectionSummary } from '@winniekagendo/componentiq-shared-types';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Progress,
-  Select,
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  Stepper,
-  Textarea,
-  cn,
-  toast,
-} from 'componentiq';
-import {
-  AlertCircle,
-  Archive,
-  CheckCircle2,
-  ChevronLeft,
-  Clock,
-  FileArchive,
-  FolderOpen,
-  Github,
-  Info,
-  Loader2,
-  RefreshCcw,
-  Search,
-  ShieldCheck,
-  Upload,
-} from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type ReactNode,
-} from 'react';
-import { useForm } from 'react-hook-form';
-
-import {
-  useDisconnectGithubConnection,
-  useStartGithubConnection,
-} from '@/hooks/mutations/use-connect-github';
-import { useGithubConnections } from '@/hooks/queries/use-github-connections';
-import { useProjectConfiguration } from '@/features/projects/hooks';
-import {
-  confirmProjectConfiguration as confirmProjectConfigurationRequest,
-  uploadLocalProjectSource,
-} from '@/lib/api/projects';
-import { requireClerkSessionToken } from '@/lib/auth/clerk-session-token';
-import { queryKeys } from '@/lib/query/query-keys';
-
-import {
-  analysisSteps,
-  localExclusions,
-  localUploadLimits,
-  repoRows,
-  stageSteps,
-  statusLabels,
-} from '../constants';
-import type {
-  ConfigurationFormValues,
-  ConfigurationStateId,
-  DirectoryPickerAttributes,
-  LocalSourceSelection,
-  ProjectConfigurationDrawerProps,
-  ProjectConfigurationProject,
-} from '../types';
-import {
-  buildConfirmConfigurationInput,
-  configurationStateForStatus,
-  getConfigurationStatus,
-  previousState,
-  stageIndexForState,
-  titleForState,
-} from '../utils';
-
-export type {
-  ConfigurationStateId,
-  ProjectConfigurationProject,
-  ProjectConfigurationStatus,
-};
-export { getConfigurationStatus };
+import type { DetectedProjectConfiguration } from '@winniekagendo/componentiq-shared-types';
+import { Button, Input, Textarea } from 'componentiq';
+import type { ReactNode } from 'react';
+import type { FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form';
 
 import { StatusCallout, SummaryRows } from '../shared-components';
+import type { ConfigurationFormValues } from '../types';
+
+type ReviewSetupStepProps = {
+  detectedConfiguration: DetectedProjectConfiguration | null;
+  register: UseFormRegister<ConfigurationFormValues>;
+  setValue: UseFormSetValue<ConfigurationFormValues>;
+  values: ConfigurationFormValues;
+  errors: FieldErrors<ConfigurationFormValues>;
+};
+
 export function ReviewSetupStep({
   detectedConfiguration,
   register,
+  setValue,
   values,
-}: {
-  detectedConfiguration: DetectedProjectConfiguration | null;
-  register: ReturnType<typeof useForm<ConfigurationFormValues>>['register'];
-  values: ConfigurationFormValues;
-}) {
-  const setup = detectedConfiguration?.setup;
-  const framework = setup?.framework.value ?? detectedConfiguration?.framework ?? 'UNKNOWN';
-  const packageManager = setup?.packageManager.value ?? detectedConfiguration?.packageManager ?? 'UNKNOWN';
-  const styling = setup?.stylingSystem.value?.join(', ') ?? detectedConfiguration?.stylingSystem ?? 'UNKNOWN';
-  const warnings = setup?.globalWarnings ?? detectedConfiguration?.warnings ?? [];
-  const evidence = setup?.framework.evidence ?? [];
+  errors,
+}: ReviewSetupStepProps) {
+  const detected = detectedValues(detectedConfiguration);
+  const evidence = detectedConfiguration?.setup?.framework.evidence ?? [];
+  const warnings = detectedConfiguration?.warnings ?? [];
+
+  function resetField(name: keyof ConfigurationFormValues, value: string) {
+    setValue(name, value, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
+  }
 
   return (
     <div className='grid gap-4'>
-      <StatusCallout tone='info' title='Review detected setup' detail='Only uncertain fields are editable before saving this configuration.' />
-      <SummaryRows rows={[
-        ['Framework', `${framework} · ${setup?.framework.confidence ?? detectedConfiguration?.confidence ?? 'LOW'} confidence`],
-        ['Package manager', `${packageManager} · ${setup?.packageManager.confidence ?? 'LOW'} confidence`],
-        ['Styling system', `${styling} · ${setup?.stylingSystem.confidence ?? 'LOW'} confidence`],
-        ['Language', setup?.language.value ?? detectedConfiguration?.language ?? 'UNKNOWN'],
-        ['Project root', setup?.projectRoot.value ?? detectedConfiguration?.projectRoot ?? values.projectRoot],
-      ]} />
-      {evidence.length > 0 && (
-        <div className='rounded-md border border-border bg-background px-4 py-3'>
-          <h3 className='text-sm font-semibold text-foreground'>Evidence</h3>
-          <ul className='mt-2 grid gap-1 text-xs text-muted-foreground'>
-            {evidence.slice(0, 5).map(item => (
-              <li key={`${item.type}-${item.path}`}>{item.path}: {item.detail}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {warnings.length > 0 && (
-        <StatusCallout tone='warning' title='Review warnings' detail={warnings.slice(0, 2).join(' ')} />
-      )}
-      {setup && setup.candidateProjectRoots.length > 1 && (
-        <div className='rounded-md border border-border bg-background px-4 py-3'>
-          <h3 className='text-sm font-semibold text-foreground'>Candidate roots</h3>
-          <ul className='mt-2 grid gap-1 text-xs text-muted-foreground'>
-            {setup.candidateProjectRoots.map(candidate => (
-              <li key={candidate.path}>{candidate.path} · score {candidate.score}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <StatusCallout
+        tone='info'
+        title='Review detected setup'
+        detail='Confirm the configuration Component IQ should use for future project analysis. You can correct values that were detected incorrectly.'
+      />
+
+      <SummaryRows
+        rows={[
+          ['Detected at', detectedConfiguration?.analyzedAt ?? 'Not available'],
+          ['Detector version', detectedConfiguration?.detectorVersion ?? 'Not available'],
+          ['Source snapshot', detectedConfiguration?.sourceSnapshotId ?? 'Not available'],
+        ]}
+      />
+
       <div className='grid gap-3'>
-        <Input label='Project root' {...register('projectRoot')} placeholder={setup?.projectRoot.value ?? detectedConfiguration?.projectRoot ?? '/'} />
-        <Input label='Component directories' {...register('componentDirectories')} placeholder={(setup?.componentPaths.value ?? detectedConfiguration?.componentPaths ?? []).join(', ')} />
-        <Input label='Design-token path' {...register('tokenPath')} placeholder={(setup?.tokenPaths.value ?? detectedConfiguration?.tokenPaths ?? []).join(', ')} />
+        <EditableField
+          label='Framework'
+          detected={detected.framework}
+          current={values.framework}
+          edited={values.framework !== detected.framework}
+          error={errors.framework?.message}
+          onReset={() => resetField('framework', detected.framework)}
+        >
+          <Input label='Framework value' {...register('framework')} />
+        </EditableField>
+        <EditableField
+          label='Package manager'
+          detected={detected.packageManager}
+          current={values.packageManager}
+          edited={values.packageManager !== detected.packageManager}
+          error={errors.packageManager?.message}
+          onReset={() => resetField('packageManager', detected.packageManager)}
+        >
+          <Input label='Package manager value' {...register('packageManager')} />
+        </EditableField>
+        <EditableField
+          label='Styling system'
+          detected={detected.stylingSystem}
+          current={values.stylingSystem}
+          edited={values.stylingSystem !== detected.stylingSystem}
+          error={errors.stylingSystem?.message}
+          onReset={() => resetField('stylingSystem', detected.stylingSystem)}
+        >
+          <Input label='Styling system value' {...register('stylingSystem')} />
+        </EditableField>
+        <EditableField
+          label='Project root'
+          detected={detected.projectRoot}
+          current={values.projectRoot}
+          edited={values.projectRoot !== detected.projectRoot}
+          error={errors.projectRoot?.message}
+          onReset={() => resetField('projectRoot', detected.projectRoot)}
+        >
+          <Input label='Project root value' {...register('projectRoot')} />
+        </EditableField>
+        <EditableField
+          label='Component paths'
+          detected={detected.componentDirectories}
+          current={values.componentDirectories}
+          edited={values.componentDirectories !== detected.componentDirectories}
+          error={errors.componentDirectories?.message}
+          onReset={() =>
+            resetField('componentDirectories', detected.componentDirectories)
+          }
+        >
+          <Input
+            label='Component paths value'
+            {...register('componentDirectories')}
+          />
+        </EditableField>
+        <EditableField
+          label='Token paths'
+          detected={detected.tokenPath}
+          current={values.tokenPath}
+          edited={values.tokenPath !== detected.tokenPath}
+          error={errors.tokenPath?.message}
+          onReset={() => resetField('tokenPath', detected.tokenPath)}
+        >
+          <Input label='Token paths value' {...register('tokenPath')} />
+        </EditableField>
         <div className='grid gap-2'>
           <label className='text-sm font-medium text-muted-foreground' htmlFor='configuration-reviewer-notes'>
             Reviewer notes
@@ -159,6 +124,94 @@ export function ReviewSetupStep({
           <Textarea id='configuration-reviewer-notes' {...register('notes')} />
         </div>
       </div>
+
+      {evidence.length > 0 && (
+        <details className='rounded-md border border-border bg-background px-4 py-3'>
+          <summary className='cursor-pointer text-sm font-semibold text-foreground'>
+            Detection evidence
+          </summary>
+          <ul className='mt-2 grid gap-1 text-xs text-muted-foreground'>
+            {evidence.slice(0, 6).map(item => (
+              <li key={`${item.type}-${item.path}-${item.detail}`}>
+                {item.path}: {item.detail}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      {warnings.length > 0 && (
+        <StatusCallout
+          tone='warning'
+          title='Review warnings'
+          detail={warnings.slice(0, 2).join(' ')}
+        />
+      )}
     </div>
   );
+}
+
+function EditableField({
+  label,
+  detected,
+  current,
+  edited,
+  error,
+  onReset,
+  children,
+}: {
+  label: string;
+  detected: string;
+  current: string;
+  edited: boolean;
+  error?: string;
+  onReset(): void;
+  children: ReactNode;
+}) {
+  return (
+    <section className='grid gap-2 rounded-md border border-border bg-background px-4 py-3'>
+      <div className='flex flex-wrap items-center justify-between gap-2'>
+        <div>
+          <h3 className='text-sm font-semibold text-foreground'>{label}</h3>
+          <p className='text-xs text-muted-foreground'>
+            Detected: <span className='font-medium'>{detected || 'UNKNOWN'}</span>
+          </p>
+        </div>
+        <div className='flex items-center gap-2'>
+          {edited && (
+            <span className='rounded-full bg-status-warning-bg px-2 py-0.5 text-xs font-medium text-status-warning'>
+              Edited
+            </span>
+          )}
+          <Button type='button' variant='ghost' onClick={onReset}>
+            Reset
+          </Button>
+        </div>
+      </div>
+      {children}
+      <p className='text-xs text-muted-foreground'>
+        Confirmed value: <span className='font-medium'>{current || 'Empty'}</span>
+      </p>
+      {error && <p className='text-xs font-medium text-status-error'>{error}</p>}
+    </section>
+  );
+}
+
+function detectedValues(detected: DetectedProjectConfiguration | null) {
+  const setup = detected?.setup;
+
+  return {
+    framework: setup?.framework.value ?? detected?.framework ?? 'UNKNOWN',
+    packageManager:
+      setup?.packageManager.value ?? detected?.packageManager ?? 'UNKNOWN',
+    stylingSystem:
+      setup?.stylingSystem.value?.[0] ?? detected?.stylingSystem ?? 'UNKNOWN',
+    projectRoot: setup?.projectRoot.value ?? detected?.projectRoot ?? '.',
+    componentDirectories: (
+      setup?.componentPaths.value ??
+      detected?.componentPaths ??
+      []
+    ).join(', '),
+    tokenPath: (setup?.tokenPaths.value ?? detected?.tokenPaths ?? []).join(', '),
+  };
 }

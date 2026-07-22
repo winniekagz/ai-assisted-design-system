@@ -2,6 +2,16 @@ import type {
   ConfirmProjectConfigurationInput,
   DetectedProjectConfiguration,
 } from '@winniekagendo/componentiq-shared-types';
+import {
+  PACKAGE_MANAGERS,
+  PROJECT_FRAMEWORKS,
+  PROJECT_LANGUAGES,
+  STYLING_SYSTEMS,
+  type PackageManager,
+  type ProjectFramework,
+  type ProjectLanguage,
+  type StylingSystem,
+} from '@winniekagendo/componentiq-shared-types';
 
 import type {
   ConfigurationFormValues,
@@ -30,22 +40,26 @@ export function buildConfirmConfigurationInput(
   const tokenPaths = parsePathList(values.tokenPath);
 
   return {
+    expectedConfigurationJobId: detectedConfiguration?.configurationJobId ?? '',
+    expectedDetectedAt: detectedConfiguration?.analyzedAt ?? undefined,
     framework:
-      cleanOptional(values.framework) ??
+      canonicalProjectFramework(cleanOptional(values.framework)) ??
       setup?.framework.value ??
-      detectedConfiguration?.framework ??
+      canonicalProjectFramework(detectedConfiguration?.framework ?? undefined) ??
       undefined,
     language:
-      setup?.language.value ?? detectedConfiguration?.language ?? undefined,
+      setup?.language.value ??
+      canonicalProjectLanguage(detectedConfiguration?.language ?? undefined) ??
+      undefined,
     packageManager:
-      cleanOptional(values.packageManager) ??
+      canonicalPackageManager(cleanOptional(values.packageManager)) ??
       setup?.packageManager.value ??
-      detectedConfiguration?.packageManager ??
+      canonicalPackageManager(detectedConfiguration?.packageManager ?? undefined) ??
       undefined,
     stylingSystem:
-      cleanOptional(values.stylingSystem) ??
-      setup?.stylingSystem.value?.join(', ') ??
-      detectedConfiguration?.stylingSystem ??
+      canonicalStylingSystem(cleanOptional(values.stylingSystem)) ??
+      setup?.stylingSystem.value?.[0] ??
+      canonicalStylingSystem(detectedConfiguration?.stylingSystem ?? undefined) ??
       undefined,
     projectRoot:
       cleanOptional(values.projectRoot) ??
@@ -64,11 +78,63 @@ export function buildConfirmConfigurationInput(
   };
 }
 
+function canonicalProjectFramework(value: string | undefined): ProjectFramework | undefined {
+  return PROJECT_FRAMEWORKS.includes(value as ProjectFramework)
+    ? (value as ProjectFramework)
+    : undefined;
+}
+
+function canonicalProjectLanguage(value: string | undefined): ProjectLanguage | undefined {
+  return PROJECT_LANGUAGES.includes(value as ProjectLanguage)
+    ? (value as ProjectLanguage)
+    : undefined;
+}
+
+function canonicalPackageManager(value: string | undefined): PackageManager | undefined {
+  return PACKAGE_MANAGERS.includes(value as PackageManager)
+    ? (value as PackageManager)
+    : undefined;
+}
+
+function canonicalStylingSystem(value: string | undefined): StylingSystem | undefined {
+  return STYLING_SYSTEMS.includes(value as StylingSystem)
+    ? (value as StylingSystem)
+    : undefined;
+}
+
 export function parsePathList(value: string) {
   return value
     .split(',')
     .map(item => item.trim())
     .filter(Boolean);
+}
+
+export function validateConfigurationPath(value: string) {
+  const normalized = value.trim().replace(/\\/g, '/');
+  const parts = normalized.split('/').filter(Boolean);
+
+  if (!normalized) return 'Path is required.';
+  if (normalized.startsWith('/') || /^[a-zA-Z]:/.test(normalized)) {
+    return 'Use a relative path inside the project.';
+  }
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(normalized)) {
+    return 'URI-style paths are not allowed.';
+  }
+  if (normalized.includes('\0') || /[;&|`$<>]/.test(normalized)) {
+    return 'Path contains unsupported characters.';
+  }
+  if (parts.some(part => part === '..' || part === '.')) {
+    return 'Path cannot traverse outside the project.';
+  }
+
+  return null;
+}
+
+export function validateConfigurationPathList(value: string) {
+  const paths = parsePathList(value);
+  const invalid = paths.find(path => validateConfigurationPath(path));
+
+  return invalid ? validateConfigurationPath(invalid) : null;
 }
 
 export function cleanOptional(value: string) {
@@ -139,6 +205,7 @@ export function previousState(state: ConfigurationStateId): ConfigurationStateId
     githubPermission: 'sourceChoice',
     githubRepoPicker: 'githubPermission',
     githubReview: 'githubRepoPicker',
+    githubReadyToAnalyze: 'githubReview',
     uploading: 'localPreflight',
     analyzing: 'sourceChoice',
     analysisWarning: 'analyzing',

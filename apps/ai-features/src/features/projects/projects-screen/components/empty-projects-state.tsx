@@ -20,7 +20,6 @@ import {
   ChevronDown,
   ChevronRight,
   CircleDashed,
-  Download,
   FolderKanban,
   Import,
   Plus,
@@ -41,7 +40,6 @@ import type {
 
 import { CreateProjectDrawer } from '@/features/projects/create-project-drawer';
 import { projectStatuses } from '@/features/projects/fixtures/projects';
-import { ImportProjectFlow } from '@/features/projects/import-project-flow';
 import {
   ConfigurationStatusBadge,
   ProjectConfigurationDrawer,
@@ -77,23 +75,18 @@ type ProjectFilterValue = string;
 
 export function EmptyProjectsState({
   onCreateProject,
-  onImportProject,
 }: {
   onCreateProject(): void;
-  onImportProject(): void;
 }) {
   return (
     <EmptyState
       icon={<FolderKanban className='size-6' />}
       title='No projects yet'
-      description='Create or import a project to connect repositories, design-system rules, and audit workflows.'
+      description='Create a project to connect repositories, design-system rules, and audit workflows.'
     >
       <div className='flex flex-wrap justify-center gap-2'>
         <Button type='button' onClick={onCreateProject} startIcon={<Plus className='size-4' />}>
           Create project
-        </Button>
-        <Button type='button' variant='outlined' onClick={onImportProject} startIcon={<Download className='size-4' />}>
-          Import existing repository
         </Button>
       </div>
     </EmptyState>

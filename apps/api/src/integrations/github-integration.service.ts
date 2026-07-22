@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpException,
   Injectable,
   Logger,
 } from '@nestjs/common';
@@ -10,6 +11,7 @@ import type { OrganizationMember } from '@prisma/client';
 import type {
   GitHubConnectionCallbackResult,
   GitHubConnectionStartResponse,
+  GitHubRepositoryListResponse,
   GitProviderConnectionSummary,
 } from '@winniekagendo/componentiq-shared-types';
 
@@ -19,16 +21,22 @@ import { AuthorizationService } from '../authorization/authorization.service';
 import { GithubAppConfigService } from './github-app-config.service';
 import { GithubConnectionStateService } from './github-connection-state.service';
 import {
+  buildGithubInstallationConfigureUrl,
   mapConnectionSummary,
   normalizeInstallationId,
   safeReturnPath,
 } from './github-connection.mapper';
 import {
   type CompleteGithubConnectionCommand,
+  connectionSelect,
   type DisconnectGithubConnectionCommand,
   type GitProviderConnectionRecord,
   type StartGithubConnectionCommand,
 } from './github-integration.types';
+import {
+  GithubDomainError,
+  GithubRepositoryService,
+} from './github-repository.service';
 
 type GithubIntegrationPrisma = {
   gitProviderConnection?: {
@@ -49,7 +57,8 @@ export class GithubIntegrationService {
     private readonly prisma: PrismaService,
     private readonly authorizationService: AuthorizationService,
     private readonly githubAppConfig: GithubAppConfigService,
-    private readonly githubConnectionState: GithubConnectionStateService
+    private readonly githubConnectionState: GithubConnectionStateService,
+    private readonly githubRepositoryService: GithubRepositoryService
   ) {}
 
   async listConnections(
@@ -60,17 +69,7 @@ export class GithubIntegrationService {
       const connections = await prisma.gitProviderConnection.findMany({
         where: { organizationId },
         orderBy: { updatedAt: 'desc' },
-        select: {
-          id: true,
-          provider: true,
-          installationId: true,
-          accountLogin: true,
-          accountType: true,
-          status: true,
-          installedAt: true,
-          lastVerifiedAt: true,
-          disconnectedAt: true,
-        },
+        select: connectionSelect,
       });
 
       return connections.map(mapConnectionSummary);
@@ -377,6 +376,69 @@ export class GithubIntegrationService {
     return mapConnectionSummary(connection);
   }
 
+  async listRepositories({
+    organizationId,
+    connectionId,
+    cursor,
+    perPage,
+  }: {
+    organizationId: string;
+    connectionId: string;
+    cursor?: string;
+    perPage?: number;
+  }): Promise<GitHubRepositoryListResponse> {
+    const connection = await this.findConnectionForOrganization(
+      organizationId,
+      connectionId
+    );
+
+    if (!connection) {
+      throw new BadRequestException('GitHub connection not found');
+    }
+
+    if (connection.status !== 'ACTIVE') {
+      throw new HttpException(
+        {
+          message: 'GitHub connection is not active',
+          errorCode: 'source_installation_revoked',
+        },
+        410
+      );
+    }
+
+    try {
+      const result = await this.githubRepositoryService.listInstallationRepositories({
+        installationId: connection.installationId,
+        cursor,
+        perPage,
+      });
+
+      return {
+        ...result,
+        connection: {
+          id: connection.id,
+          accountLogin: connection.accountLogin,
+          accountType: connection.accountType,
+          status: connection.status,
+          repositoryAccess: 'UNKNOWN',
+        },
+        configureUrl: buildGithubInstallationConfigureUrl(connection),
+      };
+    } catch (error) {
+      if (error instanceof GithubDomainError) {
+        throw new HttpException(
+          {
+            message: error.message,
+            errorCode: error.code,
+          },
+          error.status
+        );
+      }
+
+      throw error;
+    }
+  }
+
   private logMissingDelegateFallback(
     operation: string,
     context: Record<string, string>
@@ -386,6 +448,42 @@ export class GithubIntegrationService {
       operation,
       ...context,
     });
+  }
+
+  private async findConnectionForOrganization(
+    organizationId: string,
+    connectionId: string
+  ): Promise<GitProviderConnectionRecord | null> {
+    const prisma = this.prisma as unknown as GithubIntegrationPrisma;
+    if (prisma.gitProviderConnection) {
+      return prisma.gitProviderConnection.findFirst({
+        where: { id: connectionId, organizationId },
+        select: connectionSelect,
+      });
+    }
+
+    this.logMissingDelegateFallback('GitProviderConnection.findFirst', {
+      organizationId,
+      connectionId,
+    });
+
+    const [connection] = await prisma.$queryRaw<GitProviderConnectionRecord[]>`
+      SELECT
+        id,
+        provider,
+        "installationId",
+        "accountLogin",
+        "accountType",
+        status,
+        "installedAt",
+        "lastVerifiedAt",
+        "disconnectedAt"
+      FROM "GitProviderConnection"
+      WHERE id = ${connectionId} AND "organizationId" = ${organizationId}
+      LIMIT 1
+    `;
+
+    return connection ?? null;
   }
 }
 

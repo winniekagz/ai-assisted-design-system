@@ -3,10 +3,22 @@ import { Transform } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
+  IsIn,
+  IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
+import {
+  PACKAGE_MANAGERS,
+  PROJECT_FRAMEWORKS,
+  PROJECT_LANGUAGES,
+  STYLING_SYSTEMS,
+  type PackageManager,
+  type ProjectFramework,
+  type ProjectLanguage,
+  type StylingSystem,
+} from '@winniekagendo/componentiq-shared-types';
 
 function trimOptionalString(value: unknown) {
   if (typeof value !== 'string') return value;
@@ -27,33 +39,51 @@ function trimOptionalStringArray(value: unknown) {
 }
 
 export class ConfirmProjectConfigurationDto {
-  @ApiPropertyOptional({ example: 'NEXTJS', maxLength: 80 })
+  @ApiPropertyOptional({ example: 'configuration_job_id' })
+  @Transform(({ value }) => trimOptionalString(value))
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(120)
+  expectedConfigurationJobId!: string;
+
+  @ApiPropertyOptional({ example: '2026-07-22T09:30:00.000Z' })
   @Transform(({ value }) => trimOptionalString(value))
   @IsOptional()
   @IsString()
   @MaxLength(80)
-  framework?: string;
+  expectedDetectedAt?: string;
+
+  @ApiPropertyOptional({ example: 'NEXTJS', maxLength: 80 })
+  @Transform(({ value }) => trimOptionalString(value))
+  @IsOptional()
+  @IsString()
+  @IsIn(PROJECT_FRAMEWORKS)
+  @MaxLength(80)
+  framework?: ProjectFramework;
 
   @ApiPropertyOptional({ example: 'TYPESCRIPT', maxLength: 80 })
   @Transform(({ value }) => trimOptionalString(value))
   @IsOptional()
   @IsString()
+  @IsIn(PROJECT_LANGUAGES)
   @MaxLength(80)
-  language?: string;
+  language?: ProjectLanguage;
 
   @ApiPropertyOptional({ example: 'PNPM', maxLength: 80 })
   @Transform(({ value }) => trimOptionalString(value))
   @IsOptional()
   @IsString()
+  @IsIn(PACKAGE_MANAGERS)
   @MaxLength(80)
-  packageManager?: string;
+  packageManager?: PackageManager;
 
   @ApiPropertyOptional({ example: 'TAILWIND', maxLength: 120 })
   @Transform(({ value }) => trimOptionalString(value))
   @IsOptional()
   @IsString()
+  @IsIn(STYLING_SYSTEMS)
   @MaxLength(120)
-  stylingSystem?: string;
+  stylingSystem?: StylingSystem;
 
   @ApiPropertyOptional({ example: 'apps/web', maxLength: 300 })
   @Transform(({ value }) => trimOptionalString(value))

@@ -1,104 +1,11 @@
 'use client';
 
-import { useAuth } from '@clerk/nextjs';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type {
-  DetectedProjectConfiguration,
-  ProjectConfigurationStatus,
-} from '@winniekagendo/componentiq-shared-types';
 import type { GitProviderConnectionSummary } from '@winniekagendo/componentiq-shared-types';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Progress,
-  Select,
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  Stepper,
-  Textarea,
-  cn,
-  toast,
-} from 'componentiq';
-import {
-  AlertCircle,
-  Archive,
-  CheckCircle2,
-  ChevronLeft,
-  Clock,
-  FileArchive,
-  FolderOpen,
-  Github,
-  Info,
-  Loader2,
-  RefreshCcw,
-  Search,
-  ShieldCheck,
-  Upload,
-} from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type ReactNode,
-} from 'react';
-import { useForm } from 'react-hook-form';
+import { Button, Card, CardContent } from 'componentiq';
+import { Loader2, ShieldCheck } from 'lucide-react';
 
-import {
-  useDisconnectGithubConnection,
-  useStartGithubConnection,
-} from '@/hooks/mutations/use-connect-github';
-import { useGithubConnections } from '@/hooks/queries/use-github-connections';
-import { useProjectConfiguration } from '@/features/projects/hooks';
-import {
-  confirmProjectConfiguration as confirmProjectConfigurationRequest,
-  uploadLocalProjectSource,
-} from '@/lib/api/projects';
-import { requireClerkSessionToken } from '@/lib/auth/clerk-session-token';
-import { queryKeys } from '@/lib/query/query-keys';
+import { StatusCallout } from '../shared-components';
 
-import {
-  analysisSteps,
-  localExclusions,
-  localUploadLimits,
-  repoRows,
-  stageSteps,
-  statusLabels,
-} from '../constants';
-import type {
-  ConfigurationFormValues,
-  ConfigurationStateId,
-  DirectoryPickerAttributes,
-  LocalSourceSelection,
-  ProjectConfigurationDrawerProps,
-  ProjectConfigurationProject,
-} from '../types';
-import {
-  buildConfirmConfigurationInput,
-  configurationStateForStatus,
-  getConfigurationStatus,
-  previousState,
-  stageIndexForState,
-  titleForState,
-} from '../utils';
-
-export type {
-  ConfigurationStateId,
-  ProjectConfigurationProject,
-  ProjectConfigurationStatus,
-};
-export { getConfigurationStatus };
-
-import { StatusCallout, SummaryRows } from '../shared-components';
 export function GithubPermissionStep({
   connection,
   isLoading,
@@ -106,6 +13,7 @@ export function GithubPermissionStep({
   isDisconnecting,
   errorMessage,
   onAuthorize,
+  onContinue,
   onDisconnect,
 }: {
   connection: GitProviderConnectionSummary | null;
@@ -114,7 +22,7 @@ export function GithubPermissionStep({
   isDisconnecting: boolean;
   errorMessage: string | null;
   onAuthorize(): void;
-  // eslint-disable-next-line no-unused-vars
+  onContinue(): void;
   onDisconnect(connectionId: string): void;
 }) {
   const active = connection?.status === 'ACTIVE';
@@ -137,7 +45,7 @@ export function GithubPermissionStep({
         <StatusCallout
           tone='info'
           title={`Connected to ${connection.accountLogin}`}
-          detail='Continue to repository selection after the repository picker is available.'
+          detail='Continue to choose from repositories visible to this GitHub App installation.'
         />
       )}
       {connection?.status === 'DISCONNECTED' && (
@@ -158,7 +66,7 @@ export function GithubPermissionStep({
         title='ComponentIQ requests permission to'
         items={[
           'Use the permissions configured on your GitHub App installation',
-          'Read installation and repository metadata after you choose repositories',
+          'Read installation and repository metadata',
           'Store the installation association for this Component IQ organization',
         ]}
       />
@@ -166,7 +74,7 @@ export function GithubPermissionStep({
         title='ComponentIQ cannot'
         items={[
           'Store GitHub installation access tokens in the database',
-          'Select repositories in this slice',
+          'Fetch repository source in this slice',
           'Run audits or pull-request checks from GitHub yet',
         ]}
       />
@@ -177,11 +85,7 @@ export function GithubPermissionStep({
       </div>
       {active ? (
         <div className='flex flex-wrap gap-2'>
-          <Button
-            type='button'
-            disabled
-            title='Repository selection is intentionally deferred to a later slice.'
-          >
+          <Button type='button' onClick={onContinue}>
             Continue to repositories
           </Button>
           <Button
@@ -209,7 +113,13 @@ export function GithubPermissionStep({
   );
 }
 
-export function PermissionList({ title, items }: { title: string; items: string[] }) {
+export function PermissionList({
+  title,
+  items,
+}: {
+  title: string;
+  items: string[];
+}) {
   return (
     <Card className='rounded-md border border-border bg-background py-0 shadow-none'>
       <CardContent className='px-4 py-4'>
@@ -217,7 +127,10 @@ export function PermissionList({ title, items }: { title: string; items: string[
         <ul className='mt-3 grid gap-2 text-sm text-muted-foreground'>
           {items.map(item => (
             <li key={item} className='flex gap-2'>
-              <ShieldCheck className='mt-0.5 size-4 shrink-0 text-primary' aria-hidden='true' />
+              <ShieldCheck
+                className='mt-0.5 size-4 shrink-0 text-primary'
+                aria-hidden='true'
+              />
               <span>{item}</span>
             </li>
           ))}

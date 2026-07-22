@@ -1,162 +1,185 @@
 'use client';
 
-import { useAuth } from '@clerk/nextjs';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type {
-  DetectedProjectConfiguration,
-  ProjectConfigurationStatus,
+  GitHubRepositorySummary,
+  GitProviderConnectionSummary,
 } from '@winniekagendo/componentiq-shared-types';
-import type { GitProviderConnectionSummary } from '@winniekagendo/componentiq-shared-types';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Progress,
-  Select,
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  Stepper,
-  Textarea,
-  cn,
-  toast,
-} from 'componentiq';
-import {
-  AlertCircle,
-  Archive,
-  CheckCircle2,
-  ChevronLeft,
-  Clock,
-  FileArchive,
-  FolderOpen,
-  Github,
-  Info,
-  Loader2,
-  RefreshCcw,
-  Search,
-  ShieldCheck,
-  Upload,
-} from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type ReactNode,
-} from 'react';
-import { useForm } from 'react-hook-form';
+import { Button, Input, cn } from 'componentiq';
+import { RefreshCcw, Search } from 'lucide-react';
+import React from 'react';
+import type { UseFormRegister } from 'react-hook-form';
+
+import { getGithubRepositoryPickerState } from '../github-repository-picker-state';
+import type { ConfigurationFormValues } from '../types';
 
 import {
-  useDisconnectGithubConnection,
-  useStartGithubConnection,
-} from '@/hooks/mutations/use-connect-github';
-import { useGithubConnections } from '@/hooks/queries/use-github-connections';
-import { useProjectConfiguration } from '@/features/projects/hooks';
-import {
-  confirmProjectConfiguration as confirmProjectConfigurationRequest,
-  uploadLocalProjectSource,
-} from '@/lib/api/projects';
-import { requireClerkSessionToken } from '@/lib/auth/clerk-session-token';
-import { queryKeys } from '@/lib/query/query-keys';
+  GithubConnectionContext,
+  type GithubRepositoryErrorKind,
+  RepositoryAccessEmptyState,
+  RepositoryAutocompleteResults,
+  RepositoryErrorState,
+  RepositoryLoadingState,
+  RepositorySearchEmptyState,
+  SelectedRepositorySummary,
+} from './github-repo-picker-parts';
 
-import {
-  analysisSteps,
-  localExclusions,
-  localUploadLimits,
-  repoRows,
-  stageSteps,
-  statusLabels,
-} from '../constants';
-import type {
-  ConfigurationFormValues,
-  ConfigurationStateId,
-  DirectoryPickerAttributes,
-  LocalSourceSelection,
-  ProjectConfigurationDrawerProps,
-  ProjectConfigurationProject,
-} from '../types';
-import {
-  buildConfirmConfigurationInput,
-  configurationStateForStatus,
-  getConfigurationStatus,
-  previousState,
-  stageIndexForState,
-  titleForState,
-} from '../utils';
-
-export type {
-  ConfigurationStateId,
-  ProjectConfigurationProject,
-  ProjectConfigurationStatus,
-};
-export { getConfigurationStatus };
-
-import { StatusCallout, SummaryRows } from '../shared-components';
 export function GithubRepoPickerStep({
   repoSearch,
   onRepoSearch,
-  repos,
+  repositories,
   selectedRepoId,
   onSelectRepo,
   register,
+  isLoading,
+  isError,
+  errorMessage,
+  onRetry,
+  onRefresh,
+  onConfigureAccess,
+  onReconnectGithub,
+  onClearSearch,
+  onChangeRepository,
+  nextCursor,
+  isFetching,
+  isRefreshing,
+  onNextPage,
+  connection,
+  configureUrl,
+  errorKind,
+  selectedRepository,
 }: {
   repoSearch: string;
   // eslint-disable-next-line no-unused-vars
   onRepoSearch(value: string): void;
-  repos: typeof repoRows;
+  repositories: GitHubRepositorySummary[];
   selectedRepoId: string;
   // eslint-disable-next-line no-unused-vars
-  onSelectRepo(repoId: string): void;
-  register: ReturnType<typeof useForm<ConfigurationFormValues>>['register'];
+  onSelectRepo(repository: GitHubRepositorySummary): void;
+  register: UseFormRegister<ConfigurationFormValues>;
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage: string | null;
+  onRetry(): void;
+  onRefresh(): void;
+  onConfigureAccess(): void;
+  onReconnectGithub(): void;
+  onClearSearch(): void;
+  onChangeRepository(): void;
+  nextCursor: string | null;
+  isFetching: boolean;
+  isRefreshing: boolean;
+  onNextPage(): void;
+  connection: Pick<
+    GitProviderConnectionSummary,
+    'accountLogin' | 'accountType' | 'status'
+  > | null;
+  configureUrl: string | null;
+  errorKind?: GithubRepositoryErrorKind;
+  selectedRepository: GitHubRepositorySummary | null;
 }) {
+  const pickerState = getGithubRepositoryPickerState({
+    repositories,
+    search: repoSearch,
+    isLoading,
+    isError,
+  });
+  const selectedRepositoryUnavailable =
+    Boolean(selectedRepository) &&
+    Boolean(selectedRepoId) &&
+    !repositories.some(repository => repository.id === selectedRepoId);
+  const isChoosingRepository = !selectedRepository;
+
   return (
-    <div className='grid gap-4'>
-      <Select label='GitHub account' {...register('githubAccount')}>
-        <option>Acme</option>
-        <option>Personal repositories</option>
-      </Select>
-      <Input
-        label='Search repositories'
-        value={repoSearch}
-        onChange={event => onRepoSearch(event.target.value)}
-        startIcon={<Search className='size-4 text-muted-foreground' />}
-      />
-      <div className='grid gap-2'>
-        {repos.map(repo => {
-          const disabled = repo.status !== 'Available';
-          const selected = selectedRepoId === repo.id;
-          return (
-            <button
-              key={repo.id}
+    <section className='grid gap-4' aria-labelledby='github-repository-picker-heading'>
+      <GithubConnectionContext connection={connection} />
+      {selectedRepository ? (
+        <SelectedRepositorySummary
+          repository={selectedRepository}
+          isUnavailable={selectedRepositoryUnavailable}
+          onChangeRepository={onChangeRepository}
+        />
+      ) : (
+        <div className='grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end'>
+          <Input
+            label='Search repositories'
+            value={repoSearch}
+            onChange={event => onRepoSearch(event.target.value)}
+            startIcon={<Search className='size-4 text-muted-foreground' />}
+          />
+          <Button
+            type='button'
+            variant='outlined'
+            disabled={isRefreshing || isLoading}
+            onClick={onRefresh}
+          >
+            <RefreshCcw
+              className={cn('mr-2 size-4', isRefreshing && 'animate-spin')}
+              aria-hidden='true'
+            />
+            {isRefreshing ? 'Refreshing' : 'Refresh repositories'}
+          </Button>
+        </div>
+      )}
+
+      {isChoosingRepository && pickerState.status === 'loading' && (
+        <RepositoryLoadingState />
+      )}
+
+      {isChoosingRepository && pickerState.status === 'failure' && (
+        <RepositoryErrorState
+          errorKind={errorKind}
+          errorMessage={errorMessage}
+          configureUrl={configureUrl}
+          onConfigureAccess={onConfigureAccess}
+          onReconnectGithub={onReconnectGithub}
+          onRetry={onRetry}
+        />
+      )}
+
+      {isChoosingRepository && pickerState.status === 'access-empty' && (
+        <RepositoryAccessEmptyState
+          configureUrl={configureUrl}
+          isRefreshing={isRefreshing}
+          onConfigureAccess={onConfigureAccess}
+          onRefresh={onRefresh}
+        />
+      )}
+
+      {isChoosingRepository && pickerState.status === 'search-empty' && (
+        <RepositorySearchEmptyState
+          query={repoSearch.trim()}
+          configureUrl={configureUrl}
+          isRefreshing={isRefreshing}
+          onConfigureAccess={onConfigureAccess}
+          onClearSearch={onClearSearch}
+          onRefresh={onRefresh}
+        />
+      )}
+
+      {isChoosingRepository && pickerState.status === 'success' && (
+        <div className='grid gap-3'>
+          <RepositoryAutocompleteResults
+            repositories={pickerState.repositories}
+            selectedRepoId={selectedRepoId}
+            onSelectRepo={onSelectRepo}
+          />
+          {nextCursor && (
+            <Button
               type='button'
-              disabled={disabled}
-              onClick={() => onSelectRepo(repo.id)}
-              className={cn(
-                'flex flex-col gap-2 rounded-md border px-3 py-3 text-left transition-colors sm:flex-row sm:items-center sm:justify-between',
-                selected ? 'border-primary bg-primary-50' : 'border-border bg-background',
-                disabled && 'cursor-not-allowed opacity-60'
-              )}
+              variant='outlined'
+              disabled={isFetching}
+              onClick={onNextPage}
             >
-              <span>
-                <span className='block font-mono text-sm font-semibold text-foreground'>{repo.name}</span>
-                <span className='mt-1 block text-xs text-muted-foreground'>{repo.visibility} · default {repo.branch}</span>
-              </span>
-              <Badge status={repo.status === 'Available' ? 'success' : 'warning'}>{repo.status}</Badge>
-            </button>
-          );
-        })}
-      </div>
+              {isFetching ? 'Loading' : 'Next page'}
+            </Button>
+          )}
+        </div>
+      )}
+
       <div className='grid gap-3 sm:grid-cols-2'>
         <Input label='Branch' {...register('branch')} />
         <Input label='Project path' placeholder='/' {...register('projectRoot')} />
       </div>
-    </div>
+    </section>
   );
 }

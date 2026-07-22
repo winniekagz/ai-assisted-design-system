@@ -1,12 +1,10 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { Prisma } from '@prisma/client';
 import type {
   LocalProjectUploadResponse,
 } from '@winniekagendo/componentiq-shared-types';
@@ -20,7 +18,16 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { LocalSourceStorageService } from './local-source-storage.service';
 import { ProjectConfigurationService } from './project-configuration.service';
-import { failStaleConfigurationJobs } from './configuration-job-maintenance';
+import {
+  createConfigurationJobWithActiveGuard,
+  DomainHttpException,
+  describeProjectImportFailure,
+  getPrismaErrorCode,
+  getPrismaErrorMeta,
+  markConfigurationJobFailed,
+  type ProjectImportPrisma,
+  upsertDetectedConfiguration,
+} from './project-import-pipeline';
 
 export type AnalyzeLocalProjectCommand = {
   organizationId: string;
@@ -32,13 +39,7 @@ export type AnalyzeLocalProjectCommand = {
 const MAX_UPLOAD_FILES = 5000;
 const MAX_UPLOAD_BYTES = 250 * 1024 * 1024;
 
-type LocalImportPrisma = {
-  $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: unknown[]): Promise<T>;
-  $executeRaw(query: TemplateStringsArray | Prisma.Sql, ...values: unknown[]): Promise<number>;
-  $transaction<T>(
-    callback: (tx: LocalImportPrisma) => Promise<T>
-  ): Promise<T>;
-};
+type LocalImportPrisma = ProjectImportPrisma;
 
 @Injectable()
 export class LocalProjectImportService {
@@ -81,68 +82,19 @@ export class LocalProjectImportService {
       throw new NotFoundException('Project not found');
     }
 
-    await failStaleConfigurationJobs(prisma);
-    const [activeJob] = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id
-      FROM "ConfigurationJob"
-      WHERE
-        "projectId" = ${projectId}
-        AND "organizationId" = ${organizationId}
-        AND status IN (
-          'PENDING'::"ConfigurationJobStatus",
-          'UPLOADING'::"ConfigurationJobStatus",
-          'ANALYZING'::"ConfigurationJobStatus"
-        )
-      ORDER BY "createdAt" DESC
-      LIMIT 1
-    `;
-
-    if (activeJob) {
-      throw new ConflictException('Project configuration is already in progress.');
-    }
-
     let stage = 'CREATING_JOB';
     const started = Date.now();
     let job: { id: string } | null = null;
 
     try {
       const jobId = randomUUID();
-      job = await prisma.$transaction(async tx => {
-        const [createdJob] = await tx.$queryRaw<Array<{ id: string }>>`
-          INSERT INTO "ConfigurationJob" (
-            id,
-            "projectId",
-            "organizationId",
-            "sourceType",
-            status,
-            progress,
-            "startedAt",
-            "createdAt",
-            "updatedAt"
-          )
-          VALUES (
-            ${jobId},
-            ${projectId},
-            ${organizationId},
-            'LOCAL_UPLOAD'::"ConfigurationSourceType",
-            'ANALYZING'::"ConfigurationJobStatus",
-            15,
-            NOW(),
-            NOW(),
-            NOW()
-          )
-          RETURNING id
-        `;
-
-        await tx.$executeRaw`
-          UPDATE "Project"
-          SET
-            "configurationStatus" = 'CONFIGURING'::"ProjectConfigurationStatus",
-            "updatedAt" = NOW()
-          WHERE id = ${projectId} AND "organizationId" = ${organizationId}
-        `;
-
-        return createdJob ?? null;
+      job = await createConfigurationJobWithActiveGuard(prisma, {
+        id: jobId,
+        organizationId,
+        projectId,
+        sourceType: 'LOCAL_UPLOAD',
+        status: 'ANALYZING',
+        progress: 15,
       });
 
       if (!job) {
@@ -259,9 +211,13 @@ export class LocalProjectImportService {
         configuration,
       };
     } catch (error) {
-      const failure = describeLocalImportFailure(error, stage);
+      if (error instanceof DomainHttpException && !job) {
+        throw error;
+      }
+
+      const failure = describeProjectImportFailure(error, stage);
       if (job) {
-        await this.markJobFailed(job.id, failure);
+        await markConfigurationJobFailed(prisma, job.id, failure);
       }
       this.logger.error({
         message: 'Project detection failed',
@@ -279,36 +235,6 @@ export class LocalProjectImportService {
       });
       throw new BadRequestException(failure.message);
     }
-  }
-
-  private async markJobFailed(
-    jobId: string,
-    failure: { code: string; message: string }
-  ) {
-    const prisma = this.prisma as unknown as LocalImportPrisma;
-    await prisma.$executeRaw`
-      UPDATE "ConfigurationJob"
-      SET
-        status = 'FAILED'::"ConfigurationJobStatus",
-        progress = 100,
-        "errorCode" = ${failure.code},
-        "errorMessage" = ${failure.message},
-        "completedAt" = NOW(),
-        "updatedAt" = NOW()
-      WHERE id = ${jobId}
-    `;
-
-    await prisma.$executeRaw`
-      UPDATE "Project" project
-      SET
-        "configurationStatus" = 'CONFIGURATION_FAILED'::"ProjectConfigurationStatus",
-        "updatedAt" = NOW()
-      FROM "ConfigurationJob" job
-      WHERE
-        job.id = ${jobId}
-        AND project.id = job."projectId"
-        AND project."organizationId" = job."organizationId"
-    `;
   }
 
   private logStage(
@@ -330,126 +256,8 @@ export class LocalProjectImportService {
   }
 }
 
-async function upsertDetectedConfiguration(
-  tx: LocalImportPrisma,
-  configurationJobId: string,
-  setup: ReturnType<typeof detectProjectSetup>
-) {
-  const setupJson = JSON.stringify(setup);
-  const componentPathsJson = JSON.stringify(setup.componentPaths.value ?? []);
-  const tokenPathsJson = JSON.stringify(setup.tokenPaths.value ?? []);
-
-  await tx.$executeRaw`
-    INSERT INTO "DetectedConfiguration" (
-      id,
-      "configurationJobId",
-      framework,
-      language,
-      "packageManager",
-      "stylingSystem",
-      "projectRoot",
-      "componentPaths",
-      "tokenPaths",
-      "monorepoDetected",
-      "storybookDetected",
-      confidence,
-      evidence,
-      "rawDetectionResult",
-      "createdAt",
-      "updatedAt"
-    )
-    VALUES (
-      ${randomUUID()},
-      ${configurationJobId},
-      ${setup.framework.value},
-      ${setup.language.value},
-      ${setup.packageManager.value},
-      ${setup.stylingSystem.value?.join(',') ?? null},
-      ${setup.projectRoot.value},
-      CAST(${componentPathsJson} AS jsonb),
-      CAST(${tokenPathsJson} AS jsonb),
-      ${setup.monorepo.value?.detected ?? false},
-      ${setup.storybook.value ?? false},
-      ${setup.framework.confidence},
-      CAST(${setupJson} AS jsonb),
-      CAST(${setupJson} AS jsonb),
-      NOW(),
-      NOW()
-    )
-    ON CONFLICT ("configurationJobId") DO UPDATE SET
-      framework = EXCLUDED.framework,
-      language = EXCLUDED.language,
-      "packageManager" = EXCLUDED."packageManager",
-      "stylingSystem" = EXCLUDED."stylingSystem",
-      "projectRoot" = EXCLUDED."projectRoot",
-      "componentPaths" = EXCLUDED."componentPaths",
-      "tokenPaths" = EXCLUDED."tokenPaths",
-      "monorepoDetected" = EXCLUDED."monorepoDetected",
-      "storybookDetected" = EXCLUDED."storybookDetected",
-      confidence = EXCLUDED.confidence,
-      evidence = EXCLUDED.evidence,
-      "rawDetectionResult" = EXCLUDED."rawDetectionResult",
-      "updatedAt" = NOW()
-  `;
-}
-
 function firstRootName(files: UploadedSourceFile[]): string | null {
   const first = files[0]?.originalname.replace(/\\/g, '/').split('/').filter(Boolean)[0];
 
   return first ?? null;
-}
-
-function describeLocalImportFailure(error: unknown, stage: string) {
-  const prismaCode = getPrismaErrorCode(error);
-
-  if (prismaCode === 'P2003') {
-    return {
-      code: 'source_analysis_fk_failed',
-      message: `Project source could not be saved during ${stage}. A referenced record was missing.`,
-    };
-  }
-
-  if (prismaCode === 'P2021') {
-    return {
-      code: 'source_analysis_schema_missing',
-      message: 'Project source could not be analyzed because the database schema is missing required project-configuration tables.',
-    };
-  }
-
-  if (prismaCode === 'P2022') {
-    return {
-      code: 'source_analysis_column_missing',
-      message: 'Project source could not be analyzed because the database schema is missing a required project-configuration column.',
-    };
-  }
-
-  if (error instanceof Error && error.message.includes('permission denied')) {
-    return {
-      code: 'source_snapshot_store_unavailable',
-      message: 'Project source could not be analyzed because the source snapshot could not be stored.',
-    };
-  }
-
-  return {
-    code: 'source_analysis_failed',
-    message: `Project source could not be analyzed safely during ${stage}.`,
-  };
-}
-
-function getPrismaErrorCode(error: unknown) {
-  if (typeof error === 'object' && error && 'code' in error) {
-    const code = (error as { code?: unknown }).code;
-
-    return typeof code === 'string' ? code : null;
-  }
-
-  return null;
-}
-
-function getPrismaErrorMeta(error: unknown) {
-  if (typeof error === 'object' && error && 'meta' in error) {
-    return (error as { meta?: unknown }).meta ?? null;
-  }
-
-  return null;
 }

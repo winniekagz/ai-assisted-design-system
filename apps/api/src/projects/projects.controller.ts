@@ -23,6 +23,7 @@ import {
   PERMISSIONS,
   PROJECT_CONFIGURATION_STATUSES,
   type LocalProjectUploadResponse,
+  type ProjectSourceAnalysisResponse,
   type ProjectConfigurationStatus,
   type ProjectConfigurationConfirmResponse,
   type ProjectConfigurationSummary,
@@ -37,7 +38,9 @@ import { RequirePermission } from '../authorization/require-permission.decorator
 import { OrgIdParamDto } from '../common/dto/id-param.dto';
 import { ids, projectExample } from '../common/swagger/api-examples';
 import { ConfirmProjectConfigurationDto } from './dto/confirm-project-configuration.dto';
+import { ConnectGithubRepositorySourceDto } from './dto/connect-github-repository-source.dto';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { GithubProjectImportService } from './github-project-import.service';
 import { LocalProjectImportService } from './local-project-import.service';
 import { ProjectConfigurationService } from './project-configuration.service';
 import { ProjectsService } from './projects.service';
@@ -56,7 +59,8 @@ export class ProjectsController {
   constructor(
     private readonly projectsService: ProjectsService,
     private readonly projectConfigurationService: ProjectConfigurationService,
-    private readonly localProjectImportService: LocalProjectImportService
+    private readonly localProjectImportService: LocalProjectImportService,
+    private readonly githubProjectImportService: GithubProjectImportService
   ) {}
 
   @Post()
@@ -245,7 +249,7 @@ export class ProjectsController {
   }
 
   @Post(':projectId/local-source')
-  @RequirePermission(PERMISSIONS.PROJECT_CREATE)
+  @RequirePermission(PERMISSIONS.PROJECT_UPDATE)
   @UseGuards(PermissionsGuard)
   @UseInterceptors(
     FilesInterceptor('files', 5000, {
@@ -286,6 +290,46 @@ export class ProjectsController {
       projectId,
       userId: user.id,
       files: files ?? [],
+    });
+  }
+
+  @Post(':projectId/github-source')
+  @RequirePermission(PERMISSIONS.PROJECT_UPDATE)
+  @UseGuards(PermissionsGuard)
+  @ApiOperation({
+    summary: 'Fetch and analyze GitHub repository source',
+    description:
+      'Fetches the selected GitHub repository through the organization GitHub App installation, runs deterministic backend project detection, and moves the configuration job to review required.',
+  })
+  @ApiParam({
+    name: 'orgId',
+    description: 'Organization identifier',
+    example: ids.organization,
+  })
+  @ApiParam({
+    name: 'projectId',
+    description: 'Project identifier',
+    example: ids.project,
+  })
+  @ApiBody({ type: ConnectGithubRepositorySourceDto })
+  @ApiResponse({
+    status: 201,
+    description: 'GitHub project source analyzed and review result persisted',
+  })
+  uploadGithubSource(
+    @Param('projectId') projectId: string,
+    @CurrentOrganization() organization: Organization,
+    @CurrentUser() user: User,
+    @Body() dto: ConnectGithubRepositorySourceDto
+  ): Promise<ProjectSourceAnalysisResponse> {
+    return this.githubProjectImportService.analyzeGithubRepository({
+      organizationId: organization.id,
+      projectId,
+      userId: user.id,
+      connectionId: dto.connectionId,
+      repositoryOwner: dto.repositoryOwner,
+      repositoryName: dto.repositoryName,
+      branch: dto.branch,
     });
   }
 }

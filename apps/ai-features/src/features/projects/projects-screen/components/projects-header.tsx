@@ -22,7 +22,6 @@ import {
   CircleDashed,
   Download,
   FolderKanban,
-  Import,
   Plus,
   Search,
   ShieldAlert,
@@ -41,7 +40,6 @@ import type {
 
 import { CreateProjectDrawer } from '@/features/projects/create-project-drawer';
 import { projectStatuses } from '@/features/projects/fixtures/projects';
-import { ImportProjectFlow } from '@/features/projects/import-project-flow';
 import {
   ConfigurationStatusBadge,
   ProjectConfigurationDrawer,
@@ -79,12 +77,10 @@ export function ProjectsHeader({
   organizationName,
   role,
   onCreateProject,
-  onImportProject,
 }: {
   organizationName: string;
   role: string;
   onCreateProject(): void;
-  onImportProject(): void;
 }) {
   return (
     <header className='flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between'>
@@ -103,9 +99,6 @@ export function ProjectsHeader({
       <div className='flex flex-wrap gap-2'>
         <Button type='button' onClick={onCreateProject} startIcon={<Plus className='size-4' />}>
           New project
-        </Button>
-        <Button type='button' variant='outlined' onClick={onImportProject} startIcon={<Import className='size-4' />}>
-          Import
         </Button>
       </div>
     </header>

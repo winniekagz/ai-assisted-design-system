@@ -5,6 +5,7 @@ export { LocalNoDetectStep } from './local-no-detect-step';
 export { GithubPermissionStep } from './github-permission-step';
 export { GithubRepoPickerStep } from './github-repo-picker-step';
 export { GithubReviewStep } from './github-review-step';
+export { GithubReadyToAnalyzeStep } from './github-ready-to-analyze-step';
 export { UploadProgressStep } from './upload-progress-step';
 export { AnalysisProgressStep } from './analysis-progress-step';
 export { AnalysisWarningStep } from './analysis-warning-step';

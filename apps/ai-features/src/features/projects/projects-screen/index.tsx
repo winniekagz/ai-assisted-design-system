@@ -41,7 +41,6 @@ import type {
 
 import { CreateProjectDrawer } from '@/features/projects/create-project-drawer';
 import { projectStatuses } from '@/features/projects/fixtures/projects';
-import { ImportProjectFlow } from '@/features/projects/import-project-flow';
 import {
   ConfigurationStatusBadge,
   ProjectConfigurationDrawer,
@@ -110,7 +109,6 @@ function ProjectsCatalogue({
   const [page, setPage] = useState(1);
   const projectsQuery = useProjects(orgSlug);
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
-  const [importFlowOpen, setImportFlowOpen] = useState(false);
   const [configurationProject, setConfigurationProject] =
     useState<ProjectConfigurationProject | null>(null);
   const [configurationDrawerOpen, setConfigurationDrawerOpen] = useState(false);
@@ -217,11 +215,6 @@ function ProjectsCatalogue({
     setPage(1);
   }
 
-  function refetchPersistedProjects() {
-    clearFilters();
-    void projectsQuery.refetch();
-  }
-
   function openConfiguration(project: ProjectConfigurationProject) {
     setConfigurationProject(project);
     setConfigurationDrawerOpen(true);
@@ -238,7 +231,6 @@ function ProjectsCatalogue({
           organizationName={organizationName}
           role={role}
           onCreateProject={() => setCreateDrawerOpen(true)}
-          onImportProject={() => setImportFlowOpen(true)}
         />
         <EmptyState
           icon={<AlertCircle className='size-5' />}
@@ -256,26 +248,21 @@ function ProjectsCatalogue({
           organizationName={organizationName}
           role={role}
           onCreateProject={() => setCreateDrawerOpen(true)}
-          onImportProject={() => setImportFlowOpen(true)}
         />
         <EmptyProjectsState
           onCreateProject={() => setCreateDrawerOpen(true)}
-          onImportProject={() => setImportFlowOpen(true)}
         />
         <ProjectFlowMounts
           orgSlug={orgSlug}
           createDrawerOpen={createDrawerOpen}
-          importFlowOpen={importFlowOpen}
           teamOptions={teamOptions}
           existingProjects={projects}
           onCreateDrawerOpenChange={setCreateDrawerOpen}
-          onImportFlowOpenChange={setImportFlowOpen}
           configurationProject={configurationProject}
           configurationDrawerOpen={configurationDrawerOpen}
           onConfigurationDrawerOpenChange={setConfigurationDrawerOpen}
           onConfigureProject={openConfiguration}
           onCreated={clearFilters}
-          onImported={refetchPersistedProjects}
         />
       </div>
     );
@@ -287,7 +274,6 @@ function ProjectsCatalogue({
         organizationName={organizationName}
         role={role}
         onCreateProject={() => setCreateDrawerOpen(true)}
-        onImportProject={() => setImportFlowOpen(true)}
       />
       <StatusSummaryPills
         activeStatus={statusFilter}
@@ -371,17 +357,14 @@ function ProjectsCatalogue({
       <ProjectFlowMounts
         orgSlug={orgSlug}
         createDrawerOpen={createDrawerOpen}
-        importFlowOpen={importFlowOpen}
         teamOptions={teamOptions}
         existingProjects={projects}
         onCreateDrawerOpenChange={setCreateDrawerOpen}
-        onImportFlowOpenChange={setImportFlowOpen}
         configurationProject={configurationProject}
         configurationDrawerOpen={configurationDrawerOpen}
         onConfigurationDrawerOpenChange={setConfigurationDrawerOpen}
         onConfigureProject={openConfiguration}
         onCreated={clearFilters}
-        onImported={refetchPersistedProjects}
       />
     </div>
   );
