@@ -1,10 +1,12 @@
 import type {
   ConfirmProjectConfigurationInput,
+  ConnectGithubRepositorySourceInput,
   CreateProjectInput,
   LocalProjectUploadResponse,
   ProjectConfigurationConfirmResponse,
   ProjectConfigurationSummary,
   ProjectListItem,
+  ProjectSourceAnalysisResponse,
 } from '@winniekagendo/componentiq-shared-types';
 
 import { apiClient } from './client';
@@ -60,6 +62,19 @@ export function uploadLocalProjectSource(
   return apiClient.post<LocalProjectUploadResponse>(
     `/organizations/${encodeURIComponent(orgIdentifier)}/projects/${encodeURIComponent(projectId)}/local-source`,
     formData,
+    { clerkSessionToken }
+  );
+}
+
+export function analyzeGithubRepositorySource(
+  orgIdentifier: string,
+  projectId: string,
+  input: ConnectGithubRepositorySourceInput,
+  clerkSessionToken?: string | null
+) {
+  return apiClient.post<ProjectSourceAnalysisResponse>(
+    `/organizations/${encodeURIComponent(orgIdentifier)}/projects/${encodeURIComponent(projectId)}/github-source`,
+    input,
     { clerkSessionToken }
   );
 }

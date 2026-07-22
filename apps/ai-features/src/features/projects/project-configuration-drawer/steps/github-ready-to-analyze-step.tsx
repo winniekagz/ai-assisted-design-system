@@ -7,24 +7,25 @@ import type { SelectedGithubRepository } from '../types';
 
 export function GithubReadyToAnalyzeStep({
   selectedRepo,
+  isPending,
 }: {
   selectedRepo: SelectedGithubRepository | null;
+  isPending?: boolean;
 }) {
   return (
     <div className='grid gap-4'>
       <StatusCallout
         tone='info'
-        title='Ready to Analyze'
-        detail='The repository selection has been saved to this setup draft. Source download and analysis are not started in this step.'
+        title={isPending ? 'Starting analysis' : 'Ready to Analyze'}
+        detail='Component IQ will fetch a temporary snapshot of this repository to detect its project setup. The temporary source workspace is deleted after analysis.'
       />
       <SummaryRows
         rows={[
           ['Repository', selectedRepo?.repositoryFullName ?? 'Not selected'],
           ['Default branch', selectedRepo?.defaultBranch ?? 'Not selected'],
           ['GitHub installation', selectedRepo?.installationAccountLogin ?? 'Not selected'],
-          ['Source code downloaded', 'No'],
-          ['Files stored', 'No'],
-          ['Configuration job created', 'No'],
+          ['Source access', 'Starts only when you choose Analyze repository'],
+          ['After analysis', 'Review required before configuration is confirmed'],
         ]}
       />
     </div>

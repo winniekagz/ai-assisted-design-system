@@ -1,5 +1,6 @@
 import { Button, SheetFooter } from 'componentiq';
 import { ChevronLeft, Loader2 } from 'lucide-react';
+import React from 'react';
 
 import type { ConfigurationStateId } from './types';
 import { previousState } from './utils';
@@ -9,20 +10,24 @@ const stackedIconButtonClass = 'h-auto min-h-10 flex-col gap-1 px-3 py-2 text-xs
 export function ProjectConfigurationFooter({
   state,
   isConfirming,
+  isAnalyzingGithub,
   canReviewGithub,
   onStateChange,
   onClose,
   onConfirm,
   onConfirmGithubRepository,
+  onAnalyzeGithubRepository,
 }: {
   state: ConfigurationStateId;
   isConfirming: boolean;
+  isAnalyzingGithub?: boolean;
   canReviewGithub?: boolean;
   // eslint-disable-next-line no-unused-vars
   onStateChange(state: ConfigurationStateId): void;
   onClose(): void;
   onConfirm(): void;
   onConfirmGithubRepository(): void;
+  onAnalyzeGithubRepository(): void;
 }) {
   return (
     <SheetFooter className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
@@ -64,8 +69,17 @@ export function ProjectConfigurationFooter({
             <Button type='button' variant='outlined' onClick={() => onStateChange('githubRepoPicker')}>
               Change repository
             </Button>
-            <Button type='button' disabled title='Analysis starts in the next slice.'>
-              Ready to analyze
+            <Button
+              type='button'
+              disabled={isAnalyzingGithub}
+              onClick={onAnalyzeGithubRepository}
+              startIcon={
+                isAnalyzingGithub
+                  ? <Loader2 className='size-4 animate-spin' />
+                  : undefined
+              }
+            >
+              {isAnalyzingGithub ? 'Analyzing' : 'Analyze repository'}
             </Button>
           </>
         )}

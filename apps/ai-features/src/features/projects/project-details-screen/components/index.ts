@@ -1,6 +1,7 @@
 export { ProjectDetailsSkeleton } from './project-details-skeleton';
 export { ProjectDetailHeader } from './project-detail-header';
 export { ProjectSetupCard, SetupRequiredPanel } from './project-setup-card';
+export { ReadyProjectOverview } from './ready-project-overview';
 export { DeploymentStatusPanel } from './deployment-status-panel';
 export { LatestAuditSummary } from './latest-audit-summary';
 export { SectionPanel } from './section-panel';

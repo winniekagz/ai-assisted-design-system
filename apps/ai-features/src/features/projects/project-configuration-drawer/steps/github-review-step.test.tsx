@@ -89,16 +89,16 @@ describe('GithubReviewStep', () => {
 });
 
 describe('GithubReadyToAnalyzeStep', () => {
-  it('renders ready state without source download or job creation', () => {
+  it('renders ready state with explicit analysis consent copy', () => {
     const html = renderToStaticMarkup(
       <GithubReadyToAnalyzeStep selectedRepo={selectedRepo} />
     );
 
     expect(html).toContain('Ready to Analyze');
     expect(html).toContain('acme/checkout-web');
-    expect(html).toContain('Source code downloaded');
-    expect(html).toContain('Files stored');
-    expect(html).toContain('Configuration job created');
-    expect(html).toContain('No');
+    expect(html).toContain('temporary snapshot');
+    expect(html).toContain('deleted after analysis');
+    expect(html).toContain('Starts only when you choose Analyze repository');
+    expect(html).toContain('Review required before configuration is confirmed');
   });
 });

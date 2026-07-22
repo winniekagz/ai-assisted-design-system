@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type {
   GitHubRepositorySummary,
   ProjectConfigurationStatus,
+  ProjectListItem,
 } from '@winniekagendo/componentiq-shared-types';
 import {
   Sheet,
@@ -16,7 +17,7 @@ import {
   Stepper,
   toast,
 } from 'componentiq';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -29,6 +30,7 @@ import { useGithubConnections } from '@/hooks/queries/use-github-connections';
 import { useGithubRepositories } from '@/hooks/queries/use-github-repositories';
 import { ApiError } from '@/lib/api/client';
 import {
+  analyzeGithubRepositorySource,
   confirmProjectConfiguration as confirmProjectConfigurationRequest,
   uploadLocalProjectSource,
 } from '@/lib/api/projects';
@@ -76,6 +78,8 @@ import {
   getConfigurationStatus,
   stageIndexForState,
   titleForState,
+  validateConfigurationPath,
+  validateConfigurationPathList,
 } from './utils';
 
 export type {
@@ -94,6 +98,7 @@ export function ProjectConfigurationDrawer({
   onOpenChange,
 }: ProjectConfigurationDrawerProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { getToken } = useAuth();
   const githubConnections = useGithubConnections(orgSlug);
@@ -117,7 +122,15 @@ export function ProjectConfigurationDrawer({
     useState<SelectedGithubRepository | null>(null);
   const [repoSearch, setRepoSearch] = useState('');
   const [localSource, setLocalSource] = useState<LocalSourceSelection | null>(null);
-  const { getValues, register, setValue, watch } = useForm<ConfigurationFormValues>({
+  const {
+    clearErrors,
+    formState,
+    getValues,
+    register,
+    setError,
+    setValue,
+    watch,
+  } = useForm<ConfigurationFormValues>({
     defaultValues: {
       source: 'github',
       githubAccount: '',
@@ -192,6 +205,56 @@ export function ProjectConfigurationDrawer({
       });
     },
   });
+  const analyzeGithubSource = useMutation({
+    mutationFn: async (selection: SelectedGithubRepository) => {
+      if (!project) {
+        throw new Error('Project is required before analyzing source.');
+      }
+
+      const token = await requireClerkSessionToken(getToken);
+
+      return analyzeGithubRepositorySource(
+        orgSlug,
+        project.id,
+        {
+          connectionId: selection.connectionId,
+          repositoryOwner: selection.repositoryOwner,
+          repositoryName: selection.repositoryName,
+          branch: selection.defaultBranch,
+        },
+        token
+      );
+    },
+    onSuccess: async response => {
+      queryClient.setQueryData(
+        queryKeys.projectConfiguration(orgSlug, response.projectId),
+        response.configuration
+      );
+      setState('reviewSetup');
+      toast({
+        variant: 'success',
+        title: 'Repository analyzed',
+        description: 'Detected setup is ready for review.',
+      });
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.projectConfiguration(orgSlug, response.projectId),
+        }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.projects(orgSlug) }),
+      ]);
+    },
+    onError: error => {
+      setState('analysisFailure');
+      toast({
+        variant: 'error',
+        title: getGithubAnalysisFailureTitle(error),
+        description:
+          error instanceof Error
+            ? error.message
+            : 'ComponentIQ could not analyze this GitHub repository.',
+      });
+    },
+  });
   const confirmProjectConfiguration = useMutation({
     mutationFn: async () => {
       if (!project) {
@@ -211,11 +274,34 @@ export function ProjectConfigurationDrawer({
       );
     },
     onSuccess: async response => {
-      setState('success');
+      queryClient.setQueryData(
+        queryKeys.projectConfiguration(orgSlug, response.configuration.projectId),
+        response.configuration
+      );
+      queryClient.setQueryData<ProjectListItem[] | undefined>(
+        queryKeys.projects(orgSlug),
+        projects =>
+          projects?.map(item =>
+            item.id === response.configuration.projectId
+              ? {
+                  ...item,
+                  configurationStatus: 'READY',
+                  framework:
+                    response.confirmedConfiguration.framework ?? item.framework,
+                  packageManager:
+                    response.confirmedConfiguration.packageManager ??
+                    item.packageManager,
+                  stylingSystem:
+                    response.confirmedConfiguration.stylingSystem ??
+                    item.stylingSystem,
+                }
+              : item
+          )
+      );
       toast({
         variant: 'success',
-        title: 'Project configured',
-        description: `${project?.name ?? 'Project'} is ready for its first audit.`,
+        title: 'Project setup complete',
+        description: 'Your confirmed configuration is now ready for future audits.',
       });
       await Promise.all([
         queryClient.invalidateQueries({
@@ -226,6 +312,10 @@ export function ProjectConfigurationDrawer({
         }),
         queryClient.invalidateQueries({ queryKey: queryKeys.projects(orgSlug) }),
       ]);
+      onOpenChange(false);
+      if (project) {
+        router.replace(`/org/${orgSlug}/projects/${project.slug}`);
+      }
     },
     onError: error => {
       toast({
@@ -256,7 +346,9 @@ export function ProjectConfigurationDrawer({
   const stage = stageIndexForState(state);
   const title = titleForState(state, project?.name ?? 'Project');
   const analysisErrorMessage =
-    uploadLocalSource.error instanceof Error
+    analyzeGithubSource.error instanceof Error
+      ? analyzeGithubSource.error.message
+      : uploadLocalSource.error instanceof Error
       ? uploadLocalSource.error.message
       : configurationQuery.data?.lastError?.message ?? null;
 
@@ -307,6 +399,19 @@ export function ProjectConfigurationDrawer({
       (setup?.tokenPaths.value ?? detectedConfiguration.tokenPaths).join(', ')
     );
   }, [configurationQuery.data?.detectedConfiguration, open, setValue]);
+
+  useEffect(() => {
+    if (!open || state !== 'reviewSetup' || !formState.isDirty) return;
+
+    function warnBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+
+    window.addEventListener('beforeunload', warnBeforeUnload);
+
+    return () => window.removeEventListener('beforeunload', warnBeforeUnload);
+  }, [formState.isDirty, open, state]);
 
   function close() {
     onOpenChange(false);
@@ -380,7 +485,47 @@ export function ProjectConfigurationDrawer({
   }
 
   function confirmReviewedConfiguration() {
+    clearErrors();
+    const values = getValues();
+    const projectRootError = validateConfigurationPath(values.projectRoot);
+    const componentPathError = validateConfigurationPathList(values.componentDirectories);
+    const tokenPathError = validateConfigurationPathList(values.tokenPath);
+
+    if (projectRootError) {
+      setError('projectRoot', { message: projectRootError });
+    }
+    if (componentPathError) {
+      setError('componentDirectories', { message: componentPathError });
+    }
+    if (tokenPathError) {
+      setError('tokenPath', { message: tokenPathError });
+    }
+    if (projectRootError || componentPathError || tokenPathError) {
+      toast({
+        variant: 'error',
+        title: 'Check configuration paths',
+        description: 'Paths must stay inside the analyzed project.',
+      });
+      return;
+    }
+    if (!configurationQuery.data?.detectedConfiguration?.configurationJobId) {
+      toast({
+        variant: 'error',
+        title: 'Detected setup is not loaded',
+        description: 'Reload the detected setup before confirming.',
+      });
+      return;
+    }
+
     confirmProjectConfiguration.mutate();
+  }
+
+  function analyzeConfirmedGithubRepository() {
+    const repository = confirmedGithubRepository ?? selectedGithubRepository;
+    if (!repository || analyzeGithubSource.isPending) return;
+
+    setState('analyzing');
+    analyzeGithubSource.mutate(repository);
   }
 
   function configureGithubAccess() {
@@ -546,6 +691,7 @@ export function ProjectConfigurationDrawer({
             {state === 'githubReadyToAnalyze' && (
               <GithubReadyToAnalyzeStep
                 selectedRepo={confirmedGithubRepository ?? selectedRepo}
+                isPending={analyzeGithubSource.isPending}
               />
             )}
             {state === 'uploading' && (
@@ -556,6 +702,7 @@ export function ProjectConfigurationDrawer({
             )}
             {state === 'analyzing' && (
               <AnalysisProgressStep
+                source={getValues('source')}
                 onWarning={() => setState('analysisWarning')}
                 onFailure={() => setState('analysisFailure')}
                 onReview={() => setState('reviewSetup')}
@@ -570,7 +717,11 @@ export function ProjectConfigurationDrawer({
             {state === 'analysisFailure' && (
               <AnalysisFailureStep
                 errorMessage={analysisErrorMessage}
-                onRetry={uploadSelectedLocalSource}
+                onRetry={
+                  getValues('source') === 'github'
+                    ? analyzeConfirmedGithubRepository
+                    : uploadSelectedLocalSource
+                }
                 onDetails={() => setState('resume')}
               />
             )}
@@ -578,7 +729,9 @@ export function ProjectConfigurationDrawer({
               <ReviewSetupStep
                 detectedConfiguration={configurationQuery.data?.detectedConfiguration ?? null}
                 register={register}
+                setValue={setValue}
                 values={watch()}
+                errors={formState.errors}
               />
             )}
             {state === 'success' && <SuccessStep projectName={project?.name ?? 'Project'} />}
@@ -591,11 +744,13 @@ export function ProjectConfigurationDrawer({
         <ProjectConfigurationFooter
           state={state}
           isConfirming={confirmProjectConfiguration.isPending}
+          isAnalyzingGithub={analyzeGithubSource.isPending}
           canReviewGithub={Boolean(selectedRepo)}
           onStateChange={setState}
           onClose={close}
           onConfirm={confirmReviewedConfiguration}
           onConfirmGithubRepository={confirmGithubRepository}
+          onAnalyzeGithubRepository={analyzeConfirmedGithubRepository}
         />
       </SheetContent>
     </Sheet>
@@ -634,4 +789,35 @@ function getGithubRepositoryErrorKind(error: unknown) {
   if (error.status === 403 || error.status === 401) return 'inactive';
 
   return 'generic';
+}
+
+function getGithubAnalysisFailureTitle(error: unknown) {
+  const errorCode = getApiErrorCode(error);
+
+  if (
+    errorCode === 'github_connection_inactive' ||
+    errorCode === 'source_installation_revoked'
+  ) {
+    return 'GitHub access needs attention';
+  }
+
+  if (errorCode === 'configuration_job_already_active') {
+    return 'Analysis already in progress';
+  }
+
+  if (errorCode === 'source_github_rate_limited') {
+    return 'GitHub rate limit reached';
+  }
+
+  return 'Repository analysis failed';
+}
+
+function getApiErrorCode(error: unknown) {
+  if (!(error instanceof ApiError)) return '';
+
+  return typeof error.details === 'object' &&
+    error.details !== null &&
+    'errorCode' in error.details
+    ? String((error.details as { errorCode?: unknown }).errorCode)
+    : '';
 }
