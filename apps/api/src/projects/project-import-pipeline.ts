@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, HttpException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 import { detectProjectSetup } from '../project-detection/detector-orchestrator';
@@ -41,6 +41,92 @@ export async function assertNoActiveConfigurationJob(
   if (activeJob) {
     throw new ConflictException('Project configuration is already in progress.');
   }
+}
+
+export async function createConfigurationJobWithActiveGuard(
+  prisma: ProjectImportPrisma,
+  {
+    id,
+    organizationId,
+    projectId,
+    sourceType,
+    status,
+    progress,
+  }: {
+    id: string;
+    organizationId: string;
+    projectId: string;
+    sourceType: 'LOCAL_UPLOAD' | 'GIT_REPOSITORY';
+    status: 'UPLOADING' | 'ANALYZING';
+    progress: number;
+  }
+) {
+  return prisma.$transaction(async tx => {
+    await tx.$executeRaw`
+      SELECT pg_advisory_xact_lock(hashtext(${`${organizationId}:${projectId}:configuration`}))
+    `;
+
+    await failStaleConfigurationJobs(tx);
+
+    const [activeJob] = await tx.$queryRaw<Array<{ id: string }>>`
+      SELECT id
+      FROM "ConfigurationJob"
+      WHERE
+        "projectId" = ${projectId}
+        AND "organizationId" = ${organizationId}
+        AND status IN (
+          'PENDING'::"ConfigurationJobStatus",
+          'UPLOADING'::"ConfigurationJobStatus",
+          'ANALYZING'::"ConfigurationJobStatus"
+        )
+      ORDER BY "createdAt" DESC
+      LIMIT 1
+    `;
+
+    if (activeJob) {
+      throw new DomainHttpException(
+        'configuration_job_already_active',
+        'Project configuration is already in progress.',
+        409
+      );
+    }
+
+    const [createdJob] = await tx.$queryRaw<Array<{ id: string }>>`
+      INSERT INTO "ConfigurationJob" (
+        id,
+        "projectId",
+        "organizationId",
+        "sourceType",
+        status,
+        progress,
+        "startedAt",
+        "createdAt",
+        "updatedAt"
+      )
+      VALUES (
+        ${id},
+        ${projectId},
+        ${organizationId},
+        CAST(${sourceType} AS "ConfigurationSourceType"),
+        CAST(${status} AS "ConfigurationJobStatus"),
+        ${progress},
+        NOW(),
+        NOW(),
+        NOW()
+      )
+      RETURNING id
+    `;
+
+    await tx.$executeRaw`
+      UPDATE "Project"
+      SET
+        "configurationStatus" = 'CONFIGURING'::"ProjectConfigurationStatus",
+        "updatedAt" = NOW()
+      WHERE id = ${projectId} AND "organizationId" = ${organizationId}
+    `;
+
+    return createdJob ?? null;
+  });
 }
 
 export async function markConfigurationJobFailed(
@@ -134,6 +220,20 @@ export async function upsertDetectedConfiguration(
       "rawDetectionResult" = EXCLUDED."rawDetectionResult",
       "updatedAt" = NOW()
   `;
+}
+
+export class DomainHttpException extends HttpException {
+  constructor(
+    readonly errorCode: string,
+    readonly userMessage: string,
+    status: number
+  ) {
+    super({ message: userMessage, errorCode }, status);
+  }
+
+  getResponseMessage() {
+    return this.userMessage;
+  }
 }
 
 export function describeProjectImportFailure(error: unknown, stage: string) {

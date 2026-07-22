@@ -23,6 +23,9 @@ function createPrismaMock() {
     detectedConfiguration: {
       findUnique: vi.fn().mockResolvedValue(null),
     },
+    confirmedProjectConfiguration: {
+      findUnique: vi.fn().mockResolvedValue(null),
+    },
     $transaction: vi.fn((callback: (tx: typeof transactionClient) => unknown) =>
       callback(transactionClient)
     ),
@@ -159,6 +162,8 @@ describe('ProjectConfigurationService', () => {
       canRetry: false,
       lastError: null,
       detectedConfiguration: null,
+      confirmedConfiguration: null,
+      projectSource: null,
       updatedAt: projectUpdatedAt.toISOString(),
     });
   });
@@ -264,6 +269,7 @@ describe('ProjectConfigurationService', () => {
     expect(summary.detectedConfiguration).toEqual(
       expect.objectContaining({
         framework: 'Next.js',
+        configurationJobId: 'job_latest',
         componentPaths: ['src/components'],
         tokenPaths: ['src/styles/tokens.css'],
         setup: expect.objectContaining({
@@ -402,6 +408,8 @@ describe('ProjectConfigurationService', () => {
       projectId: 'project_1',
       userId: 'user_1',
       input: {
+        expectedConfigurationJobId: 'job_latest',
+        expectedDetectedAt: latestJobUpdatedAt.toISOString(),
         componentPaths: ['src/components', 'src/features'],
         notes: 'Looks right.',
       },
@@ -420,5 +428,51 @@ describe('ProjectConfigurationService', () => {
         notes: 'Looks right.',
       })
     );
+  });
+
+  it('rejects stale detected-configuration confirmation', async () => {
+    const prisma = createPrismaMock();
+    prisma.project.findFirst.mockResolvedValue(
+      createProjectRecord({ configurationStatus: 'REVIEW_REQUIRED' })
+    );
+    prisma.configurationJob.findFirst.mockResolvedValue(
+      createConfigurationJobRecord({ status: 'REVIEW_REQUIRED' })
+    );
+    prisma.detectedConfiguration.findUnique.mockResolvedValue(
+      createDetectedConfigurationRecord()
+    );
+    const service = new ProjectConfigurationService(prisma as never);
+
+    await expect(
+      service.confirmProjectConfiguration({
+        organizationId: 'org_1',
+        projectId: 'project_1',
+        userId: 'user_1',
+        input: {
+          expectedConfigurationJobId: 'older_job',
+        },
+      })
+    ).rejects.toMatchObject({
+      response: expect.objectContaining({
+        errorCode: 'configuration_review_conflict',
+      }),
+    });
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('rejects path traversal in confirmed configuration input', async () => {
+    const service = new ProjectConfigurationService(createPrismaMock() as never);
+
+    await expect(
+      service.confirmProjectConfiguration({
+        organizationId: 'org_1',
+        projectId: 'project_1',
+        userId: 'user_1',
+        input: {
+          expectedConfigurationJobId: 'job_latest',
+          projectRoot: '../secret',
+        },
+      })
+    ).rejects.toThrow('Project configuration input is invalid');
   });
 });

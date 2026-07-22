@@ -19,7 +19,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { LocalSourceStorageService } from './local-source-storage.service';
 import { ProjectConfigurationService } from './project-configuration.service';
 import {
-  assertNoActiveConfigurationJob,
+  createConfigurationJobWithActiveGuard,
+  DomainHttpException,
   describeProjectImportFailure,
   getPrismaErrorCode,
   getPrismaErrorMeta,
@@ -81,50 +82,19 @@ export class LocalProjectImportService {
       throw new NotFoundException('Project not found');
     }
 
-    await assertNoActiveConfigurationJob(prisma, organizationId, projectId);
-
     let stage = 'CREATING_JOB';
     const started = Date.now();
     let job: { id: string } | null = null;
 
     try {
       const jobId = randomUUID();
-      job = await prisma.$transaction(async tx => {
-        const [createdJob] = await tx.$queryRaw<Array<{ id: string }>>`
-          INSERT INTO "ConfigurationJob" (
-            id,
-            "projectId",
-            "organizationId",
-            "sourceType",
-            status,
-            progress,
-            "startedAt",
-            "createdAt",
-            "updatedAt"
-          )
-          VALUES (
-            ${jobId},
-            ${projectId},
-            ${organizationId},
-            'LOCAL_UPLOAD'::"ConfigurationSourceType",
-            'ANALYZING'::"ConfigurationJobStatus",
-            15,
-            NOW(),
-            NOW(),
-            NOW()
-          )
-          RETURNING id
-        `;
-
-        await tx.$executeRaw`
-          UPDATE "Project"
-          SET
-            "configurationStatus" = 'CONFIGURING'::"ProjectConfigurationStatus",
-            "updatedAt" = NOW()
-          WHERE id = ${projectId} AND "organizationId" = ${organizationId}
-        `;
-
-        return createdJob ?? null;
+      job = await createConfigurationJobWithActiveGuard(prisma, {
+        id: jobId,
+        organizationId,
+        projectId,
+        sourceType: 'LOCAL_UPLOAD',
+        status: 'ANALYZING',
+        progress: 15,
       });
 
       if (!job) {
@@ -241,6 +211,10 @@ export class LocalProjectImportService {
         configuration,
       };
     } catch (error) {
+      if (error instanceof DomainHttpException && !job) {
+        throw error;
+      }
+
       const failure = describeProjectImportFailure(error, stage);
       if (job) {
         await markConfigurationJobFailed(prisma, job.id, failure);

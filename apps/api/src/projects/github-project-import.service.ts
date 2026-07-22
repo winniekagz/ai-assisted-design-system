@@ -1,10 +1,8 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import type { ProjectSourceAnalysisResponse } from '@winniekagendo/componentiq-shared-types';
 
 import { GithubDomainError, GithubRepositoryService } from '../integrations/github-repository.service';
@@ -16,7 +14,8 @@ import { extractUploadedFilesFromGithubTarball } from './github-tarball';
 import { LocalSourceStorageService } from './local-source-storage.service';
 import { ProjectConfigurationService } from './project-configuration.service';
 import {
-  assertNoActiveConfigurationJob,
+  createConfigurationJobWithActiveGuard,
+  DomainHttpException,
   describeProjectImportFailure,
   getPrismaErrorCode,
   getPrismaErrorMeta,
@@ -30,18 +29,19 @@ export type AnalyzeGithubRepositoryCommand = {
   projectId: string;
   userId: string;
   connectionId: string;
-  repositoryId: string;
   repositoryOwner: string;
   repositoryName: string;
-  defaultBranch: string;
   branch?: string;
 };
 
 type GithubConnectionRecord = {
   id: string;
   installationId: string;
+  provider: 'GITHUB' | 'LOCAL';
   status: 'ACTIVE' | 'DISCONNECTED' | 'REVOKED' | 'FAILED';
 };
+
+const TEMP_WORKSPACE_PREFIX = 'componentiq-github-';
 
 @Injectable()
 export class GithubProjectImportService {
@@ -59,10 +59,8 @@ export class GithubProjectImportService {
     projectId,
     userId,
     connectionId,
-    repositoryId,
     repositoryOwner,
     repositoryName,
-    defaultBranch,
     branch,
   }: AnalyzeGithubRepositoryCommand): Promise<ProjectSourceAnalysisResponse> {
     const prisma = this.prisma as unknown as ProjectImportPrisma;
@@ -78,64 +76,50 @@ export class GithubProjectImportService {
     }
 
     const [connection] = await prisma.$queryRaw<GithubConnectionRecord[]>`
-      SELECT id, "installationId", status
+      SELECT id, "installationId", provider, status
       FROM "GitProviderConnection"
       WHERE id = ${connectionId} AND "organizationId" = ${organizationId}
       LIMIT 1
     `;
 
     if (!connection) {
-      throw new BadRequestException('GitHub connection not found');
+      throw new DomainHttpException(
+        'github_connection_not_found',
+        'GitHub connection not found.',
+        400
+      );
+    }
+
+    if (connection.provider !== 'GITHUB') {
+      throw new DomainHttpException(
+        'github_connection_not_found',
+        'GitHub connection not found.',
+        400
+      );
     }
 
     if (connection.status !== 'ACTIVE') {
-      throw new BadRequestException('GitHub connection is not active');
+      throw new DomainHttpException(
+        'github_connection_inactive',
+        'GitHub access needs attention. Configure or reconnect GitHub access, then try again.',
+        410
+      );
     }
-
-    await assertNoActiveConfigurationJob(prisma, organizationId, projectId);
 
     let stage = 'CREATING_JOB';
     const started = Date.now();
     let job: { id: string } | null = null;
+    let tempWorkspace: string | null = null;
 
     try {
       const configurationJobId = randomUUID();
-      job = await prisma.$transaction(async tx => {
-        const [createdJob] = await tx.$queryRaw<Array<{ id: string }>>`
-          INSERT INTO "ConfigurationJob" (
-            id,
-            "projectId",
-            "organizationId",
-            "sourceType",
-            status,
-            progress,
-            "startedAt",
-            "createdAt",
-            "updatedAt"
-          )
-          VALUES (
-            ${configurationJobId},
-            ${projectId},
-            ${organizationId},
-            'GIT_REPOSITORY'::"ConfigurationSourceType",
-            'UPLOADING'::"ConfigurationJobStatus",
-            10,
-            NOW(),
-            NOW(),
-            NOW()
-          )
-          RETURNING id
-        `;
-
-        await tx.$executeRaw`
-          UPDATE "Project"
-          SET
-            "configurationStatus" = 'CONFIGURING'::"ProjectConfigurationStatus",
-            "updatedAt" = NOW()
-          WHERE id = ${projectId} AND "organizationId" = ${organizationId}
-        `;
-
-        return createdJob ?? null;
+      job = await createConfigurationJobWithActiveGuard(prisma, {
+        id: configurationJobId,
+        organizationId,
+        projectId,
+        sourceType: 'GIT_REPOSITORY',
+        status: 'UPLOADING',
+        progress: 10,
       });
 
       if (!job) {
@@ -147,21 +131,28 @@ export class GithubProjectImportService {
         repositoryOwner,
         repositoryName,
       });
-      const selectedBranch = branch?.trim() || defaultBranch;
-      const [latestCommitSha, tarball] = await Promise.all([
-        this.githubRepository.getCommitSha({
-          installationId: connection.installationId,
-          owner: repositoryOwner,
-          repo: repositoryName,
-          ref: selectedBranch,
-        }),
-        this.githubRepository.fetchRepositoryTarball({
-          installationId: connection.installationId,
-          owner: repositoryOwner,
-          repo: repositoryName,
-          ref: selectedBranch,
-        }),
-      ]);
+      const repository = await this.githubRepository.getRepository({
+        installationId: connection.installationId,
+        owner: repositoryOwner,
+        repo: repositoryName,
+      });
+      const selectedBranch = branch?.trim() || repository.defaultBranch;
+      const latestCommitSha = await this.githubRepository.getCommitSha({
+        installationId: connection.installationId,
+        owner: repository.owner,
+        repo: repository.name,
+        ref: selectedBranch,
+      });
+      const tarball = await this.githubRepository.fetchRepositoryTarball({
+        installationId: connection.installationId,
+        owner: repository.owner,
+        repo: repository.name,
+        ref: latestCommitSha,
+      });
+      tempWorkspace = await mkdtemp(path.join(tmpdir(), TEMP_WORKSPACE_PREFIX));
+      await writeFile(path.join(tempWorkspace, 'repository.tar.gz'), tarball, {
+        mode: 0o600,
+      });
 
       stage = 'EXTRACTING_REPOSITORY';
       const files = extractUploadedFilesFromGithubTarball(tarball);
@@ -169,14 +160,18 @@ export class GithubProjectImportService {
         throw new Error('GitHub repository archive did not contain analyzable files.');
       }
 
-      await prisma.$executeRaw`
+      const updatedToAnalyzing = await prisma.$executeRaw`
         UPDATE "ConfigurationJob"
         SET
           status = 'ANALYZING'::"ConfigurationJobStatus",
           progress = 35,
           "updatedAt" = NOW()
         WHERE id = ${configurationJobId}
+          AND status = 'UPLOADING'::"ConfigurationJobStatus"
       `;
+      if (updatedToAnalyzing !== 1) {
+        throw new Error('Configuration job state changed before analysis could begin.');
+      }
 
       stage = 'BUILDING_MANIFEST';
       const manifest = buildManifestFromUpload(files);
@@ -224,11 +219,11 @@ export class GithubProjectImportService {
             'GITHUB'::"SourceProvider",
             'ACTIVE'::"SourceConnectionStatus",
             ${connectionId},
-            ${repositoryId},
-            ${repositoryOwner},
-            ${repositoryName},
-            ${`${repositoryOwner}/${repositoryName}`},
-            ${defaultBranch},
+            ${repository.id},
+            ${repository.owner},
+            ${repository.name},
+            ${repository.fullName},
+            ${repository.defaultBranch},
             ${selectedBranch},
             ${latestCommitSha},
             ${setup.projectRoot.value},
@@ -245,7 +240,7 @@ export class GithubProjectImportService {
           RETURNING id
         `;
 
-        await tx.$executeRaw`
+        const updatedJob = await tx.$executeRaw`
           UPDATE "ConfigurationJob"
           SET
             "projectSourceId" = ${createdSource.id},
@@ -254,7 +249,13 @@ export class GithubProjectImportService {
             "completedAt" = NOW(),
             "updatedAt" = NOW()
           WHERE id = ${configurationJobId}
+            AND "organizationId" = ${organizationId}
+            AND "projectId" = ${projectId}
+            AND status = 'ANALYZING'::"ConfigurationJobStatus"
         `;
+        if (updatedJob !== 1) {
+          throw new Error('Configuration job state changed before results could be saved.');
+        }
 
         await upsertDetectedConfiguration(tx, configurationJobId, setup);
 
@@ -263,7 +264,7 @@ export class GithubProjectImportService {
           SET
             "configurationStatus" = 'REVIEW_REQUIRED'::"ProjectConfigurationStatus",
             "updatedAt" = NOW()
-          WHERE id = ${projectId}
+          WHERE id = ${projectId} AND "organizationId" = ${organizationId}
         `;
 
         return createdSource;
@@ -319,7 +320,26 @@ export class GithubProjectImportService {
         prismaCode: getPrismaErrorCode(error),
         prismaMeta: getPrismaErrorMeta(error),
       });
-      throw new BadRequestException(failure.message);
+      throw new DomainHttpException(
+        failure.code,
+        failure.message,
+        statusForFailureCode(failure.code)
+      );
+    } finally {
+      if (tempWorkspace) {
+        try {
+          await rm(tempWorkspace, { recursive: true, force: true });
+        } catch {
+          this.logger.error({
+            message: 'GitHub temporary workspace cleanup failed',
+            configurationJobId: job?.id ?? null,
+            projectId,
+            organizationId,
+            repositoryOwner,
+            repositoryName,
+          });
+        }
+      }
     }
   }
 
@@ -343,6 +363,13 @@ export class GithubProjectImportService {
 }
 
 function describeGithubImportFailure(error: unknown, stage: string) {
+  if (error instanceof DomainHttpException) {
+    return {
+      code: error.errorCode,
+      message: String(error.getResponseMessage()),
+    };
+  }
+
   if (error instanceof GithubDomainError) {
     return {
       code: error.code,
@@ -355,8 +382,38 @@ function describeGithubImportFailure(error: unknown, stage: string) {
     error.message.includes('exceeds the source analysis limit')
   ) {
     return {
-      code: 'source_repository_too_large',
+      code: 'source_too_large',
       message: 'GitHub repository exceeds the source analysis limit.',
+    };
+  }
+
+  if (
+    error instanceof Error &&
+    error.message.includes('too many files')
+  ) {
+    return {
+      code: 'source_file_limit_exceeded',
+      message: 'GitHub repository contains too many files for source analysis.',
+    };
+  }
+
+  if (
+    error instanceof Error &&
+    error.message.includes('file that exceeds')
+  ) {
+    return {
+      code: 'source_file_too_large',
+      message: 'GitHub repository contains a file that exceeds the source analysis limit.',
+    };
+  }
+
+  if (
+    error instanceof Error &&
+    error.message.includes('unsafe')
+  ) {
+    return {
+      code: 'source_archive_unsafe',
+      message: 'GitHub repository archive could not be read safely.',
     };
   }
 
@@ -368,4 +425,26 @@ function describeGithubImportFailure(error: unknown, stage: string) {
   }
 
   return describeProjectImportFailure(error, stage);
+}
+
+function statusForFailureCode(code: string) {
+  if (code === 'configuration_job_already_active') return 409;
+  if (code === 'source_repository_not_found' || code === 'source_branch_not_found') {
+    return 404;
+  }
+  if (code === 'github_connection_inactive' || code === 'source_installation_revoked') {
+    return 410;
+  }
+  if (code === 'source_github_rate_limited') return 429;
+  if (code === 'source_fetch_timeout') return 504;
+  if (
+    code === 'source_too_large' ||
+    code === 'source_file_limit_exceeded' ||
+    code === 'source_file_too_large'
+  ) {
+    return 413;
+  }
+  if (code === 'github_app_not_configured') return 503;
+
+  return 400;
 }

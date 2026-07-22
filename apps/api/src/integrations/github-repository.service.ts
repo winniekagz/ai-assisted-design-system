@@ -7,11 +7,15 @@ import type {
 import { GithubAppConfigService } from './github-app-config.service';
 
 export type GithubDomainErrorCode =
+  | 'github_app_not_configured'
   | 'source_github_unauthorized'
   | 'source_github_forbidden'
   | 'source_github_rate_limited'
   | 'source_installation_revoked'
   | 'source_repository_not_found'
+  | 'source_branch_not_found'
+  | 'source_fetch_timeout'
+  | 'source_too_large'
   | 'source_fetch_failed';
 
 export class GithubDomainError extends Error {
@@ -61,6 +65,8 @@ type GithubCommitPayload = {
 const GITHUB_API_URL = 'https://api.github.com';
 const GITHUB_API_VERSION = '2022-11-28';
 const MAX_PER_PAGE = 100;
+const GITHUB_FETCH_TIMEOUT_MS = 30_000;
+export const GITHUB_MAX_COMPRESSED_ARCHIVE_BYTES = 100 * 1024 * 1024;
 
 @Injectable()
 export class GithubRepositoryService {
@@ -164,11 +170,48 @@ export class GithubRepositoryService {
     );
 
     if (!response.ok) {
+      if (response.status === 404) {
+        throw new GithubDomainError(
+          'source_branch_not_found',
+          'GitHub could not find the selected branch.',
+          404
+        );
+      }
+
       throw await mapGithubResponseError(response, 'repository_fetch');
     }
 
     const payload = (await response.json()) as GithubCommitPayload;
+    if (!payload.sha) {
+      throw new GithubDomainError(
+        'source_branch_not_found',
+        'GitHub could not resolve the selected branch.',
+        404
+      );
+    }
     return payload.sha;
+  }
+
+  async getRepository({
+    installationId,
+    owner,
+    repo,
+  }: {
+    installationId: string;
+    owner: string;
+    repo: string;
+  }): Promise<GitHubRepositorySummary> {
+    const token = await this.createInstallationToken(installationId);
+    const response = await safeGithubFetch(
+      `${GITHUB_API_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
+      { headers: githubHeaders(token) }
+    );
+
+    if (!response.ok) {
+      throw await mapGithubResponseError(response, 'repository_fetch');
+    }
+
+    return mapRepository((await response.json()) as GithubRepositoryPayload);
   }
 
   async fetchRepositoryTarball({
@@ -192,7 +235,10 @@ export class GithubRepositoryService {
       throw await mapGithubResponseError(response, 'repository_fetch');
     }
 
-    return Buffer.from(await response.arrayBuffer());
+    return readBoundedResponseBuffer(
+      response,
+      GITHUB_MAX_COMPRESSED_ARCHIVE_BYTES
+    );
   }
 }
 
@@ -267,15 +313,73 @@ async function safeGithubFetch(
   input: string | URL,
   init: RequestInit
 ): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GITHUB_FETCH_TIMEOUT_MS);
+
   try {
-    return await fetch(input, init);
-  } catch {
+    return await fetch(input, {
+      redirect: 'follow',
+      ...init,
+      signal: init.signal ?? controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new GithubDomainError(
+        'source_fetch_timeout',
+        'GitHub repository fetch timed out. Try again in a moment.',
+        504
+      );
+    }
+
     throw new GithubDomainError(
       'source_fetch_failed',
       'GitHub is currently unavailable. Try again in a moment.',
       503
     );
+  } finally {
+    clearTimeout(timeout);
   }
+}
+
+async function readBoundedResponseBuffer(
+  response: Response,
+  maxBytes: number
+): Promise<Buffer> {
+  const contentLength = Number(response.headers.get('content-length') ?? '0');
+  if (Number.isFinite(contentLength) && contentLength > maxBytes) {
+    throw new GithubDomainError(
+      'source_too_large',
+      'GitHub repository archive exceeds the source analysis limit.',
+      413
+    );
+  }
+
+  if (!response.body) {
+    return Buffer.from(await response.arrayBuffer());
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    totalBytes += value.byteLength;
+
+    if (totalBytes > maxBytes) {
+      await reader.cancel();
+      throw new GithubDomainError(
+        'source_too_large',
+        'GitHub repository archive exceeds the source analysis limit.',
+        413
+      );
+    }
+
+    chunks.push(value);
+  }
+
+  return Buffer.concat(chunks);
 }
 
 async function readGithubErrorMessage(response: Response) {

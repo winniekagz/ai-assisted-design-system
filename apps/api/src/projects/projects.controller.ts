@@ -249,7 +249,7 @@ export class ProjectsController {
   }
 
   @Post(':projectId/local-source')
-  @RequirePermission(PERMISSIONS.PROJECT_CREATE)
+  @RequirePermission(PERMISSIONS.PROJECT_UPDATE)
   @UseGuards(PermissionsGuard)
   @UseInterceptors(
     FilesInterceptor('files', 5000, {
@@ -294,7 +294,7 @@ export class ProjectsController {
   }
 
   @Post(':projectId/github-source')
-  @RequirePermission(PERMISSIONS.PROJECT_CREATE)
+  @RequirePermission(PERMISSIONS.PROJECT_UPDATE)
   @UseGuards(PermissionsGuard)
   @ApiOperation({
     summary: 'Fetch and analyze GitHub repository source',
@@ -327,10 +327,8 @@ export class ProjectsController {
       projectId,
       userId: user.id,
       connectionId: dto.connectionId,
-      repositoryId: dto.repositoryId,
       repositoryOwner: dto.repositoryOwner,
       repositoryName: dto.repositoryName,
-      defaultBranch: dto.defaultBranch,
       branch: dto.branch,
     });
   }

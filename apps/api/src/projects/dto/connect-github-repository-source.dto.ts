@@ -21,13 +21,6 @@ export class ConnectGithubRepositorySourceDto {
   @MaxLength(120)
   connectionId!: string;
 
-  @ApiProperty({ example: '123456789' })
-  @Transform(({ value }) => trimString(value))
-  @IsString()
-  @MinLength(1)
-  @MaxLength(120)
-  repositoryId!: string;
-
   @ApiProperty({ example: 'acme' })
   @Transform(({ value }) => trimString(value))
   @IsString()
@@ -41,13 +34,6 @@ export class ConnectGithubRepositorySourceDto {
   @MinLength(1)
   @MaxLength(200)
   repositoryName!: string;
-
-  @ApiProperty({ example: 'main' })
-  @Transform(({ value }) => trimString(value))
-  @IsString()
-  @MinLength(1)
-  @MaxLength(200)
-  defaultBranch!: string;
 
   @ApiPropertyOptional({ example: 'main' })
   @Transform(({ value }) => trimOptionalString(value))

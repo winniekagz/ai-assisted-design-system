@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -17,6 +18,7 @@ import {
   type ProjectConfigurationStatus,
   type ProjectConfigurationConfirmResponse,
   type ProjectConfigurationSummary,
+  type ProjectSourceSummary,
 } from '@winniekagendo/componentiq-shared-types';
 
 import { PrismaService } from '../prisma/prisma.service';
@@ -52,6 +54,20 @@ type ConfigurationJobRecord = {
   projectSourceId: string | null;
   projectSource: {
     sourceSnapshotId: string | null;
+    id?: string;
+    type?: string;
+    provider?: string;
+    repositoryFullName?: string | null;
+    repositoryOwner?: string | null;
+    repositoryName?: string | null;
+    defaultBranch?: string | null;
+    selectedBranch?: string | null;
+    latestCommitSha?: string | null;
+    projectRoot?: string | null;
+    originalName?: string | null;
+    fileCount?: number | null;
+    totalBytes?: number | null;
+    updatedAt?: Date;
   } | null;
   updatedAt: Date;
 };
@@ -92,6 +108,24 @@ type ConfirmedConfigurationRecord = {
   updatedAt: Date;
 };
 
+type ProjectSourceRecord = {
+  id: string;
+  type: 'LOCAL_UPLOAD' | 'GITHUB_REPOSITORY';
+  provider: 'LOCAL' | 'GITHUB';
+  repositoryFullName: string | null;
+  repositoryOwner: string | null;
+  repositoryName: string | null;
+  defaultBranch: string | null;
+  selectedBranch: string | null;
+  latestCommitSha: string | null;
+  projectRoot: string | null;
+  sourceSnapshotId: string | null;
+  originalName: string | null;
+  fileCount: number | null;
+  totalBytes: number | null;
+  updatedAt: Date;
+};
+
 type ProjectConfigurationPrisma = {
   project?: {
     findFirst(args: unknown): Promise<ProjectRecord | null>;
@@ -101,6 +135,9 @@ type ProjectConfigurationPrisma = {
   };
   detectedConfiguration?: {
     findUnique(args: unknown): Promise<DetectedConfigurationRecord | null>;
+  };
+  confirmedProjectConfiguration?: {
+    findUnique(args: unknown): Promise<ConfirmedConfigurationRecord | null>;
   };
   $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: unknown[]): Promise<T>;
   $executeRaw(query: TemplateStringsArray | Prisma.Sql, ...values: unknown[]): Promise<number>;
@@ -134,6 +171,13 @@ export class ProjectConfigurationService {
       latestJob?.id,
       projectStatus
     );
+    const confirmedConfiguration = await this.getConfirmedConfigurationIfNeeded(
+      project.id,
+      projectStatus
+    );
+    const projectSource = latestJob?.projectSourceId
+      ? await this.findProjectSource(prisma, organizationId, latestJob.projectSourceId)
+      : null;
     const lastError =
       latestJob?.status === 'FAILED' || projectStatus === 'CONFIGURATION_FAILED'
         ? {
@@ -153,6 +197,8 @@ export class ProjectConfigurationService {
       canRetry: projectStatus === 'CONFIGURATION_FAILED',
       lastError,
       detectedConfiguration,
+      confirmedConfiguration,
+      projectSource: projectSource ? mapProjectSource(projectSource) : null,
       updatedAt: (latestJob?.updatedAt ?? project.updatedAt).toISOString(),
     };
   }
@@ -178,10 +224,36 @@ export class ProjectConfigurationService {
 
     const latestJob = await this.findLatestJob(prisma, organizationId, project.id);
 
+    if (
+      project.configurationStatus === 'READY' &&
+      latestJob?.id === parsed.data.expectedConfigurationJobId
+    ) {
+      const existing = await this.findConfirmedConfiguration(prisma, project.id);
+      if (existing) {
+        return {
+          configuration: await this.getProjectConfigurationSummary({
+            organizationId,
+            projectId,
+          }),
+          confirmedConfiguration: mapConfirmedConfiguration(existing),
+        };
+      }
+    }
+
     if (!latestJob || latestJob.status !== 'REVIEW_REQUIRED') {
       throw new BadRequestException(
         'Project configuration is not ready for confirmation.'
       );
+    }
+
+    if (
+      latestJob.id !== parsed.data.expectedConfigurationJobId ||
+      project.configurationStatus !== 'REVIEW_REQUIRED'
+    ) {
+      throw new ConflictException({
+        message: 'This project setup changed while you were reviewing it.',
+        errorCode: 'configuration_review_conflict',
+      });
     }
 
     const detected = await this.findDetectedConfiguration(prisma, latestJob.id);
@@ -190,6 +262,16 @@ export class ProjectConfigurationService {
       throw new BadRequestException(
         'Detected project configuration is missing. Re-run source analysis.'
       );
+    }
+
+    if (
+      parsed.data.expectedDetectedAt &&
+      detected.createdAt.toISOString() !== parsed.data.expectedDetectedAt
+    ) {
+      throw new ConflictException({
+        message: 'This project setup changed while you were reviewing it.',
+        errorCode: 'configuration_review_conflict',
+      });
     }
 
     const confirmedValues = mergeConfirmedConfiguration(parsed.data, detected);
@@ -272,7 +354,7 @@ export class ProjectConfigurationService {
         throw new Error('Confirmed project configuration was not saved.');
       }
 
-      await tx.$executeRaw`
+      const jobUpdates = await tx.$executeRaw`
         UPDATE "ConfigurationJob"
         SET
           status = 'COMPLETED'::"ConfigurationJobStatus",
@@ -283,9 +365,16 @@ export class ProjectConfigurationService {
           id = ${latestJob.id}
           AND "projectId" = ${projectId}
           AND "organizationId" = ${organizationId}
+          AND status = 'REVIEW_REQUIRED'::"ConfigurationJobStatus"
       `;
+      if (jobUpdates !== 1) {
+        throw new ConflictException({
+          message: 'This project setup changed while you were reviewing it.',
+          errorCode: 'configuration_review_conflict',
+        });
+      }
 
-      await tx.$executeRaw`
+      const projectUpdates = await tx.$executeRaw`
         UPDATE "Project"
         SET
           framework = ${confirmedValues.framework ?? 'Not configured'},
@@ -293,8 +382,17 @@ export class ProjectConfigurationService {
           "stylingSystem" = ${confirmedValues.stylingSystem ?? 'Not configured'},
           "configurationStatus" = 'READY'::"ProjectConfigurationStatus",
           "updatedAt" = NOW()
-        WHERE id = ${projectId} AND "organizationId" = ${organizationId}
+        WHERE
+          id = ${projectId}
+          AND "organizationId" = ${organizationId}
+          AND "configurationStatus" = 'REVIEW_REQUIRED'::"ProjectConfigurationStatus"
       `;
+      if (projectUpdates !== 1) {
+        throw new ConflictException({
+          message: 'This project setup changed while you were reviewing it.',
+          errorCode: 'configuration_review_conflict',
+        });
+      }
 
       return mapConfirmedConfiguration(confirmed);
     });
@@ -326,6 +424,7 @@ export class ProjectConfigurationService {
     }
 
     return {
+      configurationJobId: latestJobId,
       framework: detected.framework,
       language: detected.language,
       packageManager: detected.packageManager,
@@ -352,6 +451,20 @@ export class ProjectConfigurationService {
         detectedProjectSetupFromJson(detected.rawDetectionResult)
           ?.sourceSnapshotId ?? null,
     };
+  }
+
+  private async getConfirmedConfigurationIfNeeded(
+    projectId: string,
+    projectStatus: ProjectConfigurationStatus
+  ): Promise<ConfirmedProjectConfiguration | null> {
+    if (projectStatus !== 'READY') {
+      return null;
+    }
+
+    const prisma = this.prisma as unknown as ProjectConfigurationPrisma;
+    const confirmed = await this.findConfirmedConfiguration(prisma, projectId);
+
+    return confirmed ? mapConfirmedConfiguration(confirmed) : null;
   }
 
   private async findProject(
@@ -503,6 +616,99 @@ export class ProjectConfigurationService {
     )[0] ?? null;
   }
 
+  private async findConfirmedConfiguration(
+    prisma: ProjectConfigurationPrisma,
+    projectId: string
+  ) {
+    if (prisma.confirmedProjectConfiguration) {
+      try {
+        return await prisma.confirmedProjectConfiguration.findUnique({
+          where: { projectId },
+          select: {
+            id: true,
+            projectId: true,
+            organizationId: true,
+            configurationJobId: true,
+            sourceType: true,
+            framework: true,
+            language: true,
+            packageManager: true,
+            stylingSystem: true,
+            projectRoot: true,
+            componentPaths: true,
+            tokenPaths: true,
+            notes: true,
+            confirmedByUserId: true,
+            confirmedAt: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        });
+      } catch (error) {
+        if (!isStalePrismaClientError(error)) throw error;
+        this.logStalePrismaFallback('ConfirmedProjectConfiguration.findUnique', {
+          projectId,
+        });
+      }
+    }
+
+    return (
+      await prisma.$queryRaw<ConfirmedConfigurationRecord[]>`
+        SELECT
+          id,
+          "projectId",
+          "organizationId",
+          "configurationJobId",
+          "sourceType",
+          framework,
+          language,
+          "packageManager",
+          "stylingSystem",
+          "projectRoot",
+          "componentPaths",
+          "tokenPaths",
+          notes,
+          "confirmedByUserId",
+          "confirmedAt",
+          "createdAt",
+          "updatedAt"
+        FROM "ConfirmedProjectConfiguration"
+        WHERE "projectId" = ${projectId}
+        LIMIT 1
+      `
+    )[0] ?? null;
+  }
+
+  private async findProjectSource(
+    prisma: ProjectConfigurationPrisma,
+    organizationId: string,
+    projectSourceId: string
+  ) {
+    return (
+      await prisma.$queryRaw<ProjectSourceRecord[]>`
+        SELECT
+          id,
+          type,
+          provider,
+          "repositoryFullName",
+          "repositoryOwner",
+          "repositoryName",
+          "defaultBranch",
+          "selectedBranch",
+          "latestCommitSha",
+          "projectRoot",
+          "sourceSnapshotId",
+          "originalName",
+          "fileCount",
+          "totalBytes",
+          "updatedAt"
+        FROM "ProjectSource"
+        WHERE id = ${projectSourceId} AND "organizationId" = ${organizationId}
+        LIMIT 1
+      `
+    )[0] ?? null;
+  }
+
   private logStalePrismaFallback(
     operation: string,
     context: Record<string, string>
@@ -600,6 +806,26 @@ function mapConfirmedConfiguration(
     confirmedAt: configuration.confirmedAt.toISOString(),
     createdAt: configuration.createdAt.toISOString(),
     updatedAt: configuration.updatedAt.toISOString(),
+  };
+}
+
+function mapProjectSource(source: ProjectSourceRecord): ProjectSourceSummary {
+  return {
+    id: source.id,
+    type: source.type,
+    provider: source.provider,
+    repositoryFullName: source.repositoryFullName,
+    repositoryOwner: source.repositoryOwner,
+    repositoryName: source.repositoryName,
+    defaultBranch: source.defaultBranch,
+    selectedBranch: source.selectedBranch,
+    latestCommitSha: source.latestCommitSha,
+    projectRoot: source.projectRoot,
+    sourceSnapshotId: source.sourceSnapshotId,
+    originalName: source.originalName,
+    fileCount: source.fileCount,
+    totalBytes: source.totalBytes,
+    updatedAt: source.updatedAt.toISOString(),
   };
 }
 

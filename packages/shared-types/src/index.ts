@@ -239,6 +239,42 @@ export type StylingSystem =
   | 'UNKNOWN';
 export type MonorepoTool = 'PNPM_WORKSPACE' | 'TURBO' | 'NX' | 'LERNA' | 'PACKAGE_WORKSPACES' | 'UNKNOWN';
 
+export const PROJECT_FRAMEWORKS = [
+  'NEXTJS',
+  'REACT_VITE',
+  'REACT',
+  'VUE',
+  'NUXT',
+  'ANGULAR',
+  'SVELTE',
+  'SVELTEKIT',
+  'REMIX',
+  'ASTRO',
+  'MOBILE_WEB',
+  'UNKNOWN',
+] as const satisfies readonly ProjectFramework[];
+export const PROJECT_LANGUAGES = [
+  'TYPESCRIPT',
+  'JAVASCRIPT',
+  'UNKNOWN',
+] as const satisfies readonly ProjectLanguage[];
+export const PACKAGE_MANAGERS = [
+  'PNPM',
+  'NPM',
+  'YARN',
+  'BUN',
+  'UNKNOWN',
+] as const satisfies readonly PackageManager[];
+export const STYLING_SYSTEMS = [
+  'TAILWIND',
+  'CSS_MODULES',
+  'SASS',
+  'STYLED_COMPONENTS',
+  'EMOTION',
+  'PLAIN_CSS',
+  'UNKNOWN',
+] as const satisfies readonly StylingSystem[];
+
 export interface DetectionEvidence {
   type: string;
   path: string;
@@ -346,6 +382,7 @@ export interface ConfigurationJobSummary {
 }
 
 export interface DetectedProjectConfiguration {
+  configurationJobId: string;
   framework: string | null;
   language: string | null;
   packageManager: string | null;
@@ -365,18 +402,31 @@ export interface DetectedProjectConfiguration {
   sourceSnapshotId: string | null;
 }
 
+const relativePathSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(300)
+  .refine(value => isSafeRelativeConfigurationPath(value), {
+    message: 'Path must be relative and stay inside the project.',
+  })
+  .transform(normalizeConfigurationPath);
+
 const confirmedPathListSchema = z
-  .array(z.string().trim().min(1).max(300))
+  .array(relativePathSchema)
   .max(50)
+  .transform(values => Array.from(new Set(values)))
   .optional();
 
 export const confirmProjectConfigurationSchema = z
   .object({
-    framework: z.string().trim().max(80).optional(),
-    language: z.string().trim().max(80).optional(),
-    packageManager: z.string().trim().max(80).optional(),
-    stylingSystem: z.string().trim().max(120).optional(),
-    projectRoot: z.string().trim().max(300).optional(),
+    expectedConfigurationJobId: z.string().trim().min(1).max(120),
+    expectedDetectedAt: z.string().trim().min(1).max(80).optional(),
+    framework: z.enum(PROJECT_FRAMEWORKS).optional(),
+    language: z.enum(PROJECT_LANGUAGES).optional(),
+    packageManager: z.enum(PACKAGE_MANAGERS).optional(),
+    stylingSystem: z.enum(STYLING_SYSTEMS).optional(),
+    projectRoot: relativePathSchema.optional(),
     componentPaths: confirmedPathListSchema,
     tokenPaths: confirmedPathListSchema,
     notes: z.string().trim().max(1000).optional(),
@@ -410,6 +460,24 @@ export interface ConfirmedProjectConfiguration {
   updatedAt: string;
 }
 
+export interface ProjectSourceSummary {
+  id: string;
+  type: ProjectSourceType;
+  provider: SourceProvider;
+  repositoryFullName: string | null;
+  repositoryOwner: string | null;
+  repositoryName: string | null;
+  defaultBranch: string | null;
+  selectedBranch: string | null;
+  latestCommitSha: string | null;
+  projectRoot: string | null;
+  sourceSnapshotId: string | null;
+  originalName: string | null;
+  fileCount: number | null;
+  totalBytes: number | null;
+  updatedAt: string;
+}
+
 export interface ProjectConfigurationSummary {
   projectId: string;
   projectStatus: ProjectConfigurationStatus;
@@ -424,6 +492,8 @@ export interface ProjectConfigurationSummary {
     message: string | null;
   } | null;
   detectedConfiguration: DetectedProjectConfiguration | null;
+  confirmedConfiguration: ConfirmedProjectConfiguration | null;
+  projectSource: ProjectSourceSummary | null;
   updatedAt: string;
 }
 
@@ -443,11 +513,30 @@ export type ProjectSourceAnalysisResponse = LocalProjectUploadResponse;
 
 export interface ConnectGithubRepositorySourceInput {
   connectionId: string;
-  repositoryId: string;
   repositoryOwner: string;
   repositoryName: string;
-  defaultBranch: string;
   branch?: string;
+}
+
+function isSafeRelativeConfigurationPath(value: string) {
+  const normalized = value.trim().replace(/\\/g, '/');
+  const parts = normalized.split('/').filter(Boolean);
+
+  return (
+    normalized.length > 0 &&
+    !normalized.startsWith('/') &&
+    !/^[a-zA-Z]:/.test(normalized) &&
+    !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(normalized) &&
+    !normalized.includes('\0') &&
+    !/[;&|`$<>]/.test(normalized) &&
+    parts.every(part => part !== '..' && part !== '.')
+  );
+}
+
+function normalizeConfigurationPath(value: string) {
+  const normalized = value.trim().replace(/\\/g, '/').replace(/^\.\/+/, '');
+
+  return normalized === '' ? '.' : normalized.replace(/\/+/g, '/');
 }
 
 export interface GitProviderConnectionSummary {
