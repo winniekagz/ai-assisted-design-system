@@ -14,6 +14,7 @@ export function mapConnectionSummary(
     installedAt: connection.installedAt?.toISOString() ?? null,
     lastVerifiedAt: connection.lastVerifiedAt?.toISOString() ?? null,
     canDisconnect: connection.status === 'ACTIVE',
+    configureUrl: buildGithubInstallationConfigureUrl(connection),
   };
 }
 
@@ -33,4 +34,28 @@ export function normalizeInstallationId(value: string | undefined) {
   }
 
   return trimmed;
+}
+
+export function buildGithubInstallationConfigureUrl(
+  connection: Pick<
+    GitProviderConnectionRecord,
+    'installationId' | 'accountLogin' | 'accountType'
+  >
+) {
+  const installationId = encodeURIComponent(connection.installationId);
+  const url =
+    connection.accountType === 'Organization'
+      ? new URL(
+          `/organizations/${encodeURIComponent(
+            connection.accountLogin
+          )}/settings/installations/${installationId}`,
+          'https://github.com'
+        )
+      : new URL(`/settings/installations/${installationId}`, 'https://github.com');
+
+  if (url.origin !== 'https://github.com') {
+    throw new Error('Invalid GitHub installation configuration URL');
+  }
+
+  return url.toString();
 }

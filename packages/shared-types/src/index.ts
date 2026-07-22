@@ -439,6 +439,17 @@ export interface LocalProjectUploadResponse {
   configuration: ProjectConfigurationSummary;
 }
 
+export type ProjectSourceAnalysisResponse = LocalProjectUploadResponse;
+
+export interface ConnectGithubRepositorySourceInput {
+  connectionId: string;
+  repositoryId: string;
+  repositoryOwner: string;
+  repositoryName: string;
+  defaultBranch: string;
+  branch?: string;
+}
+
 export interface GitProviderConnectionSummary {
   id: string;
   provider: Extract<SourceProvider, 'GITHUB'>;
@@ -448,6 +459,7 @@ export interface GitProviderConnectionSummary {
   installedAt: string | null;
   lastVerifiedAt: string | null;
   canDisconnect: boolean;
+  configureUrl?: string;
 }
 
 export interface GitHubConnectionStartResponse {
@@ -460,6 +472,32 @@ export interface GitHubConnectionCallbackResult {
   status: 'connected';
   connection: GitProviderConnectionSummary;
   returnPath: string;
+}
+
+export interface GitHubRepositorySummary {
+  id: string;
+  owner: string;
+  name: string;
+  fullName: string;
+  defaultBranch: string;
+  private: boolean;
+  updatedAt: string | null;
+  sizeKb: number | null;
+}
+
+export interface GitHubRepositoryListResponse {
+  repositories: GitHubRepositorySummary[];
+  pagination: {
+    nextCursor: string | null;
+  };
+  connection: {
+    id: string;
+    accountLogin: string;
+    accountType: string | null;
+    status: GitProviderConnectionStatus;
+    repositoryAccess: 'ALL' | 'SELECTED' | 'UNKNOWN';
+  };
+  configureUrl: string;
 }
 
 export interface ComponentRuleSummary {

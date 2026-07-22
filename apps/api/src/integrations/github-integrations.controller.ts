@@ -20,6 +20,7 @@ import {
   PERMISSIONS,
   type GitHubConnectionCallbackResult,
   type GitHubConnectionStartResponse,
+  type GitHubRepositoryListResponse,
   type GitProviderConnectionSummary,
 } from '@winniekagendo/componentiq-shared-types';
 
@@ -57,6 +58,48 @@ export class GithubIntegrationsController {
     @CurrentOrganization() organization: Organization
   ): Promise<GitProviderConnectionSummary[]> {
     return this.githubIntegrationService.listConnections(organization.id);
+  }
+
+  @Get('organizations/:orgId/integrations/github/:connectionId/repositories')
+  @RequirePermission(PERMISSIONS.PROJECT_VIEW)
+  @UseGuards(PermissionsGuard)
+  @ApiOperation({
+    summary: 'List GitHub repositories for a provider connection',
+    description:
+      'Returns repositories visible to the organization-scoped GitHub App installation. Pagination is represented as an opaque nextCursor.',
+  })
+  @ApiParam({
+    name: 'orgId',
+    description: 'Organization identifier or slug',
+    example: ids.organization,
+  })
+  @ApiParam({
+    name: 'connectionId',
+    description: 'GitHub provider connection identifier',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Opaque cursor returned from the previous response.',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Repositories per page, capped at 100.',
+  })
+  @ApiResponse({ status: 200, description: 'GitHub repositories returned' })
+  listRepositories(
+    @CurrentOrganization() organization: Organization,
+    @Param('connectionId') connectionId: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string
+  ): Promise<GitHubRepositoryListResponse> {
+    return this.githubIntegrationService.listRepositories({
+      organizationId: organization.id,
+      connectionId,
+      cursor,
+      perPage: parseOptionalInteger(limit),
+    });
   }
 
   @Post('organizations/:orgId/integrations/github/connect')
@@ -151,4 +194,14 @@ export class GithubIntegrationsController {
       organizationIdFromClient,
     });
   }
+}
+
+function parseOptionalInteger(value: string | undefined) {
+  if (!value) {
+    return undefined;
+  }
+
+  const parsed = Number(value);
+
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
