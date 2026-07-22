@@ -1,121 +1,64 @@
 'use client';
 
-import { useAuth } from '@clerk/nextjs';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type {
-  DetectedProjectConfiguration,
-  ProjectConfigurationStatus,
-} from '@winniekagendo/componentiq-shared-types';
-import type { GitProviderConnectionSummary } from '@winniekagendo/componentiq-shared-types';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Progress,
-  Select,
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  Stepper,
-  Textarea,
-  cn,
-  toast,
-} from 'componentiq';
-import {
-  AlertCircle,
-  Archive,
-  CheckCircle2,
-  ChevronLeft,
-  Clock,
-  FileArchive,
-  FolderOpen,
-  Github,
-  Info,
-  Loader2,
-  RefreshCcw,
-  Search,
-  ShieldCheck,
-  Upload,
-} from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type ReactNode,
-} from 'react';
-import { useForm } from 'react-hook-form';
-
-import {
-  useDisconnectGithubConnection,
-  useStartGithubConnection,
-} from '@/hooks/mutations/use-connect-github';
-import { useGithubConnections } from '@/hooks/queries/use-github-connections';
-import { useProjectConfiguration } from '@/features/projects/hooks';
-import {
-  confirmProjectConfiguration as confirmProjectConfigurationRequest,
-  uploadLocalProjectSource,
-} from '@/lib/api/projects';
-import { requireClerkSessionToken } from '@/lib/auth/clerk-session-token';
-import { queryKeys } from '@/lib/query/query-keys';
-
-import {
-  analysisSteps,
-  localExclusions,
-  localUploadLimits,
-  repoRows,
-  stageSteps,
-  statusLabels,
-} from '../constants';
-import type {
-  ConfigurationFormValues,
-  ConfigurationStateId,
-  DirectoryPickerAttributes,
-  LocalSourceSelection,
-  ProjectConfigurationDrawerProps,
-  ProjectConfigurationProject,
-} from '../types';
-import {
-  buildConfirmConfigurationInput,
-  configurationStateForStatus,
-  getConfigurationStatus,
-  previousState,
-  stageIndexForState,
-  titleForState,
-} from '../utils';
-
-export type {
-  ConfigurationStateId,
-  ProjectConfigurationProject,
-  ProjectConfigurationStatus,
-};
-export { getConfigurationStatus };
+import { Button } from 'componentiq';
+import React from 'react';
 
 import { StatusCallout, SummaryRows } from '../shared-components';
+import type { ConfigurationFormValues, SelectedGithubRepository } from '../types';
+
 export function GithubReviewStep({
   selectedRepo,
   values,
+  onChangeRepository,
 }: {
-  selectedRepo: typeof repoRows[number];
+  selectedRepo: SelectedGithubRepository | null;
   values: ConfigurationFormValues;
+  onChangeRepository(): void;
 }) {
   return (
     <div className='grid gap-4'>
-      <StatusCallout tone='info' title='Review connection' detail='Confirm how ComponentIQ should access this repository before analysis starts.' />
-      <SummaryRows rows={[
-        ['Repository', selectedRepo.name],
-        ['Branch', values.branch],
-        ['Project path', values.projectRoot || '/'],
-        ['Connection type', 'Continuous'],
-        ['Requested access', 'Read-only'],
-      ]} />
+      <StatusCallout
+        tone='info'
+        title='Review repository'
+        detail='Confirm the selected repository metadata before analysis is enabled. ComponentIQ has not downloaded source code.'
+      />
+      <SummaryRows
+        rows={[
+          ['Repository name', selectedRepo?.repositoryName ?? values.repository],
+          ['Owner', selectedRepo?.repositoryOwner ?? values.githubAccount],
+          ['Default branch', selectedRepo?.defaultBranch ?? values.branch],
+          ['Visibility', selectedRepo ? (selectedRepo.private ? 'Private' : 'Public') : 'Not selected'],
+          ['Last updated', formatUpdatedAt(selectedRepo?.updatedAt ?? null)],
+          ['Estimated repository size', formatRepositorySize(selectedRepo?.sizeKb ?? null)],
+          ['Connected GitHub installation', selectedRepo?.installationAccountLogin ?? 'Not selected'],
+        ]}
+      />
+      <div>
+        <Button type='button' variant='outlined' onClick={onChangeRepository}>
+          Change repository
+        </Button>
+      </div>
     </div>
   );
+}
+
+function formatUpdatedAt(updatedAt: string | null) {
+  if (!updatedAt) return 'Unknown';
+
+  try {
+    return new Intl.DateTimeFormat('en', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(new Date(updatedAt));
+  } catch {
+    return 'Unknown';
+  }
+}
+
+function formatRepositorySize(sizeKb: number | null) {
+  if (typeof sizeKb !== 'number') return 'Not available';
+  if (sizeKb < 1024) return `${sizeKb.toLocaleString()} KB`;
+
+  return `${(sizeKb / 1024).toFixed(1)} MB`;
 }

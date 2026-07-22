@@ -9,6 +9,20 @@ export const queryKeys = {
     ['organizations', orgSlug, 'projects', projectId, 'audits'] as const,
   githubConnections: (orgSlug: string) =>
     ['organizations', orgSlug, 'integrations', 'github'] as const,
+  githubRepositories: (
+    orgSlug: string,
+    connectionId: string,
+    cursor?: string | null
+  ) =>
+    [
+      'organizations',
+      orgSlug,
+      'integrations',
+      'github',
+      connectionId,
+      'repositories',
+      cursor ?? 'first-page',
+    ] as const,
   members: (orgSlug: string) => ['organizations', orgSlug, 'members'] as const,
   invites: (orgSlug: string) => ['organizations', orgSlug, 'invites'] as const,
   invitePreview: (token: string) => ['invites', 'validate', token] as const,

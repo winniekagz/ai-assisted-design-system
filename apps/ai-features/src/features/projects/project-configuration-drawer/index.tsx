@@ -3,18 +3,10 @@
 import { useAuth } from '@clerk/nextjs';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type {
-  DetectedProjectConfiguration,
+  GitHubRepositorySummary,
   ProjectConfigurationStatus,
 } from '@winniekagendo/componentiq-shared-types';
-import type { GitProviderConnectionSummary } from '@winniekagendo/componentiq-shared-types';
 import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Progress,
-  Select,
   Sheet,
   SheetBody,
   SheetContent,
@@ -22,36 +14,20 @@ import {
   SheetHeader,
   SheetTitle,
   Stepper,
-  Textarea,
-  cn,
   toast,
 } from 'componentiq';
-import {
-  FileArchive,
-  FolderOpen,
-  Github,
-  Info,
-  RefreshCcw,
-  Search,
-  ShieldCheck,
-  Upload,
-} from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type ReactNode,
-} from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { useProjectConfiguration } from '@/features/projects/hooks';
 import {
   useDisconnectGithubConnection,
   useStartGithubConnection,
 } from '@/hooks/mutations/use-connect-github';
 import { useGithubConnections } from '@/hooks/queries/use-github-connections';
-import { useProjectConfiguration } from '@/features/projects/hooks';
+import { useGithubRepositories } from '@/hooks/queries/use-github-repositories';
+import { ApiError } from '@/lib/api/client';
 import {
   confirmProjectConfiguration as confirmProjectConfigurationRequest,
   uploadLocalProjectSource,
@@ -60,38 +36,20 @@ import { requireClerkSessionToken } from '@/lib/auth/clerk-session-token';
 import { queryKeys } from '@/lib/query/query-keys';
 
 import {
-  analysisSteps,
-  localExclusions,
   localUploadLimits,
-  repoRows,
   stageSteps,
 } from './constants';
-import type {
-  ConfigurationFormValues,
-  ConfigurationStateId,
-  DirectoryPickerAttributes,
-  LocalSourceSelection,
-  ProjectConfigurationDrawerProps,
-  ProjectConfigurationProject,
-} from './types';
-import {
-  buildConfirmConfigurationInput,
-  configurationStateForStatus,
-  formatBytes,
-  getConfigurationStatus,
-  stageIndexForState,
-  titleForState,
-} from './utils';
+import { ProjectConfigurationFooter } from './footer';
 import {
   ConfigurationStatusBadge,
   configurationDetail,
 } from './status';
-import { ProjectConfigurationFooter } from './footer';
 import {
   AnalysisFailureStep,
   AnalysisProgressStep,
   AnalysisWarningStep,
   GithubPermissionStep,
+  GithubReadyToAnalyzeStep,
   GithubRepoPickerStep,
   GithubReviewStep,
   LocalNoDetectStep,
@@ -103,6 +61,22 @@ import {
   SuccessStep,
   UploadProgressStep,
 } from './steps';
+import type {
+  ConfigurationFormValues,
+  ConfigurationStateId,
+  LocalSourceSelection,
+  ProjectConfigurationDrawerProps,
+  ProjectConfigurationProject,
+  SelectedGithubRepository,
+} from './types';
+import {
+  buildConfirmConfigurationInput,
+  configurationStateForStatus,
+  formatBytes,
+  getConfigurationStatus,
+  stageIndexForState,
+  titleForState,
+} from './utils';
 
 export type {
   ConfigurationStateId,
@@ -126,18 +100,28 @@ export function ProjectConfigurationDrawer({
   const startGithubConnection = useStartGithubConnection(orgSlug);
   const disconnectGithubConnection = useDisconnectGithubConnection(orgSlug);
   const configurationQuery = useProjectConfiguration(orgSlug, project?.id ?? '');
+  const githubConnection = githubConnections.data?.[0] ?? null;
+  const [repositoryCursor, setRepositoryCursor] = useState<string | null>(null);
+  const githubRepositories = useGithubRepositories(
+    orgSlug,
+    githubConnection?.id,
+    repositoryCursor
+  );
   const [state, setState] = useState<ConfigurationStateId>(
     initialState ?? configurationStateForStatus(getConfigurationStatus(project))
   );
   const [showExclusions, setShowExclusions] = useState(false);
-  const [selectedRepoId, setSelectedRepoId] = useState('checkout-web');
+  const [selectedGithubRepository, setSelectedGithubRepository] =
+    useState<SelectedGithubRepository | null>(null);
+  const [confirmedGithubRepository, setConfirmedGithubRepository] =
+    useState<SelectedGithubRepository | null>(null);
   const [repoSearch, setRepoSearch] = useState('');
   const [localSource, setLocalSource] = useState<LocalSourceSelection | null>(null);
   const { getValues, register, setValue, watch } = useForm<ConfigurationFormValues>({
     defaultValues: {
       source: 'github',
-      githubAccount: 'Acme',
-      repository: 'acme/checkout-web',
+      githubAccount: '',
+      repository: '',
       branch: 'main',
       projectRoot: '/',
       workspace: 'apps/web',
@@ -254,18 +238,40 @@ export function ProjectConfigurationDrawer({
       });
     },
   });
-  const githubConnection = githubConnections.data?.[0] ?? null;
-  const selectedRepo = repoRows.find(repo => repo.id === selectedRepoId) ?? repoRows[0];
-  const filteredRepos = repoRows.filter(repo =>
-    repo.name.toLowerCase().includes(repoSearch.trim().toLowerCase())
-  );
+  const repositories = githubRepositories.data?.repositories ?? [];
+  const selectedRepo = selectedGithubRepository;
+  const selectedRepositoryForPicker: GitHubRepositorySummary | null =
+    selectedGithubRepository
+      ? {
+          id: selectedGithubRepository.repositoryId,
+          owner: selectedGithubRepository.repositoryOwner,
+          name: selectedGithubRepository.repositoryName,
+          fullName: selectedGithubRepository.repositoryFullName,
+          defaultBranch: selectedGithubRepository.defaultBranch,
+          private: selectedGithubRepository.private,
+          updatedAt: selectedGithubRepository.updatedAt,
+          sizeKb: selectedGithubRepository.sizeKb,
+        }
+      : null;
   const stage = stageIndexForState(state);
   const title = titleForState(state, project?.name ?? 'Project');
+  const analysisErrorMessage =
+    uploadLocalSource.error instanceof Error
+      ? uploadLocalSource.error.message
+      : configurationQuery.data?.lastError?.message ?? null;
 
   useEffect(() => {
     if (!open) return;
     setState(initialState ?? configurationStateForStatus(getConfigurationStatus(project)));
   }, [initialState, open, project]);
+
+  useEffect(() => {
+    if (!open) return;
+    setRepositoryCursor(null);
+    setRepoSearch('');
+    setSelectedGithubRepository(null);
+    setConfirmedGithubRepository(null);
+  }, [githubConnection?.id, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -308,20 +314,43 @@ export function ProjectConfigurationDrawer({
 
   function chooseGithub() {
     setValue('source', 'github');
+    setLocalSource(null);
     setState('githubPermission');
   }
 
   function chooseLocal() {
     setValue('source', 'local');
+    setSelectedGithubRepository(null);
     setState('localUpload');
   }
 
-  function selectRepo(repoId: string) {
-    const repo = repoRows.find(item => item.id === repoId);
-    if (!repo || repo.status !== 'Available') return;
-    setSelectedRepoId(repoId);
-    setValue('repository', repo.name);
-    setValue('branch', repo.branch);
+  function selectRepo(repo: GitHubRepositorySummary) {
+    if (!githubConnection) return;
+
+    setSelectedGithubRepository({
+      connectionId: githubConnection.id,
+      repositoryId: repo.id,
+      repositoryOwner: repo.owner,
+      repositoryName: repo.name,
+      repositoryFullName: repo.fullName,
+      defaultBranch: repo.defaultBranch,
+      private: repo.private,
+      updatedAt: repo.updatedAt,
+      sizeKb: repo.sizeKb,
+      installationAccountLogin: githubConnection.accountLogin,
+    });
+    setConfirmedGithubRepository(null);
+    setValue('repository', repo.fullName);
+    setValue('branch', repo.defaultBranch);
+    setValue('githubAccount', repo.owner);
+  }
+
+  function changeGithubRepository() {
+    setSelectedGithubRepository(null);
+    setConfirmedGithubRepository(null);
+    setRepoSearch('');
+    setValue('repository', '');
+    setValue('githubAccount', '');
   }
 
   function selectLocalSource(selection: LocalSourceSelection) {
@@ -335,8 +364,43 @@ export function ProjectConfigurationDrawer({
     uploadLocalSource.mutate(localSource);
   }
 
+  function confirmGithubRepository() {
+    if (!selectedGithubRepository) return;
+
+    setConfirmedGithubRepository({
+      ...selectedGithubRepository,
+      defaultBranch: getValues('branch') || selectedGithubRepository.defaultBranch,
+    });
+    setState('githubReadyToAnalyze');
+    toast({
+      variant: 'success',
+      title: 'Repository confirmed',
+      description: 'Repository metadata is saved to this setup draft.',
+    });
+  }
+
   function confirmReviewedConfiguration() {
     confirmProjectConfiguration.mutate();
+  }
+
+  function configureGithubAccess() {
+    const configureUrl =
+      githubRepositories.data?.configureUrl ?? githubConnection?.configureUrl;
+
+    if (!configureUrl || !isSafeGithubUrl(configureUrl)) {
+      toast({
+        variant: 'error',
+        title: 'GitHub access could not be opened',
+        description: 'Reconnect GitHub and try configuring repository access again.',
+      });
+      return;
+    }
+
+    window.open(configureUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  function refreshGithubRepositories() {
+    void githubRepositories.refetch();
   }
 
   async function startGithubInstall() {
@@ -418,6 +482,7 @@ export function ProjectConfigurationDrawer({
                 onAuthorize={() => {
                   void startGithubInstall();
                 }}
+                onContinue={() => setState('githubRepoPicker')}
                 onDisconnect={connectionId => {
                   void disconnectGithubConnection.mutateAsync(connectionId);
                 }}
@@ -427,17 +492,67 @@ export function ProjectConfigurationDrawer({
               <GithubRepoPickerStep
                 repoSearch={repoSearch}
                 onRepoSearch={setRepoSearch}
-                repos={filteredRepos}
-                selectedRepoId={selectedRepoId}
+                repositories={repositories}
+                selectedRepoId={selectedGithubRepository?.repositoryId ?? ''}
                 onSelectRepo={selectRepo}
                 register={register}
+                isLoading={githubRepositories.isLoading}
+                isError={githubRepositories.isError}
+                isFetching={githubRepositories.isFetching}
+                errorMessage={
+                  githubRepositories.error instanceof Error
+                    ? githubRepositories.error.message
+                    : null
+                }
+                nextCursor={
+                  githubRepositories.data?.pagination.nextCursor ?? null
+                }
+                onRetry={() => {
+                  void githubRepositories.refetch();
+                }}
+                onRefresh={refreshGithubRepositories}
+                onConfigureAccess={configureGithubAccess}
+                onReconnectGithub={() => {
+                  void startGithubInstall();
+                }}
+                onClearSearch={() => setRepoSearch('')}
+                onNextPage={() => {
+                  setRepositoryCursor(
+                    githubRepositories.data?.pagination.nextCursor ?? null
+                  );
+                  setRepoSearch('');
+                }}
+                connection={githubRepositories.data?.connection ?? githubConnection}
+                configureUrl={
+                  githubRepositories.data?.configureUrl ??
+                  githubConnection?.configureUrl ??
+                  null
+                }
+                errorKind={getGithubRepositoryErrorKind(githubRepositories.error)}
+                isRefreshing={
+                  githubRepositories.isFetching && !githubRepositories.isLoading
+                }
+                selectedRepository={selectedRepositoryForPicker}
+                onChangeRepository={changeGithubRepository}
               />
             )}
             {state === 'githubReview' && (
-              <GithubReviewStep selectedRepo={selectedRepo} values={watch()} />
+              <GithubReviewStep
+                selectedRepo={selectedRepo}
+                values={watch()}
+                onChangeRepository={() => setState('githubRepoPicker')}
+              />
+            )}
+            {state === 'githubReadyToAnalyze' && (
+              <GithubReadyToAnalyzeStep
+                selectedRepo={confirmedGithubRepository ?? selectedRepo}
+              />
             )}
             {state === 'uploading' && (
-              <UploadProgressStep source={localSource} isPending={uploadLocalSource.isPending} />
+              <UploadProgressStep
+                source={localSource}
+                isPending={uploadLocalSource.isPending}
+              />
             )}
             {state === 'analyzing' && (
               <AnalysisProgressStep
@@ -454,11 +569,7 @@ export function ProjectConfigurationDrawer({
             )}
             {state === 'analysisFailure' && (
               <AnalysisFailureStep
-                errorMessage={
-                  uploadLocalSource.error instanceof Error
-                    ? uploadLocalSource.error.message
-                    : configurationQuery.data?.lastError?.message ?? null
-                }
+                errorMessage={analysisErrorMessage}
                 onRetry={uploadSelectedLocalSource}
                 onDetails={() => setState('resume')}
               />
@@ -480,11 +591,47 @@ export function ProjectConfigurationDrawer({
         <ProjectConfigurationFooter
           state={state}
           isConfirming={confirmProjectConfiguration.isPending}
+          canReviewGithub={Boolean(selectedRepo)}
           onStateChange={setState}
           onClose={close}
           onConfirm={confirmReviewedConfiguration}
+          onConfirmGithubRepository={confirmGithubRepository}
         />
       </SheetContent>
     </Sheet>
   );
+}
+
+function isSafeGithubUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.origin === 'https://github.com';
+  } catch {
+    return false;
+  }
+}
+
+function getGithubRepositoryErrorKind(error: unknown) {
+  if (!(error instanceof ApiError)) {
+    return error ? 'network' : undefined;
+  }
+
+  const errorCode =
+    typeof error.details === 'object' &&
+    error.details !== null &&
+    'errorCode' in error.details
+      ? String((error.details as { errorCode?: unknown }).errorCode)
+      : '';
+
+  if (errorCode === 'source_installation_revoked') return 'revoked';
+  if (errorCode === 'source_github_rate_limited') return 'rate-limit';
+  if (errorCode === 'source_fetch_failed' && error.status >= 500) {
+    return 'temporary';
+  }
+  if (error.status === 410) return 'revoked';
+  if (error.status === 429) return 'rate-limit';
+  if (error.status >= 500) return 'temporary';
+  if (error.status === 403 || error.status === 401) return 'inactive';
+
+  return 'generic';
 }

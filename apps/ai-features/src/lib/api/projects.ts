@@ -10,7 +10,10 @@ import type {
 import { apiClient } from './client';
 
 export type { CreateProjectInput, ProjectListItem };
-export type { ConfirmProjectConfigurationInput, ProjectConfigurationSummary };
+export type {
+  ConfirmProjectConfigurationInput,
+  ProjectConfigurationSummary,
+};
 export type ApiProject = ProjectListItem;
 
 export function getProjects(

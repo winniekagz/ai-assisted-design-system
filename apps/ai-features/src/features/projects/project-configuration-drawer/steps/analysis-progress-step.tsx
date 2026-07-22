@@ -101,9 +101,7 @@ export { getConfigurationStatus };
 
 import { StatusCallout, SummaryRows } from '../shared-components';
 export function AnalysisProgressStep({
-  onWarning,
-  onFailure,
-  onReview,
+  onReview: _onReview,
 }: {
   onWarning(): void;
   onFailure(): void;
@@ -115,11 +113,6 @@ export function AnalysisProgressStep({
         <AnalysisLoadingState />
       </div>
       <StatusCallout tone='info' title='You can leave this page' detail='Analysis continues in the background and can be resumed from the project.' />
-      <div className='flex flex-wrap gap-2'>
-        <Button type='button' onClick={onReview}>Continue to review</Button>
-        <Button type='button' variant='outlined' onClick={onWarning}>Preview warning</Button>
-        <Button type='button' variant='outlined' onClick={onFailure}>Preview failure</Button>
-      </div>
     </div>
   );
 }

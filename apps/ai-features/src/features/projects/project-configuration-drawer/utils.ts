@@ -139,6 +139,7 @@ export function previousState(state: ConfigurationStateId): ConfigurationStateId
     githubPermission: 'sourceChoice',
     githubRepoPicker: 'githubPermission',
     githubReview: 'githubRepoPicker',
+    githubReadyToAnalyze: 'githubReview',
     uploading: 'localPreflight',
     analyzing: 'sourceChoice',
     analysisWarning: 'analyzing',
