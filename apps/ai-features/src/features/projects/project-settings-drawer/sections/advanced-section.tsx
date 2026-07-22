@@ -1,38 +1,7 @@
-import {
-  Button,
-  Card,
-  CardContent,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  Input,
-  Select,
-  Switch,
-  Textarea,
-  cn,
-} from 'componentiq';
-import { Archive, ChevronDown, Github, Trash2 } from 'lucide-react';
-
+import { settingsMetadataFixture } from '@/features/projects/fixtures/settings';
 import type { ProjectRow } from '@/features/projects/types';
-import {
-  settingsIntegrationsFixture,
-  settingsMetadataFixture,
-  settingsRepositoriesFixture,
-  settingsRulesFixture,
-  settingsTeamOptions,
-  statusExplanations,
-  type ProjectSettingsForm,
-} from '@/features/projects/fixtures/settings';
 
-import {
-  DangerRow,
-  Meta,
-  SectionHeading,
-  Stat,
-  StatusBadge,
-} from '../components';
-import { statusOptions, type UpdateProjectSettingsForm } from '../types';
+import { Meta, SectionHeading } from '../components';
 
 export function AdvancedSection({ project }: { project: ProjectRow }) {
   return (

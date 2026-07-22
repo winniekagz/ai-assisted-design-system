@@ -7,11 +7,15 @@ import { ReadyProjectOverview } from './ready-project-overview';
 vi.mock('componentiq', () => ({
   Button: ({
     children,
-    startIcon: _startIcon,
+    startIcon,
     ...props
   }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
     startIcon?: React.ReactNode;
-  }) => React.createElement('button', props, children),
+  }) => {
+    void startIcon;
+
+    return React.createElement('button', props, children);
+  },
   Card: ({ children }: { children: React.ReactNode }) =>
     React.createElement('section', null, children),
   CardContent: ({ children }: { children: React.ReactNode }) =>

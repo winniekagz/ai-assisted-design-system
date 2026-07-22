@@ -1,104 +1,11 @@
 'use client';
 
-import { useAuth } from '@clerk/nextjs';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type {
-  DetectedProjectConfiguration,
-  ProjectConfigurationStatus,
-} from '@winniekagendo/componentiq-shared-types';
-import type { GitProviderConnectionSummary } from '@winniekagendo/componentiq-shared-types';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Progress,
-  Select,
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  Stepper,
-  Textarea,
-  cn,
-  toast,
-} from 'componentiq';
-import {
-  AlertCircle,
-  Archive,
-  CheckCircle2,
-  ChevronLeft,
-  Clock,
-  FileArchive,
-  FolderOpen,
-  Github,
-  Info,
-  Loader2,
-  RefreshCcw,
-  Search,
-  ShieldCheck,
-  Upload,
-} from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type ReactNode,
-} from 'react';
-import { useForm } from 'react-hook-form';
+import { Badge, Button } from 'componentiq';
 
-import {
-  useDisconnectGithubConnection,
-  useStartGithubConnection,
-} from '@/hooks/mutations/use-connect-github';
-import { useGithubConnections } from '@/hooks/queries/use-github-connections';
-import { useProjectConfiguration } from '@/features/projects/hooks';
-import {
-  confirmProjectConfiguration as confirmProjectConfigurationRequest,
-  uploadLocalProjectSource,
-} from '@/lib/api/projects';
-import { requireClerkSessionToken } from '@/lib/auth/clerk-session-token';
-import { queryKeys } from '@/lib/query/query-keys';
+import { localUploadLimits } from '../constants';
+import { StatusCallout } from '../shared-components';
+import type { LocalSourceSelection } from '../types';
 
-import {
-  analysisSteps,
-  localExclusions,
-  localUploadLimits,
-  repoRows,
-  stageSteps,
-  statusLabels,
-} from '../constants';
-import type {
-  ConfigurationFormValues,
-  ConfigurationStateId,
-  DirectoryPickerAttributes,
-  LocalSourceSelection,
-  ProjectConfigurationDrawerProps,
-  ProjectConfigurationProject,
-} from '../types';
-import {
-  buildConfirmConfigurationInput,
-  configurationStateForStatus,
-  getConfigurationStatus,
-  previousState,
-  stageIndexForState,
-  titleForState,
-} from '../utils';
-
-export type {
-  ConfigurationStateId,
-  ProjectConfigurationProject,
-  ProjectConfigurationStatus,
-};
-export { getConfigurationStatus };
-
-import { StatusCallout, SummaryRows } from '../shared-components';
 export function LocalPreflightStep({
   source,
   onAnalyze,
@@ -171,10 +78,6 @@ export function LocalPreflightStep({
   );
 }
 
-function totalFileSize(files: File[]) {
-  return files.reduce((total, file) => total + file.size, 0);
-}
-
 function formatBytes(bytes: number) {
   if (bytes === 0) return '0 B';
 
@@ -183,42 +86,4 @@ function formatBytes(bytes: number) {
   const value = bytes / 1024 ** unitIndex;
 
   return `${value >= 10 || unitIndex === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[unitIndex]}`;
-}
-
-function shouldIgnoreLocalFile(file: File) {
-  const relativePath =
-    (file as File & { webkitRelativePath?: string }).webkitRelativePath ||
-    file.name;
-  const normalized = relativePath.replace(/\\/g, '/');
-  const parts = normalized.split('/').filter(Boolean);
-  const basename = parts.at(-1)?.toLowerCase() ?? '';
-  const excludedSegments = new Set([
-    'node_modules',
-    '.git',
-    '.next',
-    'dist',
-    'build',
-    'coverage',
-    '.cache',
-    '.turbo',
-    '.vercel',
-    '.output',
-  ]);
-  const excludedBasenames = new Set([
-    '.env',
-    '.env.local',
-    '.env.development',
-    '.env.production',
-    'id_rsa',
-    'id_dsa',
-    'id_ecdsa',
-    'id_ed25519',
-  ]);
-
-  if (parts.some(part => excludedSegments.has(part))) return true;
-  if (excludedBasenames.has(basename)) return true;
-  if (basename.endsWith('.pem') || basename.endsWith('.key')) return true;
-  if (basename.endsWith('.log') || basename.endsWith('.map')) return true;
-
-  return false;
 }
