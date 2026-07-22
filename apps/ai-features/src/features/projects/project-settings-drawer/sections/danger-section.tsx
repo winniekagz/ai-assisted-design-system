@@ -1,38 +1,9 @@
-import {
-  Button,
-  Card,
-  CardContent,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  Input,
-  Select,
-  Switch,
-  Textarea,
-  cn,
-} from 'componentiq';
-import { Archive, ChevronDown, Github, Trash2 } from 'lucide-react';
+import { Button, Input } from 'componentiq';
+import { Archive, Trash2 } from 'lucide-react';
 
 import type { ProjectRow } from '@/features/projects/types';
-import {
-  settingsIntegrationsFixture,
-  settingsMetadataFixture,
-  settingsRepositoriesFixture,
-  settingsRulesFixture,
-  settingsTeamOptions,
-  statusExplanations,
-  type ProjectSettingsForm,
-} from '@/features/projects/fixtures/settings';
 
-import {
-  DangerRow,
-  Meta,
-  SectionHeading,
-  Stat,
-  StatusBadge,
-} from '../components';
-import { statusOptions, type UpdateProjectSettingsForm } from '../types';
+import { DangerRow, SectionHeading } from '../components';
 
 export function DangerSection({
   project,

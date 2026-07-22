@@ -23,6 +23,7 @@ export function GithubPermissionStep({
   errorMessage: string | null;
   onAuthorize(): void;
   onContinue(): void;
+  // eslint-disable-next-line no-unused-vars
   onDisconnect(connectionId: string): void;
 }) {
   const active = connection?.status === 'ACTIVE';

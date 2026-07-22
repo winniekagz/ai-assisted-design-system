@@ -1,8 +1,8 @@
-import type { ProjectRow } from '@/features/projects/types';
 import type {
   ProjectSettingsForm,
   ProjectSettingsStatus,
 } from '@/features/projects/fixtures/settings';
+import type { ProjectRow } from '@/features/projects/types';
 
 export type ProjectSettingsDrawerProps = {
   open: boolean;

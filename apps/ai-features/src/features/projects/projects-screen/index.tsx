@@ -2,60 +2,38 @@
 
 import {
   Button,
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
   EmptyState,
   Input,
-  Skeleton,
-  cn,
 } from 'componentiq';
 import {
   AlertCircle,
-  Archive,
-  CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  CircleDashed,
-  Download,
   FolderKanban,
-  Import,
-  Plus,
   Search,
-  ShieldAlert,
 } from 'lucide-react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 
 import { OrgFrame } from '@/features/org/org-frame';
 import { useProjects } from '@/features/projects/hooks';
+import type { ProjectConfigurationProject } from '@/features/projects/project-configuration-drawer';
+import { projectRowFromApiProject } from '@/features/projects/project-row-mapper';
+import {
+  EmptyProjectsState,
+  ProjectFlowMounts,
+  ProjectMenuFilter,
+  ProjectsHeader,
+  ProjectsPagination,
+  ProjectsSkeleton,
+  ProjectsTable,
+  StatusFilter,
+  StatusSummaryPills,
+  isProjectsListState,
+  uniqueProjectOptions,
+} from '@/features/projects/projects-screen/components';
 import type {
   ProjectRow,
   ProjectStatus,
-  ProjectsListState,
 } from '@/features/projects/types';
-
-import { CreateProjectDrawer } from '@/features/projects/create-project-drawer';
-import { projectStatuses } from '@/features/projects/fixtures/projects';
-import {
-  ConfigurationStatusBadge,
-  ProjectConfigurationDrawer,
-  type ProjectConfigurationProject,
-  getConfigurationStatus,
-} from '@/features/projects/project-configuration-drawer';
-import { projectRowFromApiProject } from '@/features/projects/project-row-mapper';
-
-const statusLabels: Record<ProjectStatus, string> = {
-  healthy: 'Healthy',
-  needs_attention: 'Needs Attention',
-  blocked: 'Blocked',
-  not_configured: 'Not Configured',
-  archived: 'Archived',
-};
 
 const auditStateLabels: Record<ProjectRow['latestAudit']['state'], string> = {
   passed: 'Passed',
@@ -369,17 +347,3 @@ function ProjectsCatalogue({
     </div>
   );
 }
-
-import {
-  EmptyProjectsState,
-  ProjectFlowMounts,
-  ProjectMenuFilter,
-  ProjectsHeader,
-  ProjectsPagination,
-  ProjectsSkeleton,
-  ProjectsTable,
-  StatusFilter,
-  StatusSummaryPills,
-  isProjectsListState,
-  uniqueProjectOptions,
-} from './components';

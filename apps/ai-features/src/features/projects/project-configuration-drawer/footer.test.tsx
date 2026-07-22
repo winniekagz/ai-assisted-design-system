@@ -7,11 +7,15 @@ import { ProjectConfigurationFooter } from './footer';
 vi.mock('componentiq', () => ({
   Button: ({
     children,
-    startIcon: _startIcon,
+    startIcon,
     ...props
   }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
     startIcon?: React.ReactNode;
-  }) => React.createElement('button', props, children),
+  }) => {
+    void startIcon;
+
+    return React.createElement('button', props, children);
+  },
   SheetFooter: ({
     children,
     ...props

@@ -78,7 +78,8 @@ export function ProjectSettingsDrawer({
     setDeleteText('');
   }, [open, project]);
 
-  function updateForm(updater: (current: ProjectSettingsForm) => ProjectSettingsForm) {
+  // eslint-disable-next-line no-unused-vars
+  function updateForm(updater: (form: ProjectSettingsForm) => ProjectSettingsForm) {
     setForm(current => updater(current));
     setFooterSuccess('');
     setFooterError('');

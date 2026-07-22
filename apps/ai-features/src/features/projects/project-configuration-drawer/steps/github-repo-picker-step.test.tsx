@@ -9,26 +9,32 @@ vi.mock('componentiq', () => ({
     React.createElement('span', null, children),
   Button: ({
     children,
-    startIcon: _startIcon,
+    startIcon,
     ...props
   }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
     startIcon?: React.ReactNode;
-  }) =>
-    React.createElement('button', props, children),
+  }) => {
+    void startIcon;
+
+    return React.createElement('button', props, children);
+  },
   Input: ({
     label,
-    startIcon: _startIcon,
+    startIcon,
     ...props
   }: React.InputHTMLAttributes<HTMLInputElement> & {
     label: string;
     startIcon?: React.ReactNode;
-  }) =>
-    React.createElement(
+  }) => {
+    void startIcon;
+
+    return React.createElement(
       'label',
       null,
       label,
       React.createElement('input', props)
-    ),
+    );
+  },
   cn: (...classes: Array<string | false | null | undefined>) =>
     classes.filter(Boolean).join(' '),
 }));
