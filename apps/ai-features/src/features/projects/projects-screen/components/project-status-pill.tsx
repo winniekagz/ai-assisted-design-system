@@ -41,7 +41,6 @@ import type {
 
 import { CreateProjectDrawer } from '@/features/projects/create-project-drawer';
 import { projectStatuses } from '@/features/projects/fixtures/projects';
-import { ImportProjectFlow } from '@/features/projects/import-project-flow';
 import {
   ConfigurationStatusBadge,
   ProjectConfigurationDrawer,

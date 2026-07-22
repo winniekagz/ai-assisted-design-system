@@ -41,7 +41,6 @@ import type {
 
 import { CreateProjectDrawer } from '@/features/projects/create-project-drawer';
 import { projectStatuses } from '@/features/projects/fixtures/projects';
-import { ImportProjectFlow } from '@/features/projects/import-project-flow';
 import {
   ConfigurationStatusBadge,
   ProjectConfigurationDrawer,
@@ -78,21 +77,17 @@ type ProjectFilterValue = string;
 export function ProjectFlowMounts({
   orgSlug,
   createDrawerOpen,
-  importFlowOpen,
   teamOptions,
   existingProjects,
   configurationProject,
   configurationDrawerOpen,
   onCreateDrawerOpenChange,
-  onImportFlowOpenChange,
   onConfigurationDrawerOpenChange,
   onConfigureProject,
   onCreated,
-  onImported,
 }: {
   orgSlug: string;
   createDrawerOpen: boolean;
-  importFlowOpen: boolean;
   teamOptions: string[];
   existingProjects: ProjectRow[];
   configurationProject: ProjectConfigurationProject | null;
@@ -100,13 +95,10 @@ export function ProjectFlowMounts({
   // eslint-disable-next-line no-unused-vars
   onCreateDrawerOpenChange(open: boolean): void;
   // eslint-disable-next-line no-unused-vars
-  onImportFlowOpenChange(open: boolean): void;
-  // eslint-disable-next-line no-unused-vars
   onConfigurationDrawerOpenChange(open: boolean): void;
   // eslint-disable-next-line no-unused-vars
   onConfigureProject(project: ProjectConfigurationProject): void;
   onCreated(): void;
-  onImported(): void;
 }) {
   return (
     <>
@@ -118,12 +110,6 @@ export function ProjectFlowMounts({
         onOpenChange={onCreateDrawerOpenChange}
         onCreated={onCreated}
         onConfigureProject={project => onConfigureProject(projectRowFromApiProject(project))}
-      />
-      <ImportProjectFlow
-        open={importFlowOpen}
-        organizationId={orgSlug}
-        onOpenChange={onImportFlowOpenChange}
-        onImported={onImported}
       />
       <ProjectConfigurationDrawer
         open={configurationDrawerOpen}
