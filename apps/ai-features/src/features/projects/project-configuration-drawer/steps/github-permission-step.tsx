@@ -6,12 +6,11 @@ import { Loader2, ShieldCheck } from 'lucide-react';
 
 import { StatusCallout } from '../shared-components';
 
-export function GithubPermissionStep({
+export function GithubPermissionFooterActions({
   connection,
   isLoading,
   isStarting,
   isDisconnecting,
-  errorMessage,
   onAuthorize,
   onContinue,
   onDisconnect,
@@ -20,11 +19,51 @@ export function GithubPermissionStep({
   isLoading: boolean;
   isStarting: boolean;
   isDisconnecting: boolean;
-  errorMessage: string | null;
   onAuthorize(): void;
   onContinue(): void;
   // eslint-disable-next-line no-unused-vars
   onDisconnect(connectionId: string): void;
+}) {
+  const active = connection?.status === 'ACTIVE';
+
+  if (active) {
+    return (
+      <>
+        <Button type='button' onClick={onContinue}>
+          Continue to repositories
+        </Button>
+        <Button
+          type='button'
+          variant='outlined'
+          disabled={isDisconnecting}
+          onClick={() => onDisconnect(connection.id)}
+        >
+          Disconnect association
+        </Button>
+      </>
+    );
+  }
+
+  return (
+    <Button
+      type='button'
+      disabled={isLoading || isStarting}
+      onClick={onAuthorize}
+      startIcon={
+        isStarting ? <Loader2 className='size-4 animate-spin' /> : undefined
+      }
+    >
+      {connection ? 'Repair GitHub connection' : 'Connect GitHub'}
+    </Button>
+  );
+}
+
+export function GithubPermissionStep({
+  connection,
+  errorMessage,
+}: {
+  connection: GitProviderConnectionSummary | null;
+  errorMessage: string | null;
 }) {
   const active = connection?.status === 'ACTIVE';
 
@@ -84,32 +123,6 @@ export function GithubPermissionStep({
         here only removes the Component IQ association; it does not uninstall the
         GitHub App or delete projects, configuration jobs, audits, or findings.
       </div>
-      {active ? (
-        <div className='flex flex-wrap gap-2'>
-          <Button type='button' onClick={onContinue}>
-            Continue to repositories
-          </Button>
-          <Button
-            type='button'
-            variant='outlined'
-            disabled={isDisconnecting}
-            onClick={() => onDisconnect(connection.id)}
-          >
-            Disconnect association
-          </Button>
-        </div>
-      ) : (
-        <Button
-          type='button'
-          disabled={isLoading || isStarting}
-          onClick={onAuthorize}
-          startIcon={
-            isStarting ? <Loader2 className='size-4 animate-spin' /> : undefined
-          }
-        >
-          {connection ? 'Repair GitHub connection' : 'Connect GitHub'}
-        </Button>
-      )}
     </div>
   );
 }

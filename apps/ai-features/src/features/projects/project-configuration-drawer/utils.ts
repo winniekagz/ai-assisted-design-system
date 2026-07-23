@@ -144,6 +144,7 @@ export function validateConfigurationPath(value: string) {
   const parts = normalized.split('/').filter(Boolean);
 
   if (!normalized) return 'Path is required.';
+  if (normalized === '.') return null;
   if (normalized.startsWith('/') || /^[a-zA-Z]:/.test(normalized)) {
     return 'Use a relative path inside the project.';
   }

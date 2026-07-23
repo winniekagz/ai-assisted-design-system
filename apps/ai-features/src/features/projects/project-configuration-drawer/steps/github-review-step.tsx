@@ -6,6 +6,20 @@ import React from 'react';
 import { StatusCallout, SummaryRows } from '../shared-components';
 import type { ConfigurationFormValues, SelectedGithubRepository } from '../types';
 
+export function GithubReviewFooterActions({
+  canReviewGithub,
+  onConfirm,
+}: {
+  canReviewGithub?: boolean;
+  onConfirm(): void;
+}) {
+  return (
+    <Button type='button' disabled={!canReviewGithub} onClick={onConfirm}>
+      Confirm repository
+    </Button>
+  );
+}
+
 export function GithubReviewStep({
   selectedRepo,
   values,

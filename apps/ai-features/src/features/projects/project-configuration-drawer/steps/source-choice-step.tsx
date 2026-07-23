@@ -1,7 +1,16 @@
 'use client';
 
+import { Button } from 'componentiq';
 import { Github, Upload } from 'lucide-react';
 import type { ReactNode } from 'react';
+
+export function SourceChoiceFooterActions({ onClose }: { onClose(): void }) {
+  return (
+    <Button type='button' variant='outlined' onClick={onClose}>
+      I&apos;ll do this later
+    </Button>
+  );
+}
 
 export function SourceChoiceStep({
   onGithub,

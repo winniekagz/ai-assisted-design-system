@@ -1,7 +1,16 @@
+import type { GitProviderConnectionSummary } from '@winniekagendo/componentiq-shared-types';
 import { Button, SheetFooter } from 'componentiq';
-import { ChevronLeft, Loader2 } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import React from 'react';
 
+import { GithubPermissionFooterActions } from './steps/github-permission-step';
+import { GithubReadyToAnalyzeFooterActions } from './steps/github-ready-to-analyze-step';
+import { GithubRepoPickerFooterActions } from './steps/github-repo-picker-step';
+import { GithubReviewFooterActions } from './steps/github-review-step';
+import { ReviewSetupFooterActions } from './steps/review-setup-step';
+import { SourceChoiceFooterActions } from './steps/source-choice-step';
+import { SuccessFooterActions } from './steps/success-step';
+import { UploadProgressFooterActions } from './steps/upload-progress-step';
 import type { ConfigurationStateId } from './types';
 import { previousState } from './utils';
 
@@ -12,22 +21,37 @@ export function ProjectConfigurationFooter({
   isConfirming,
   isAnalyzingGithub,
   canReviewGithub,
+  githubConnection,
+  isGithubConnectionLoading,
+  isStartingGithubConnection,
+  isDisconnectingGithub,
   onStateChange,
   onClose,
   onConfirm,
   onConfirmGithubRepository,
   onAnalyzeGithubRepository,
+  onAuthorizeGithub,
+  onContinueToGithubRepos,
+  onDisconnectGithub,
 }: {
   state: ConfigurationStateId;
   isConfirming: boolean;
   isAnalyzingGithub?: boolean;
   canReviewGithub?: boolean;
+  githubConnection?: GitProviderConnectionSummary | null;
+  isGithubConnectionLoading?: boolean;
+  isStartingGithubConnection?: boolean;
+  isDisconnectingGithub?: boolean;
   // eslint-disable-next-line no-unused-vars
   onStateChange(state: ConfigurationStateId): void;
   onClose(): void;
   onConfirm(): void;
   onConfirmGithubRepository(): void;
   onAnalyzeGithubRepository(): void;
+  onAuthorizeGithub?(): void;
+  onContinueToGithubRepos?(): void;
+  // eslint-disable-next-line no-unused-vars
+  onDisconnectGithub?(connectionId: string): void;
 }) {
   return (
     <SheetFooter className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
@@ -41,82 +65,46 @@ export function ProjectConfigurationFooter({
         Back
       </Button>
       <div className='flex flex-wrap justify-end gap-2'>
-        {state === 'sourceChoice' && (
-          <Button type='button' variant='outlined' onClick={onClose}>
-            I&apos;ll do this later
-          </Button>
+        {state === 'sourceChoice' && <SourceChoiceFooterActions onClose={onClose} />}
+        {state === 'githubPermission' && (
+          <GithubPermissionFooterActions
+            connection={githubConnection ?? null}
+            isLoading={Boolean(isGithubConnectionLoading)}
+            isStarting={Boolean(isStartingGithubConnection)}
+            isDisconnecting={Boolean(isDisconnectingGithub)}
+            onAuthorize={() => onAuthorizeGithub?.()}
+            onContinue={() => onContinueToGithubRepos?.()}
+            onDisconnect={connectionId => onDisconnectGithub?.(connectionId)}
+          />
         )}
         {state === 'githubRepoPicker' && (
-          <Button
-            type='button'
-            disabled={!canReviewGithub}
-            onClick={() => onStateChange('githubReview')}
-          >
-            Review connection
-          </Button>
+          <GithubRepoPickerFooterActions
+            canReviewGithub={canReviewGithub}
+            onReview={() => onStateChange('githubReview')}
+          />
         )}
         {state === 'githubReview' && (
-          <Button
-            type='button'
-            disabled={!canReviewGithub}
-            onClick={onConfirmGithubRepository}
-          >
-            Confirm repository
-          </Button>
+          <GithubReviewFooterActions
+            canReviewGithub={canReviewGithub}
+            onConfirm={onConfirmGithubRepository}
+          />
         )}
         {state === 'githubReadyToAnalyze' && (
-          <>
-            <Button type='button' variant='outlined' onClick={() => onStateChange('githubRepoPicker')}>
-              Change repository
-            </Button>
-            <Button
-              type='button'
-              disabled={isAnalyzingGithub}
-              onClick={onAnalyzeGithubRepository}
-              startIcon={
-                isAnalyzingGithub
-                  ? <Loader2 className='size-4 animate-spin' />
-                  : undefined
-              }
-            >
-              {isAnalyzingGithub ? 'Analyzing' : 'Analyze repository'}
-            </Button>
-          </>
+          <GithubReadyToAnalyzeFooterActions
+            isAnalyzingGithub={isAnalyzingGithub}
+            onChangeRepository={() => onStateChange('githubRepoPicker')}
+            onAnalyze={onAnalyzeGithubRepository}
+          />
         )}
-        {state === 'uploading' && (
-          <Button type='button' disabled startIcon={<Loader2 className='size-4 animate-spin' />}>
-            Uploading
-          </Button>
-        )}
+        {state === 'uploading' && <UploadProgressFooterActions />}
         {state === 'reviewSetup' && (
-          <>
-            <Button type='button' variant='outlined' onClick={onClose}>
-              Save and review later
-            </Button>
-            <Button
-              type='button'
-              disabled={isConfirming}
-              onClick={onConfirm}
-              startIcon={
-                isConfirming
-                  ? <Loader2 className='size-4 animate-spin' />
-                  : undefined
-              }
-            >
-              {isConfirming ? 'Confirming' : 'Confirm configuration'}
-            </Button>
-          </>
+          <ReviewSetupFooterActions
+            isConfirming={isConfirming}
+            onClose={onClose}
+            onConfirm={onConfirm}
+          />
         )}
-        {state === 'success' && (
-          <>
-            <Button type='button' variant='outlined' onClick={onClose}>
-              View project
-            </Button>
-            <Button type='button' disabled title='Run your first audit from the project page.'>
-              Run first audit
-            </Button>
-          </>
-        )}
+        {state === 'success' && <SuccessFooterActions onClose={onClose} />}
       </div>
     </SheetFooter>
   );

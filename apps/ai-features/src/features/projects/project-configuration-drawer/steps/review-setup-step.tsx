@@ -2,11 +2,40 @@
 
 import type { DetectedProjectConfiguration } from '@winniekagendo/componentiq-shared-types';
 import { Button, Input, Textarea } from 'componentiq';
+import { Loader2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form';
 
 import { StatusCallout, SummaryRows } from '../shared-components';
 import type { ConfigurationFormValues } from '../types';
+
+export function ReviewSetupFooterActions({
+  isConfirming,
+  onClose,
+  onConfirm,
+}: {
+  isConfirming?: boolean;
+  onClose(): void;
+  onConfirm(): void;
+}) {
+  return (
+    <>
+      <Button type='button' variant='outlined' onClick={onClose}>
+        Save and review later
+      </Button>
+      <Button
+        type='button'
+        disabled={isConfirming}
+        onClick={onConfirm}
+        startIcon={
+          isConfirming ? <Loader2 className='size-4 animate-spin' /> : undefined
+        }
+      >
+        {isConfirming ? 'Confirming' : 'Confirm configuration'}
+      </Button>
+    </>
+  );
+}
 
 type ReviewSetupStepProps = {
   detectedConfiguration: DetectedProjectConfiguration | null;

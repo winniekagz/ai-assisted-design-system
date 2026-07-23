@@ -266,7 +266,8 @@ export class ProjectConfigurationService {
 
     if (
       parsed.data.expectedDetectedAt &&
-      detected.createdAt.toISOString() !== parsed.data.expectedDetectedAt
+      detectedConfigurationReviewTimestamp(detected) !==
+        parsed.data.expectedDetectedAt
     ) {
       throw new ConflictException({
         message: 'This project setup changed while you were reviewing it.',
@@ -445,8 +446,7 @@ export class ProjectConfigurationService {
         detectedProjectSetupFromJson(detected.rawDetectionResult)?.detectorVersion ??
         null,
       analyzedAt:
-        detectedProjectSetupFromJson(detected.rawDetectionResult)?.analyzedAt ??
-        detected.createdAt.toISOString(),
+        detectedConfigurationReviewTimestamp(detected),
       sourceSnapshotId:
         detectedProjectSetupFromJson(detected.rawDetectionResult)
           ?.sourceSnapshotId ?? null,
@@ -766,6 +766,15 @@ function detectedProjectSetupFromJson(value: unknown): DetectedProjectSetup | nu
   }
 
   return value as DetectedProjectSetup;
+}
+
+function detectedConfigurationReviewTimestamp(
+  detected: Pick<DetectedConfigurationRecord, 'createdAt' | 'rawDetectionResult'>
+) {
+  return (
+    detectedProjectSetupFromJson(detected.rawDetectionResult)?.analyzedAt ??
+    detected.createdAt.toISOString()
+  );
 }
 
 function mergeConfirmedConfiguration(

@@ -1,9 +1,39 @@
 'use client';
 
+import { Button } from 'componentiq';
+import { Loader2 } from 'lucide-react';
 import React from 'react';
 
 import { StatusCallout, SummaryRows } from '../shared-components';
 import type { SelectedGithubRepository } from '../types';
+
+export function GithubReadyToAnalyzeFooterActions({
+  isAnalyzingGithub,
+  onChangeRepository,
+  onAnalyze,
+}: {
+  isAnalyzingGithub?: boolean;
+  onChangeRepository(): void;
+  onAnalyze(): void;
+}) {
+  return (
+    <>
+      <Button type='button' variant='outlined' onClick={onChangeRepository}>
+        Change repository
+      </Button>
+      <Button
+        type='button'
+        disabled={isAnalyzingGithub}
+        onClick={onAnalyze}
+        startIcon={
+          isAnalyzingGithub ? <Loader2 className='size-4 animate-spin' /> : undefined
+        }
+      >
+        {isAnalyzingGithub ? 'Analyzing' : 'Analyze repository'}
+      </Button>
+    </>
+  );
+}
 
 export function GithubReadyToAnalyzeStep({
   selectedRepo,
