@@ -1,6 +1,11 @@
-import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
+import {
+  createInputSecurityProcessor,
+  type InputNormalizationPolicy,
+  type InputValidationResult,
+} from '@/lib/input-security';
+import { cn } from '@/lib/utils';
 
 const textareaVariants = cva(
   'flex min-h-[80px] w-full font-rubik text-base font-normal leading-6 tracking-[0.15px] text-[color:var(--color-text-secondary)] rounded border border-[color:var(--color-border-default)] bg-transparent px-3 py-2 placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none',
@@ -27,17 +32,33 @@ const textareaVariants = cva(
   }
 );
 
-export interface TextareaProps
-  extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'>,
-    VariantProps<typeof textareaVariants> {
-  error?: boolean;
-  success?: boolean;
-  autoGrow?: boolean;
-  startIcon?: React.ReactNode;
-  endIcon?: React.ReactNode;
-  onStartIconClick?: () => void;
-  onEndIconClick?: () => void;
-}
+type TextareaSecurityProps =
+  | {
+      inputSecurityPolicy?: undefined;
+      onInputValidationResult?: never;
+      onNormalizedValueChange?: never;
+    }
+  | {
+      inputSecurityPolicy: InputNormalizationPolicy;
+      // eslint-disable-next-line no-unused-vars
+      onInputValidationResult?: (result: InputValidationResult) => void;
+      // eslint-disable-next-line no-unused-vars
+      onNormalizedValueChange: (value: string) => void;
+    };
+
+export type TextareaProps = Omit<
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+  'size'
+> &
+  VariantProps<typeof textareaVariants> & {
+    error?: boolean;
+    success?: boolean;
+    autoGrow?: boolean;
+    startIcon?: React.ReactNode;
+    endIcon?: React.ReactNode;
+    onStartIconClick?: () => void;
+    onEndIconClick?: () => void;
+  } & TextareaSecurityProps;
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
@@ -52,11 +73,30 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       endIcon,
       onStartIconClick,
       onEndIconClick,
+      inputSecurityPolicy,
+      onInputValidationResult,
+      onNormalizedValueChange,
+      onBlur,
+      onChange,
+      onCompositionEnd,
+      onCompositionStart,
       ...props
     },
     ref
   ) => {
     const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+    const isComposingRef = React.useRef(false);
+    const inputSecurityProcessor = React.useMemo(
+      () =>
+        inputSecurityPolicy
+          ? createInputSecurityProcessor({
+              policy: inputSecurityPolicy,
+              onValidationResult: onInputValidationResult,
+              onNormalizedValue: value => onNormalizedValueChange?.(value),
+            })
+          : null,
+      [inputSecurityPolicy, onInputValidationResult, onNormalizedValueChange]
+    );
 
     // Determine variant based on error/success states
     let finalVariant = variant;
@@ -78,7 +118,32 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         textarea.style.height = 'auto';
         textarea.style.height = `${textarea.scrollHeight}px`;
       }
-      props.onChange?.(e);
+      inputSecurityProcessor?.handleChange(e.currentTarget.value, {
+        isComposing: isComposingRef.current,
+      });
+      onChange?.(e);
+    };
+
+    const handleBlur = (event: React.FocusEvent<HTMLTextAreaElement>) => {
+      const outcome = inputSecurityProcessor?.handleBlur(event.currentTarget.value);
+      if (outcome?.changed) {
+        event.currentTarget.value = outcome.result.value;
+      }
+      onBlur?.(event);
+    };
+
+    const handleCompositionStart = (
+      event: React.CompositionEvent<HTMLTextAreaElement>
+    ) => {
+      isComposingRef.current = true;
+      onCompositionStart?.(event);
+    };
+
+    const handleCompositionEnd = (
+      event: React.CompositionEvent<HTMLTextAreaElement>
+    ) => {
+      isComposingRef.current = false;
+      onCompositionEnd?.(event);
     };
 
     return (
@@ -98,8 +163,11 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             }
             textareaRef.current = node;
           }}
-          onChange={handleChange}
           {...props}
+          onBlur={handleBlur}
+          onChange={handleChange}
+          onCompositionEnd={handleCompositionEnd}
+          onCompositionStart={handleCompositionStart}
         />
         {startIcon && (
           <div

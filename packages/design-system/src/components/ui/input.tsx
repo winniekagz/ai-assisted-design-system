@@ -3,8 +3,18 @@ import { Input as HeroInput } from '@heroui/react';
 
 import { cn } from '@/lib/utils';
 
+/**
+ * @deprecated Prefer `Input` from `components/ui/form-fields/input` (exported as
+ * `Input`, this one is exported as `BaseInput`) — it supports label/helperText/
+ * aria-describedby and `inputSecurityPolicy` wiring. This is a thin `@heroui/react`
+ * wrapper kept for existing call sites only; it will not receive new features.
+ */
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
+/**
+ * @deprecated Prefer `Input` from `components/ui/form-fields/input` (exported here as
+ * `BaseInput`) — see the `InputProps` deprecation note above for details.
+ */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => {
     return (

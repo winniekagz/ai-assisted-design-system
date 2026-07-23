@@ -175,6 +175,8 @@ export {
   Autocomplete,
   Checkbox,
   DatePicker,
+  emptyFileUploadSelection,
+  FileUpload,
   Input,
   Radio,
   RadioGroup,
@@ -183,6 +185,12 @@ export {
   Textarea,
   type DatePickerProps,
   type DatePickerValue,
+  type FileUploadAccept,
+  type FileUploadLimits,
+  type FileUploadProps,
+  type FileUploadRejection,
+  type FileUploadRejectionReason,
+  type FileUploadSelection,
 } from './components/ui/form-fields';
 export { EnhancedDataTable } from './components/ui/dataTable/enhanced-data-table';
 export {
@@ -195,6 +203,7 @@ export { useMenu } from './hooks/useMenu';
 export { usePagination } from './hooks/use-pagination';
 export { useTableState } from './hooks/useTable';
 export * from './lib/button-utils';
+export * from './lib/input-security';
 export { cn } from './lib/utils';
 export * from './theme';
 export type * from './types/badgw';
