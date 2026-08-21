@@ -6,6 +6,13 @@ on:
       - main
     paths:
       - 'packages/design-system/**'
+      - 'packages/ai/**'
+      - 'packages/shared-types/**'
+      - 'README.npm.md'
+      - 'package-lock.json'
+      - 'package.json'
+      - 'turbo.json'
+      - '.github/workflows/publish.yml'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -20,6 +27,7 @@ jobs:
 
     permissions:
       contents: write
+      id-token: write
 
     steps:
       - name: Checkout
@@ -40,8 +48,8 @@ jobs:
       - name: Type check library
         run: npm run type-check --workspace=packages/design-system
 
-      - name: Build library
-        run: npm run build:lib --workspace=packages/design-system
+      - name: Build library and dependencies
+        run: npx turbo run build --filter=componentiq...
 
       - name: Use npm package README
         run: cp ../../README.npm.md README.md
@@ -62,14 +70,14 @@ jobs:
 
       - name: Publish dry run
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
-        run: npm publish --dry-run
+        run: npm publish --dry-run --access public
         working-directory: packages/design-system
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
         if: ${{ github.event_name != 'workflow_dispatch' || !inputs.dry_run }}
-        run: npm publish --access public
+        run: npm publish --access public --provenance
         working-directory: packages/design-system
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

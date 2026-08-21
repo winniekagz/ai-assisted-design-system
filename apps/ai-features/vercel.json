@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand":"npm run build --workspace=@winniekagendo/ai-features",
+  "installCommand": "cd ../.. && npm ci",
+  "buildCommand": "cd ../.. && npx turbo run build --filter=@winniekagendo/ai-features...",
   "outputDirectory": ".next"
 }

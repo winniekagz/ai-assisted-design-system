@@ -17,6 +17,7 @@
     }
   },
   "scripts": {
+    "build": "npm run build:lib",
     "build:lib": "tsup src/index.ts --format cjs,esm --dts",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts",

@@ -38,8 +38,8 @@ jobs:
       - name: Type check
         run: npm run type-check
 
-      - name: Build library
-        run: npm run build:lib
+      - name: Build library packages
+        run: npx turbo run build --filter=@winniekagendo/docs^...
 
       - name: Pull Vercel environment
         run: npx vercel@latest pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
@@ -75,8 +75,8 @@ jobs:
       - name: Type check
         run: npm run type-check
 
-      - name: Build library
-        run: npm run build:lib
+      - name: Build library packages
+        run: npx turbo run build --filter=@winniekagendo/docs^...
 
       - name: Pull Vercel environment
         run: npx vercel@latest pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
