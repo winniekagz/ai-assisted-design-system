@@ -6,6 +6,7 @@ import { ProjectConfigurationService } from '../src/projects/project-configurati
 const projectUpdatedAt = new Date('2026-07-17T09:30:00.000Z');
 const olderJobUpdatedAt = new Date('2026-07-17T10:00:00.000Z');
 const latestJobUpdatedAt = new Date('2026-07-17T11:00:00.000Z');
+const detectedAnalyzedAt = new Date('2026-07-17T11:00:00.123Z');
 
 function createPrismaMock() {
   const transactionClient = {
@@ -77,7 +78,7 @@ function createDetectedConfigurationRecord() {
       globalWarnings: [],
       candidateProjectRoots: [{ path: '.', score: 20, evidence: [] }],
       detectorVersion: '1',
-      analyzedAt: latestJobUpdatedAt.toISOString(),
+      analyzedAt: detectedAnalyzedAt.toISOString(),
       sourceSnapshotId: 'snapshot_1',
     },
     createdAt: latestJobUpdatedAt,
@@ -409,7 +410,7 @@ describe('ProjectConfigurationService', () => {
       userId: 'user_1',
       input: {
         expectedConfigurationJobId: 'job_latest',
-        expectedDetectedAt: latestJobUpdatedAt.toISOString(),
+        expectedDetectedAt: detectedAnalyzedAt.toISOString(),
         componentPaths: ['src/components', 'src/features'],
         notes: 'Looks right.',
       },

@@ -1,6 +1,21 @@
 'use client';
 
+import { Button } from 'componentiq';
 import { CheckCircle2 } from 'lucide-react';
+
+export function SuccessFooterActions({ onClose }: { onClose(): void }) {
+  return (
+    <>
+      <Button type='button' variant='outlined' onClick={onClose}>
+        View project
+      </Button>
+      <Button type='button' disabled title='Run your first audit from the project page.'>
+        Run first audit
+      </Button>
+    </>
+  );
+}
+
 export function SuccessStep({ projectName }: { projectName: string }) {
   return (
     <div className='grid gap-4 text-center'>

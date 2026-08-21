@@ -23,6 +23,20 @@ import {
   SelectedRepositorySummary,
 } from './github-repo-picker-parts';
 
+export function GithubRepoPickerFooterActions({
+  canReviewGithub,
+  onReview,
+}: {
+  canReviewGithub?: boolean;
+  onReview(): void;
+}) {
+  return (
+    <Button type='button' disabled={!canReviewGithub} onClick={onReview}>
+      Review connection
+    </Button>
+  );
+}
+
 export function GithubRepoPickerStep({
   repoSearch,
   onRepoSearch,

@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: componentiq-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: componentiq-db
+          property: connectionString
+      - key: FRONTEND_URL
+        sync: false
+      - key: CLERK_AUTHORIZED_PARTIES
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: AI_PROVIDER
+        value: mock
+
+databases:
+  - name: componentiq-db
+    plan: free

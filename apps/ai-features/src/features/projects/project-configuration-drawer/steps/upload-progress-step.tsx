@@ -1,10 +1,20 @@
 'use client';
 
-import { Progress } from 'componentiq';
+import { Button, Progress } from 'componentiq';
+import { Loader2 } from 'lucide-react';
 
 import { StatusCallout } from '../shared-components';
 import type { LocalSourceSelection } from '../types';
 import { formatBytes } from '../utils';
+
+export function UploadProgressFooterActions() {
+  return (
+    <Button type='button' disabled startIcon={<Loader2 className='size-4 animate-spin' />}>
+      Uploading
+    </Button>
+  );
+}
+
 export function UploadProgressStep({
   source,
   isPending,

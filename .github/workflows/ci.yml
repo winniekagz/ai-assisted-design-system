@@ -28,6 +28,10 @@ jobs:
       - name: Type check
         run: npm run type-check
 
+     
+      - name: Run tests
+        run: npx turbo test --filter='!@winniekagendo/docs'
+
       - name: Build library
         run: npm run build:lib
 

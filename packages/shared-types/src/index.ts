@@ -524,12 +524,13 @@ function isSafeRelativeConfigurationPath(value: string) {
 
   return (
     normalized.length > 0 &&
-    !normalized.startsWith('/') &&
-    !/^[a-zA-Z]:/.test(normalized) &&
-    !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(normalized) &&
-    !normalized.includes('\0') &&
-    !/[;&|`$<>]/.test(normalized) &&
-    parts.every(part => part !== '..' && part !== '.')
+    (normalized === '.' ||
+      (!normalized.startsWith('/') &&
+        !/^[a-zA-Z]:/.test(normalized) &&
+        !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(normalized) &&
+        !normalized.includes('\0') &&
+        !/[;&|`$<>]/.test(normalized) &&
+        parts.every(part => part !== '..' && part !== '.')))
   );
 }
 

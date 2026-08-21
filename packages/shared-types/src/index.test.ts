@@ -10,6 +10,7 @@ import {
   SOURCE_CONNECTION_STATUSES,
   SOURCE_PROVIDERS,
   createProjectSchema,
+  confirmProjectConfigurationSchema,
   hasPermission,
   rolePermissions,
 } from './index';
@@ -85,6 +86,24 @@ describe('project configuration contracts', () => {
       'REVOKED',
       'FAILED',
     ]);
+  });
+
+  it('accepts repository root as a project configuration path', () => {
+    expect(
+      confirmProjectConfigurationSchema.parse({
+        expectedConfigurationJobId: 'job_1',
+        projectRoot: '.',
+      }).projectRoot
+    ).toBe('.');
+  });
+
+  it('rejects absolute project configuration paths', () => {
+    expect(() =>
+      confirmProjectConfigurationSchema.parse({
+        expectedConfigurationJobId: 'job_1',
+        projectRoot: '/',
+      })
+    ).toThrow();
   });
 });
 

@@ -136,7 +136,7 @@ export function ProjectConfigurationDrawer({
       githubAccount: '',
       repository: '',
       branch: 'main',
-      projectRoot: '/',
+      projectRoot: '.',
       workspace: 'apps/web',
       framework: 'Next.js',
       packageManager: 'npm',
@@ -388,7 +388,7 @@ export function ProjectConfigurationDrawer({
     );
     setValue(
       'projectRoot',
-      setup?.projectRoot.value ?? detectedConfiguration.projectRoot ?? '/'
+      setup?.projectRoot.value ?? detectedConfiguration.projectRoot ?? '.'
     );
     setValue(
       'componentDirectories',
@@ -614,9 +614,6 @@ export function ProjectConfigurationDrawer({
             {state === 'githubPermission' && (
               <GithubPermissionStep
                 connection={githubConnection}
-                isLoading={githubConnections.isLoading}
-                isStarting={startGithubConnection.isPending}
-                isDisconnecting={disconnectGithubConnection.isPending}
                 errorMessage={
                   githubConnections.isError
                     ? 'GitHub connection status could not be loaded.'
@@ -624,13 +621,6 @@ export function ProjectConfigurationDrawer({
                       ? startGithubConnection.error.message
                       : null
                 }
-                onAuthorize={() => {
-                  void startGithubInstall();
-                }}
-                onContinue={() => setState('githubRepoPicker')}
-                onDisconnect={connectionId => {
-                  void disconnectGithubConnection.mutateAsync(connectionId);
-                }}
               />
             )}
             {state === 'githubRepoPicker' && (
@@ -746,11 +736,22 @@ export function ProjectConfigurationDrawer({
           isConfirming={confirmProjectConfiguration.isPending}
           isAnalyzingGithub={analyzeGithubSource.isPending}
           canReviewGithub={Boolean(selectedRepo)}
+          githubConnection={githubConnection}
+          isGithubConnectionLoading={githubConnections.isLoading}
+          isStartingGithubConnection={startGithubConnection.isPending}
+          isDisconnectingGithub={disconnectGithubConnection.isPending}
           onStateChange={setState}
           onClose={close}
           onConfirm={confirmReviewedConfiguration}
           onConfirmGithubRepository={confirmGithubRepository}
           onAnalyzeGithubRepository={analyzeConfirmedGithubRepository}
+          onAuthorizeGithub={() => {
+            void startGithubInstall();
+          }}
+          onContinueToGithubRepos={() => setState('githubRepoPicker')}
+          onDisconnectGithub={connectionId => {
+            void disconnectGithubConnection.mutateAsync(connectionId);
+          }}
         />
       </SheetContent>
     </Sheet>

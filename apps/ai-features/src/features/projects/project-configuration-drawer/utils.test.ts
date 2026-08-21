@@ -2,7 +2,10 @@ import type { DetectedProjectConfiguration } from '@winniekagendo/componentiq-sh
 import { describe, expect, it } from 'vitest';
 
 import type { ConfigurationFormValues } from './types';
-import { buildConfirmConfigurationInput } from './utils';
+import {
+  buildConfirmConfigurationInput,
+  validateConfigurationPath,
+} from './utils';
 
 const baseValues: ConfigurationFormValues = {
   source: 'github',
@@ -71,5 +74,15 @@ describe('buildConfirmConfigurationInput', () => {
     expect(input.framework).toBe('REACT');
     expect(input.packageManager).toBe('PNPM');
     expect(input.stylingSystem).toBe('PLAIN_CSS');
+  });
+});
+
+describe('validateConfigurationPath', () => {
+  it('allows the repository root marker', () => {
+    expect(validateConfigurationPath('.')).toBeNull();
+  });
+
+  it('rejects absolute roots', () => {
+    expect(validateConfigurationPath('/')).toBe('Use a relative path inside the project.');
   });
 });
