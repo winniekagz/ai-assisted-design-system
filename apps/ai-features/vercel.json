@@ -3,5 +3,8 @@
   "framework": "nextjs",
   "installCommand": "cd ../.. && npm ci",
   "buildCommand": "cd ../.. && npx turbo run build --filter=@winniekagendo/ai-features...",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://componentiq-api.onrender.com"
+  }
 }
