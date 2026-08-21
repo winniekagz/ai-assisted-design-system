@@ -30,6 +30,7 @@
     "access": "public"
   },
   "scripts": {
+    "build": "npm run build:lib",
     "build:lib": "tsup",
     "prepublishOnly": "npm run build:lib",
     "type-check": "tsc --noEmit",

@@ -19,12 +19,24 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
 
     env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_ORG_ID: ${{ secrets.STORYBOOK_VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.STORYBOOK_VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Validate Vercel secrets
+        run: |
+          test -n "$VERCEL_TOKEN" || { echo "Missing GitHub secret: VERCEL_TOKEN"; exit 1; }
+          test -n "$VERCEL_ORG_ID" || { echo "Missing GitHub secret: STORYBOOK_VERCEL_ORG_ID"; exit 1; }
+          test -n "$VERCEL_PROJECT_ID" || { echo "Missing GitHub secret: STORYBOOK_VERCEL_PROJECT_ID"; exit 1; }
+          {
+            printf 'VERCEL_TOKEN=%s\n' "$(printf '%s' "$VERCEL_TOKEN" | tr -d '\r\n')"
+            printf 'VERCEL_ORG_ID=%s\n' "$(printf '%s' "$VERCEL_ORG_ID" | tr -d '\r\n')"
+            printf 'VERCEL_PROJECT_ID=%s\n' "$(printf '%s' "$VERCEL_PROJECT_ID" | tr -d '\r\n')"
+          } >> "$GITHUB_ENV"
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -38,17 +50,17 @@ jobs:
       - name: Type check
         run: npm run type-check
 
-      - name: Build library
-        run: npm run build:lib
+      - name: Build library packages
+        run: npx turbo run build --filter=@winniekagendo/docs^...
 
       - name: Pull Vercel environment
-        run: npx vercel@latest pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel@latest pull --yes --environment=preview --token="$VERCEL_TOKEN"
 
       - name: Build Vercel output
-        run: npx vercel@latest build --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel@latest build --token="$VERCEL_TOKEN"
 
       - name: Deploy preview
-        run: npx vercel@latest deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel@latest deploy --prebuilt --token="$VERCEL_TOKEN"
 
   production:
     name: Production Deployment
@@ -56,12 +68,24 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_ORG_ID: ${{ secrets.STORYBOOK_VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.STORYBOOK_VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Validate Vercel secrets
+        run: |
+          test -n "$VERCEL_TOKEN" || { echo "Missing GitHub secret: VERCEL_TOKEN"; exit 1; }
+          test -n "$VERCEL_ORG_ID" || { echo "Missing GitHub secret: STORYBOOK_VERCEL_ORG_ID"; exit 1; }
+          test -n "$VERCEL_PROJECT_ID" || { echo "Missing GitHub secret: STORYBOOK_VERCEL_PROJECT_ID"; exit 1; }
+          {
+            printf 'VERCEL_TOKEN=%s\n' "$(printf '%s' "$VERCEL_TOKEN" | tr -d '\r\n')"
+            printf 'VERCEL_ORG_ID=%s\n' "$(printf '%s' "$VERCEL_ORG_ID" | tr -d '\r\n')"
+            printf 'VERCEL_PROJECT_ID=%s\n' "$(printf '%s' "$VERCEL_PROJECT_ID" | tr -d '\r\n')"
+          } >> "$GITHUB_ENV"
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -75,14 +99,14 @@ jobs:
       - name: Type check
         run: npm run type-check
 
-      - name: Build library
-        run: npm run build:lib
+      - name: Build library packages
+        run: npx turbo run build --filter=@winniekagendo/docs^...
 
       - name: Pull Vercel environment
-        run: npx vercel@latest pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Build Vercel output
-        run: npx vercel@latest build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel@latest build --prod --token="$VERCEL_TOKEN"
 
       - name: Deploy production
-        run: npx vercel@latest deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
