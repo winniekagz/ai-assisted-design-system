@@ -21,6 +21,9 @@ COPY package.json package-lock.json ./
 COPY apps/api ./apps/api
 COPY packages/shared-types ./packages/shared-types
 
+WORKDIR /app/packages/shared-types
+RUN npm run build:lib
+
 WORKDIR /app/apps/api
 RUN npx prisma generate
 RUN npm run build
