@@ -1,6 +1,6 @@
 {
   "name": "componentiq",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A reusable React UI component library built with TypeScript and Tailwind CSS.",
   "private": false,
   "repository": {
