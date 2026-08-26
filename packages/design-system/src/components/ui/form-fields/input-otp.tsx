@@ -52,6 +52,7 @@ const InputOTP = React.forwardRef<HTMLInputElement, InputOTPProps>(
       required,
       disabled,
       children,
+      'aria-describedby': ariaDescribedBy,
       ...props
     },
     ref
@@ -59,6 +60,7 @@ const InputOTP = React.forwardRef<HTMLInputElement, InputOTPProps>(
     const generatedId = React.useId();
     const inputId = id ?? generatedId;
     const helperId = helperText ? `${inputId}-helper` : undefined;
+    const describedBy = [ariaDescribedBy, helperId].filter(Boolean).join(' ');
     const helperColor = error
       ? 'text-[color:var(--helper-error)]'
       : success
@@ -99,7 +101,7 @@ const InputOTP = React.forwardRef<HTMLInputElement, InputOTPProps>(
           required={required}
           disabled={disabled}
           aria-invalid={error ? 'true' : undefined}
-          aria-describedby={helperId}
+          aria-describedby={describedBy || undefined}
           data-size={size}
           data-error={error ? 'true' : undefined}
           data-success={success ? 'true' : undefined}
