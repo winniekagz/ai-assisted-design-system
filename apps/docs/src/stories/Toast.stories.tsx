@@ -110,8 +110,8 @@ toast({
 | \`duration\` | number | Sonner default | Passed through to Sonner |
 
 ### Accessibility
-- Success, info, warning, pending, and default render with \`role="status"\`, \`aria-live="polite"\`, and \`aria-atomic="true"\`.
-- Error toasts render with \`role="alert"\` and \`aria-live="assertive"\`.
+- Sonner owns announcements through the persistent \`Toaster\` live-region container.
+- The toast body does not render its own \`role\`, \`aria-live\`, or \`aria-atomic\` attributes, which avoids duplicate screen-reader announcements.
 - Icons are decorative and hidden from assistive tech; message text must carry the meaning.
 - The close button has an accessible name and is positioned in the top-right corner.
 - Action buttons use visible labels and receive normal keyboard focus.

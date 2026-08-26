@@ -173,9 +173,6 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastVisualProps>(
   ) => (
     <div
       ref={ref}
-      role={variant === 'error' ? 'alert' : 'status'}
-      aria-live={variant === 'error' ? 'assertive' : 'polite'}
-      aria-atomic='true'
       style={{ ...createToastStyles(variant, colors), ...style }}
       className={cn(
         'relative grid min-h-[88px] w-full grid-cols-[auto_minmax(0,1fr)] gap-x-[var(--spacing-sm)] rounded-[var(--radius-md)] border border-[color:var(--toast-border)] px-[var(--spacing-md)] py-[var(--spacing-md)] pr-[calc(var(--spacing-lg)+20px)] text-[color:var(--text-primary)] shadow-[var(--shadow-lg)] [font-family:var(--font-rubik)]',
@@ -283,6 +280,7 @@ export const Toaster = React.forwardRef<
     visibleToasts={5}
     offset='var(--spacing-lg)'
     mobileOffset='var(--spacing-md)'
+    containerAriaLabel='Notifications'
     toastOptions={{
       ...toastOptions,
       unstyled: true,
