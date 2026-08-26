@@ -50,6 +50,28 @@ describe('FileUpload', () => {
     ).toBeInTheDocument();
   });
 
+  it('only renders the footer help button when a handler is provided', async () => {
+    const user = userEvent.setup();
+    const onHelpClick = vi.fn();
+    const { rerender } = render(<FileUpload label='Files' showFooter />);
+
+    expect(
+      screen.queryByRole('button', { name: 'Help Center' })
+    ).not.toBeInTheDocument();
+
+    rerender(
+      <FileUpload
+        label='Files'
+        showFooter
+        helpText='Upload help'
+        onHelpClick={onHelpClick}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Upload help' }));
+    expect(onHelpClick).toHaveBeenCalledTimes(1);
+  });
+
   it('emits a selected-status selection with the chosen files', async () => {
     const user = userEvent.setup();
     let latest: FileUploadSelection = { status: 'empty' };

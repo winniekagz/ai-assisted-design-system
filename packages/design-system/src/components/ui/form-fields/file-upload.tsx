@@ -782,15 +782,17 @@ const FileUpload = React.forwardRef<HTMLInputElement, FileUploadProps>(
 
         {showFooter && (
           <div className='flex flex-wrap items-center justify-between gap-[var(--spacing-md)] border-t border-[color:var(--border-subtle)] pt-[var(--spacing-md)]'>
-            <button
-              type='button'
-              onClick={onHelpClick}
-              className='inline-flex items-center gap-1 text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] hover:text-[color:var(--text-title)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)]'
-            >
-              <HelpCircle className='size-4' aria-hidden='true' />
-              {helpText}
-            </button>
-            <div className='flex items-center gap-[var(--spacing-sm)]'>
+            {onHelpClick && (
+              <button
+                type='button'
+                onClick={onHelpClick}
+                className='inline-flex items-center gap-1 text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] hover:text-[color:var(--text-title)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)]'
+              >
+                <HelpCircle className='size-4' aria-hidden='true' />
+                {helpText}
+              </button>
+            )}
+            <div className='ml-auto flex items-center gap-[var(--spacing-sm)]'>
               <Button
                 type='button'
                 variant='outlined'
