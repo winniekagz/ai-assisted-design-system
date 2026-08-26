@@ -31,11 +31,25 @@ async function bootstrap() {
       'API documentation for organizations, projects, catalog components, guardrails, AI recommendations, and audits.'
     )
     .setVersion('1.0')
-    .addBearerAuth()
+    .addServer('https://componentiq-api.onrender.com', 'Render production')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description:
+          'Paste a Clerk session JWT. Swagger will add the Bearer prefix automatically.',
+      },
+      'bearer'
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
+  app.getHttpAdapter().get('/', (_request, response) => {
+    response.redirect('/api/docs');
+  });
   SwaggerModule.setup('api/docs', app, document, {
+    customSiteTitle: 'ComponentIQ API Docs',
     swaggerOptions: {
       persistAuthorization: true,
       tagsSorter: 'alpha',
