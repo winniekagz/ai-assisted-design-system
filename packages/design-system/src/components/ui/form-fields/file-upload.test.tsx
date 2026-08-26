@@ -29,6 +29,27 @@ describe('FileUpload', () => {
     expect(screen.getByText('Up to 250MB.')).toBeInTheDocument();
   });
 
+  it('summarizes MIME-only accepted formats', () => {
+    render(<FileUpload label='Files' accept={{ mimeTypes: ['image/png'] }} />);
+
+    expect(
+      screen.getByText('Supported formats: image/png')
+    ).toBeInTheDocument();
+  });
+
+  it('summarizes accepted extensions and MIME types together', () => {
+    render(
+      <FileUpload
+        label='Files'
+        accept={{ extensions: ['.csv'], mimeTypes: ['application/pdf'] }}
+      />
+    );
+
+    expect(
+      screen.getByText('Supported formats: CSV, application/pdf')
+    ).toBeInTheDocument();
+  });
+
   it('emits a selected-status selection with the chosen files', async () => {
     const user = userEvent.setup();
     let latest: FileUploadSelection = { status: 'empty' };
@@ -78,7 +99,11 @@ describe('FileUpload', () => {
     const second = makeFile('two.tsx', 5);
     await user.upload(input, [first, second]);
 
-    expect(latest).toEqual({ status: 'selected', files: [first], totalBytes: 5 });
+    expect(latest).toEqual({
+      status: 'selected',
+      files: [first],
+      totalBytes: 5,
+    });
     expect(rejections).toEqual([{ file: second, reason: 'too_many_files' }]);
   });
 
@@ -105,7 +130,11 @@ describe('FileUpload', () => {
     const second = makeFile('two.tsx', 8);
     await user.upload(input, [first, second]);
 
-    expect(latest).toEqual({ status: 'selected', files: [first], totalBytes: 8 });
+    expect(latest).toEqual({
+      status: 'selected',
+      files: [first],
+      totalBytes: 8,
+    });
     expect(rejections).toEqual([{ file: second, reason: 'too_large' }]);
   });
 
@@ -153,7 +182,9 @@ describe('FileUpload', () => {
   it('removes a single file via its remove control', async () => {
     const user = userEvent.setup();
 
-    render(<FileUpload label='Files' multiple defaultValue={{ status: 'empty' }} />);
+    render(
+      <FileUpload label='Files' multiple defaultValue={{ status: 'empty' }} />
+    );
 
     const input = screen.getByLabelText('Files');
     const first = makeFile('one.tsx', 5);
@@ -169,7 +200,9 @@ describe('FileUpload', () => {
   it('clears the whole selection via "Clear all"', async () => {
     const user = userEvent.setup();
 
-    render(<FileUpload label='Files' multiple defaultValue={{ status: 'empty' }} />);
+    render(
+      <FileUpload label='Files' multiple defaultValue={{ status: 'empty' }} />
+    );
 
     const input = screen.getByLabelText('Files');
     await user.upload(input, [makeFile('one.tsx', 5), makeFile('two.tsx', 5)]);
@@ -288,7 +321,10 @@ describe('FileUpload', () => {
 
   it('marks aria-invalid when error is set', () => {
     render(<FileUpload label='Files' error helperText='Something is wrong.' />);
-    expect(screen.getByLabelText('Files')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Files')).toHaveAttribute(
+      'aria-invalid',
+      'true'
+    );
   });
 
   it('is keyboard operable — Enter and Space on the trigger button open the picker', async () => {
@@ -346,9 +382,14 @@ describe('FileUpload', () => {
     });
 
     try {
-      render(<FileUpload label='Files' multiple defaultValue={{ status: 'empty' }} />);
+      render(
+        <FileUpload label='Files' multiple defaultValue={{ status: 'empty' }} />
+      );
       const input = screen.getByLabelText('Files');
-      await user.upload(input, [makeFile('one.tsx', 5), makeFile('two.tsx', 5)]);
+      await user.upload(input, [
+        makeFile('one.tsx', 5),
+        makeFile('two.tsx', 5),
+      ]);
       await user.click(screen.getByRole('button', { name: 'Remove one.tsx' }));
 
       expect(createObjectURLSpy).not.toHaveBeenCalled();

@@ -61,28 +61,30 @@ function VariantShowcase({
         {variants.map((v, i) => (
           <div
             key={v.label}
-            role='button'
-            tabIndex={0}
-            aria-pressed={sel === i}
-            onClick={() => setSel(i)}
-            onKeyDown={event => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                setSel(i);
-              }
-            }}
-            className={`flex flex-col items-start gap-[var(--spacing-sm)] rounded-[var(--radius-md)] border p-[var(--spacing-md)] text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)] ${
+            className={`flex flex-col items-start gap-[var(--spacing-sm)] rounded-[var(--radius-md)] border p-[var(--spacing-md)] text-left transition-colors ${
               sel === i
                 ? 'border-[color:var(--color-primary)] bg-[color:var(--bg-hover)]'
                 : 'border-[color:var(--border-subtle)] bg-[color:var(--bg-surface)] hover:bg-[color:var(--bg-hover)]'
             }`}
           >
-            <span className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] [font-family:var(--font-rubik)]'>
-              {v.label}
-            </span>
-            <div className='w-full' onClick={event => event.stopPropagation()}>
-              {v.node}
+            <div className='flex w-full items-center justify-between gap-[var(--spacing-sm)]'>
+              <span className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] [font-family:var(--font-rubik)]'>
+                {v.label}
+              </span>
+              <button
+                type='button'
+                aria-pressed={sel === i}
+                onClick={() => setSel(i)}
+                className={`shrink-0 rounded-[var(--radius-sm)] border px-[var(--spacing-sm)] py-[var(--spacing-xs)] text-[length:var(--font-size-xs)] font-[var(--font-weight-medium)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)] ${
+                  sel === i
+                    ? 'border-[color:var(--color-primary)] bg-[color:var(--color-primary)] text-[color:var(--color-primary-fg)]'
+                    : 'border-[color:var(--border-subtle)] bg-[color:var(--bg-surface)] text-[color:var(--text-secondary)] hover:bg-[color:var(--bg-hover)]'
+                }`}
+              >
+                {sel === i ? 'Showing code' : 'Show code'}
+              </button>
             </div>
+            <div className='w-full'>{v.node}</div>
           </div>
         ))}
       </div>

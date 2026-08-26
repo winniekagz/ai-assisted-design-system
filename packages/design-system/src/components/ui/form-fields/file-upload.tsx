@@ -273,10 +273,16 @@ function clampToMode(
 }
 
 function getAcceptSummary(accept: FileUploadAccept | undefined) {
-  if (!accept?.extensions?.length) return 'Supported formats: Any file';
-  return `Supported formats: ${accept.extensions
-    .map(extension => extension.replace(/^\./, '').toUpperCase())
-    .join(', ')}`;
+  const formats = [
+    ...(accept?.extensions ?? []).map(extension =>
+      extension.replace(/^\./, '').toUpperCase()
+    ),
+    ...(accept?.mimeTypes ?? []),
+  ];
+
+  if (formats.length === 0) return 'Supported formats: Any file';
+
+  return `Supported formats: ${formats.join(', ')}`;
 }
 
 function getMaxSizeSummary(limits: FileUploadLimits | undefined) {
