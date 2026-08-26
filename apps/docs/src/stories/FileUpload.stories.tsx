@@ -1,10 +1,151 @@
 import * as React from 'react';
-import { FileUpload } from '@/components/ui/form-fields/file-upload';
-import type { FileUploadRejection } from '@/components/ui/form-fields/file-upload';
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import {
+  FileDisplayCard,
+  FileTypeIcon,
+  FileUpload,
+  FileUploadProgress,
+  type FileUploadDisplayFile,
+  type FileUploadRejection,
+  type FileUploadStatus,
+} from '@/components/ui/form-fields/file-upload';
 
-function makeSyntheticFile(name: string, sizeBytes: number, type = 'text/plain') {
+function makeSyntheticFile(
+  name: string,
+  sizeBytes: number,
+  type = 'text/plain'
+) {
   return new File([new Uint8Array(sizeBytes)], name, { type });
+}
+
+const sampleFiles: FileUploadDisplayFile[] = [
+  {
+    name: 'customers_Q5_2023.xlsx',
+    size: 3 * 1024 * 1024,
+    status: 'loading',
+    progress: 40,
+  },
+  { name: 'release-notes.txt', size: 14 * 1024, status: 'success' },
+  { name: 'contract.pdf', size: 2.4 * 1024 * 1024, status: 'idle' },
+  { name: 'brand-preview.png', size: 860 * 1024, status: 'success' },
+  {
+    name: 'subscribers.csv',
+    size: 750 * 1024,
+    status: 'loading',
+    progress: 72,
+  },
+  { name: 'proposal.docx', size: 1.8 * 1024 * 1024, status: 'idle' },
+  {
+    name: 'roadmap.ppt',
+    size: 6.2 * 1024 * 1024,
+    status: 'error',
+    message: 'Upload failed. Try again.',
+  },
+];
+
+function VariantShowcase({
+  title,
+  variants,
+}: {
+  title: string;
+  variants: Array<{ label: string; code: string; node: React.ReactNode }>;
+}) {
+  const [sel, setSel] = React.useState(0);
+
+  return (
+    <div className='w-full space-y-[var(--spacing-md)]'>
+      <h2 className='text-[length:var(--font-size-heading-6)] font-[var(--font-weight-bold)] text-[color:var(--text-title)] [font-family:var(--font-heading)]'>
+        {title}
+      </h2>
+      <div className='grid grid-cols-1 gap-[var(--spacing-sm)] lg:grid-cols-2'>
+        {variants.map((v, i) => (
+          <div
+            key={v.label}
+            role='button'
+            tabIndex={0}
+            aria-pressed={sel === i}
+            onClick={() => setSel(i)}
+            onKeyDown={event => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                setSel(i);
+              }
+            }}
+            className={`flex flex-col items-start gap-[var(--spacing-sm)] rounded-[var(--radius-md)] border p-[var(--spacing-md)] text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-primary)] ${
+              sel === i
+                ? 'border-[color:var(--color-primary)] bg-[color:var(--bg-hover)]'
+                : 'border-[color:var(--border-subtle)] bg-[color:var(--bg-surface)] hover:bg-[color:var(--bg-hover)]'
+            }`}
+          >
+            <span className='text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] [font-family:var(--font-rubik)]'>
+              {v.label}
+            </span>
+            <div className='w-full' onClick={event => event.stopPropagation()}>
+              {v.node}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className='rounded-[var(--radius-md)] border border-[color:var(--border-subtle)] bg-[color:var(--bg-secondary)] p-[var(--spacing-md)]'>
+        <p className='mb-[var(--spacing-sm)] text-[length:var(--font-size-xs)] text-[color:var(--text-muted)] [font-family:var(--font-rubik)]'>
+          {variants[sel].label}
+        </p>
+        <pre className='overflow-x-auto whitespace-pre-wrap font-mono text-[length:var(--font-size-xs)] text-[color:var(--text-paragraph)]'>
+          <code>{variants[sel].code}</code>
+        </pre>
+      </div>
+    </div>
+  );
+}
+
+function LoadingUploadDemo() {
+  const [progress, setProgress] = React.useState(40);
+
+  React.useEffect(() => {
+    const timer = window.setInterval(() => {
+      setProgress(current => (current >= 92 ? 26 : current + 13));
+    }, 1400);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return (
+    <FileUpload
+      label='Upload file'
+      accept={{ extensions: ['.xls', '.xlsx'] }}
+      limits={{ maxTotalBytes: 25 * 1024 * 1024 }}
+      displayFiles={[
+        {
+          name: 'Table Name.xls',
+          size: 3 * 1024 * 1024,
+          status: 'loading',
+          progress,
+        },
+      ]}
+      uploadStatus='loading'
+      showFooter
+    />
+  );
+}
+
+function RemovableDisplayFilesDemo() {
+  const [files, setFiles] = React.useState<FileUploadDisplayFile[]>(
+    sampleFiles.slice(0, 4)
+  );
+
+  return (
+    <FileUpload
+      label='Upload file'
+      multiple
+      displayFiles={files}
+      onDisplayFileRemove={(_, index) =>
+        setFiles(current =>
+          current.filter((__, fileIndex) => fileIndex !== index)
+        )
+      }
+      showFooter
+    />
+  );
 }
 
 const meta = {
@@ -13,47 +154,67 @@ const meta = {
   parameters: {
     layout: 'padded',
     docs: {
+      story: {
+        inline: false,
+        iframeHeight: 520,
+      },
+      source: {
+        type: 'dynamic',
+        language: 'tsx',
+      },
+      canvas: {
+        sourceState: 'shown',
+      },
       description: {
         component: `
-Native-file-picker-based upload input. Follows the same label/helperText/error/aria
-conventions as **Input** and **Textarea**.
+Reusable upload organism with atomic file primitives. The full \`FileUpload\` composes a hidden native file input, accessible drag-and-drop dropzone, metadata-only selection handling, reusable file display cards, loading progress, success/error states, and removable files.
 
-### What this component does NOT provide
-This is a client-side metadata/UX primitive only. It does **not** provide, and must
-never be assumed to provide:
-- malware or virus scanning
-- trusted MIME-type verification (\`accept\` is a UX hint — real browsers let users
-  bypass it via "All Files" in the OS picker, and a scripted request can ignore it
-  entirely)
-- file-content sanitization
-- archive-extraction safety (zip/tar contents are not inspected)
-- SVG sanitization
-- secret detection
-
-\`limits\` (max file count / total size) are enforced here purely for fast UI feedback.
-The authoritative security boundary is server-side — see this repo's
-\`FilesInterceptor\` limits in the projects API, which are enforced independently of
-whatever this component allows through.
-
-Drag-and-drop is intentionally not implemented in this phase (no existing dropzone
-pattern in this repo, and it adds meaningfully more surface area than the native
-picker for no stated requirement). Zip upload is also out of scope here — archive
-handling needs its own safety work first.
+### Atomic design
+- **Atoms:** \`FileTypeIcon\`, \`FileUploadProgress\`
+- **Molecule:** \`FileDisplayCard\`
+- **Organism:** \`FileUpload\`
 
 ### Usage
 \`\`\`tsx
 import { FileUpload } from 'componentiq';
 
 <FileUpload
-  label="Project source"
-  helperText="Up to 250MB, 5,000 files."
+  label="Upload file"
+  accept={{ extensions: ['.xls', '.xlsx', '.csv'] }}
+  limits={{ maxTotalBytes: 25 * 1024 * 1024 }}
   multiple
-  limits={{ maxFiles: 5000, maxTotalBytes: 250 * 1024 * 1024 }}
+  uploadStatus="loading"
+  progress={40}
+  showFooter
   onSelectionChange={selection => console.log(selection)}
-  onRejections={rejections => console.log(rejections)}
 />
 \`\`\`
-      `,
+
+### Props cheat sheet
+| Prop | Type | Default | Notes |
+|------|------|---------|-------|
+| \`label\` | string | "Upload file" | Heading and input label |
+| \`helperText\` | string | — | Helper or validation text |
+| \`error\` / \`success\` | boolean | false | Dropzone and helper state |
+| \`accept\` | \`{ mimeTypes?, extensions? }\` | — | Browser picker hint plus client-side rejection |
+| \`limits\` | \`{ maxFiles?, maxTotalBytes? }\` | — | Client-side UX limit |
+| \`uploadStatus\` | \`"idle" \\| "loading" \\| "success" \\| "error"\` | "idle" | Fallback status for file cards |
+| \`progress\` | number | — | Fallback upload progress |
+| \`fileStatuses\` / \`fileProgress\` | Record<string, ...> | — | Per-file display state keyed by sanitized file name |
+| \`displayFiles\` | FileUploadDisplayFile[] | — | Show controlled display cards without selecting real files |
+| \`onDisplayFileRemove\` | function | — | Remove callback for controlled \`displayFiles\` cards |
+| \`showFooter\` | boolean | false | Shows Help Center, Cancel, and Next controls |
+
+### Accessibility
+- The native \`<input type="file">\` remains labelled and available to assistive technology.
+- A visible keyboard-operable dropzone opens the picker with Enter or Space.
+- The hidden input is removed from sequential tab order so users do not land on an invisible control.
+- Remove buttons are labelled with the sanitized file name.
+- Loading progress uses \`role="progressbar"\` with numeric ARIA values when progress is known.
+
+### Security boundary
+This component only reads client-side file metadata: name, size, and MIME hint. It does not scan contents, sanitize uploads, or enforce a trusted MIME boundary. Server-side validation remains required.
+        `,
       },
     },
   },
@@ -65,11 +226,163 @@ import { FileUpload } from 'componentiq';
     success: { control: 'boolean' },
     disabled: { control: 'boolean' },
     multiple: { control: 'boolean' },
+    uploadStatus: {
+      control: { type: 'select' },
+      options: ['idle', 'loading', 'success', 'error'],
+    },
+    progress: { control: { type: 'range', min: 0, max: 100, step: 1 } },
+    displayFiles: { table: { disable: true } },
+    fileStatuses: { table: { disable: true } },
+    fileProgress: { table: { disable: true } },
+  },
+  args: {
+    label: 'Upload file',
+    accept: { extensions: ['.xls', '.xlsx'] },
+    limits: { maxTotalBytes: 25 * 1024 * 1024 },
   },
 } satisfies Meta<typeof FileUpload>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+export const AllVariants: Story = {
+  render: () => (
+    <VariantShowcase
+      title='File Upload'
+      variants={[
+        {
+          label: 'Empty organism',
+          code: `<FileUpload
+  label="Upload file"
+  accept={{ extensions: ['.xls', '.xlsx'] }}
+  limits={{ maxTotalBytes: 25 * 1024 * 1024 }}
+  showFooter
+/>`,
+          node: (
+            <FileUpload
+              label='Upload file'
+              accept={{ extensions: ['.xls', '.xlsx'] }}
+              limits={{ maxTotalBytes: 25 * 1024 * 1024 }}
+              showFooter
+            />
+          ),
+        },
+        {
+          label: 'Loading upload',
+          code: `<FileUpload
+  label="Upload file"
+  displayFiles={[{ name: 'Table Name.xls', size: 3145728, status: 'loading', progress: 40 }]}
+  uploadStatus="loading"
+  showFooter
+/>`,
+          node: <LoadingUploadDemo />,
+        },
+        {
+          label: 'Success state',
+          code: `<FileUpload
+  label="Upload file"
+  success
+  helperText="File uploaded successfully."
+  displayFiles={[{ name: 'customers_Q5_2023.xlsx', size: 3145728, status: 'success' }]}
+/>`,
+          node: (
+            <FileUpload
+              label='Upload file'
+              success
+              helperText='File uploaded successfully.'
+              displayFiles={[
+                {
+                  name: 'customers_Q5_2023.xlsx',
+                  size: 3 * 1024 * 1024,
+                  status: 'success',
+                },
+              ]}
+            />
+          ),
+        },
+        {
+          label: 'Error state',
+          code: `<FileUpload
+  label="Upload file"
+  error
+  helperText="Upload failed. Try again."
+  displayFiles={[{ name: 'roadmap.ppt', size: 6501171, status: 'error', message: 'Network timeout.' }]}
+/>`,
+          node: (
+            <FileUpload
+              label='Upload file'
+              error
+              helperText='Upload failed. Try again.'
+              displayFiles={[
+                {
+                  name: 'roadmap.ppt',
+                  size: 6.2 * 1024 * 1024,
+                  status: 'error',
+                  message: 'Network timeout.',
+                },
+              ]}
+            />
+          ),
+        },
+        {
+          label: 'File display card',
+          code: `<FileDisplayCard
+  file={{ name: 'contract.pdf', size: 2516582, status: 'loading', progress: 26 }}
+  status="loading"
+  progress={26}
+  onRemove={() => removeFile()}
+/>`,
+          node: (
+            <FileDisplayCard
+              file={{
+                name: 'contract.pdf',
+                size: 2.4 * 1024 * 1024,
+                status: 'loading',
+                progress: 26,
+              }}
+              status='loading'
+              progress={26}
+              onRemove={() => undefined}
+            />
+          ),
+        },
+        {
+          label: 'Supported file types',
+          code: `['xlsx', 'txt', 'pdf', 'png', 'csv', 'docx', 'ppt'].map(type => (
+  <FileTypeIcon key={type} fileName={\`example.\${type}\`} />
+))`,
+          node: (
+            <div className='flex flex-wrap gap-[var(--spacing-sm)]'>
+              {['xlsx', 'txt', 'pdf', 'png', 'csv', 'docx', 'ppt'].map(type => (
+                <FileTypeIcon key={type} fileName={`example.${type}`} />
+              ))}
+            </div>
+          ),
+        },
+        {
+          label: 'Removable display files',
+          code: `const [files, setFiles] = React.useState(displayFiles);
+
+<FileUpload
+  label="Upload file"
+  displayFiles={files}
+  onDisplayFileRemove={(_, index) =>
+    setFiles(current => current.filter((__, fileIndex) => fileIndex !== index))
+  }
+/>`,
+          node: <RemovableDisplayFilesDemo />,
+        },
+      ]}
+    />
+  ),
+  decorators: [
+    Story => (
+      <div className='w-full max-w-5xl'>
+        <Story />
+      </div>
+    ),
+  ],
+};
 
 const fieldDecorator = [
   (Story: React.ComponentType) => (
@@ -81,13 +394,88 @@ const fieldDecorator = [
 
 export const Default: Story = {
   decorators: fieldDecorator,
-  args: { label: 'Project source', helperText: 'Choose a file to upload.' },
+  args: { helperText: 'Choose a file to upload.' },
+};
+
+export const Loading: Story = {
+  decorators: fieldDecorator,
+  render: () => <LoadingUploadDemo />,
+};
+
+export const Success: Story = {
+  decorators: fieldDecorator,
+  args: {
+    success: true,
+    helperText: 'File uploaded successfully.',
+    displayFiles: [
+      {
+        name: 'customers_Q5_2023.xlsx',
+        size: 3 * 1024 * 1024,
+        status: 'success' satisfies FileUploadStatus,
+      },
+    ],
+  },
+};
+
+export const Error: Story = {
+  decorators: fieldDecorator,
+  args: {
+    error: true,
+    helperText: 'Upload failed. Try again.',
+    displayFiles: [
+      {
+        name: 'roadmap.ppt',
+        size: 6.2 * 1024 * 1024,
+        status: 'error' satisfies FileUploadStatus,
+        message: 'Network timeout.',
+      },
+    ],
+  },
+};
+
+export const FileDisplayCards: Story = {
+  decorators: [
+    Story => (
+      <div className='w-full max-w-2xl'>
+        <Story />
+      </div>
+    ),
+  ],
+  render: () => (
+    <div className='grid gap-[var(--spacing-sm)]'>
+      {sampleFiles.map(file => (
+        <FileDisplayCard
+          key={file.name}
+          file={file}
+          status={file.status}
+          progress={file.progress}
+          onRemove={() => undefined}
+        />
+      ))}
+    </div>
+  ),
+};
+
+export const RemovableDisplayFiles: Story = {
+  decorators: fieldDecorator,
+  render: () => <RemovableDisplayFilesDemo />,
+};
+
+export const ProgressStates: Story = {
+  decorators: fieldDecorator,
+  render: () => (
+    <div className='grid gap-[var(--spacing-md)]'>
+      <FileUploadProgress status='loading' progress={26} />
+      <FileUploadProgress status='loading' progress={78} />
+      <FileUploadProgress status='success' />
+      <FileUploadProgress status='error' />
+    </div>
+  ),
 };
 
 export const WithSelection: Story = {
   decorators: fieldDecorator,
   args: {
-    label: 'Project source',
     multiple: true,
     defaultValue: {
       status: 'selected',
@@ -102,7 +490,17 @@ export const WithSelection: Story = {
 
 export const Disabled: Story = {
   decorators: fieldDecorator,
-  args: { label: 'Project source', disabled: true, helperText: 'Unavailable right now.' },
+  args: {
+    disabled: true,
+    helperText: 'Unavailable right now.',
+    displayFiles: [
+      {
+        name: 'customers_Q5_2023.xlsx',
+        size: 3 * 1024 * 1024,
+        status: 'idle',
+      },
+    ],
+  },
 };
 
 function RejectionDemo({
@@ -123,7 +521,7 @@ function RejectionDemo({
         error={rejections.length > 0}
         helperText={
           rejections.length > 0
-            ? `${rejections.length} file(s) rejected — see below.`
+            ? `${rejections.length} file(s) rejected. See below.`
             : 'Client-side limits only; the server enforces the real boundary.'
         }
         onRejections={setRejections}
@@ -135,7 +533,7 @@ function RejectionDemo({
         <ul className='text-[length:var(--font-size-xs)] text-[color:var(--helper-error)]'>
           {rejections.map((r, i) => (
             <li key={i}>
-              {r.file.name} — {r.reason}
+              {r.file.name}: {r.reason}
             </li>
           ))}
         </ul>
@@ -149,16 +547,12 @@ export const RejectedTooMany: Story = {
   render: () => (
     <RejectionDemo
       limits={{ maxFiles: 1 }}
-      files={[makeSyntheticFile('one.tsx', 100), makeSyntheticFile('two.tsx', 100)]}
+      files={[
+        makeSyntheticFile('one.tsx', 100),
+        makeSyntheticFile('two.tsx', 100),
+      ]}
     />
   ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'Selecting more files than `limits.maxFiles` rejects the excess via `onRejections`.',
-      },
-    },
-  },
 };
 
 export const RejectedTooLarge: Story = {
@@ -166,35 +560,23 @@ export const RejectedTooLarge: Story = {
   render: () => (
     <RejectionDemo
       limits={{ maxTotalBytes: 100 }}
-      files={[makeSyntheticFile('small.tsx', 60), makeSyntheticFile('big.tsx', 60)]}
+      files={[
+        makeSyntheticFile('small.tsx', 60),
+        makeSyntheticFile('big.tsx', 60),
+      ]}
     />
   ),
-  parameters: {
-    docs: {
-      description: {
-        story: 'Selecting files whose combined size exceeds `limits.maxTotalBytes` rejects the overflow via `onRejections`.',
-      },
-    },
-  },
 };
 
 export const MaliciousFilenameDisplay: Story = {
   decorators: fieldDecorator,
   args: {
-    label: 'Project source',
-    helperText: 'Filenames are sanitized before display — this does not affect the underlying file.',
+    helperText:
+      'Filenames are sanitized before display. This does not affect the underlying file.',
     defaultValue: {
       status: 'selected',
       files: [makeSyntheticFile('safe‮txt.exe', 2048)],
       totalBytes: 2048,
-    },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'This file is named with a bidi-override character (U+202E) so it *looks* like `safe...exe.txt` if rendered raw. The component strips display-unsafe control/bidi characters (via the same `sanitizeDisplayText` primitive used by `Input`/`Textarea`) before rendering the filename summary.',
-      },
     },
   },
 };
